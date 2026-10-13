@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<StackPane prefHeight="720.0" prefWidth="1280.0" stylesheets="@style.css" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.sabaytayo.PrimaryController">
+   <children>
+      <!-- Layer 1: Bus Background Image -->
+      <ImageView fitHeight="720.0" fitWidth="1280.0" pickOnBounds="true">
+         <image>
+            <Image url="@images/bg.jpg" />
+         </image>
+      </ImageView>
+      <AnchorPane prefHeight="443.0" prefWidth="808.0">
+         <children>
+            <Button layoutX="524.0" layoutY="372.0" mnemonicParsing="false" onAction="#onStartGame" prefHeight="72.0" prefWidth="232.0" styleClass="dialogue-box" text="Start Game" textFill="WHITE">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Button>
+            <Button layoutX="524.0" layoutY="460.0" mnemonicParsing="false" onAction="#onLoadGame" prefHeight="72.0" prefWidth="232.0" styleClass="dialogue-box" text="Load Game" textFill="WHITE">
+               <font>
+                  <Font name="Rockwell" size="24.0" />
+               </font>
+            </Button>
+            <Button layoutX="524.0" layoutY="551.0" mnemonicParsing="false" onAction="#onSettings" prefHeight="72.0" prefWidth="232.0" styleClass="dialogue-box" stylesheets="@style.css" text="Settings" textFill="WHITE">
+               <font>
+                  <Font name="Rockwell" size="24.0" />
+               </font>
+            </Button>
+         </children>
+      </AnchorPane>
+   </children>
+</StackPane>
