@@ -119,7 +119,31 @@
     -fx-font-weight: bold;
 }
 
-/* 7. PERSONA 5 CHOICE RESPONSE CARDS */
+/* 7. PERSONA 5 CHOICE RESPONSE CARDS & MENU BUTTONS */
+.menu-button {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    -fx-background-color: linear-gradient(to right, rgba(42, 16, 56, 0.95), rgba(64, 22, 84, 0.92));
+    -fx-text-fill: #f5e9f2;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 28px;
+    -fx-background-radius: 12px;
+    -fx-border-color: #d1568d;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1.8px;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 8, 0, 0, 2);
+}
+
+.menu-button:hover {
+    -fx-background-color: linear-gradient(to right, #ff4081, #ab47bc);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #ffffff;
+    -fx-translate-y: -2px;
+    -fx-effect: dropshadow(gaussian, rgba(255, 64, 129, 0.8), 16, 0, 0, 0);
+}
+
 .choice-button {
     -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
     -fx-background-color: linear-gradient(to right, rgba(42, 16, 56, 0.95), rgba(64, 22, 84, 0.92));
