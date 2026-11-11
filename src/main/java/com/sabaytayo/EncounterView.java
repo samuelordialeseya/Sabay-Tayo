@@ -66,17 +66,12 @@ public class EncounterView extends StackPane {
 
         topBar.getChildren().addAll(momentumBadge, spacer, viewEndingButton);
 
-        // Bottom Dialogue & Choices Container
-        VBox bottomContainer = new VBox(10);
-        bottomContainer.setAlignment(Pos.BOTTOM_CENTER);
-        bottomContainer.setPadding(new Insets(0, 120, 30, 120));
-
-        // Choices Box
-        choicesContainer = new VBox(8);
+        // Choices Container - moved up towards upper-center to leave ample space for character sprites below
+        choicesContainer = new VBox(10);
         choicesContainer.setAlignment(Pos.CENTER);
-        choicesContainer.setMaxWidth(800);
+        choicesContainer.setMaxWidth(560);
 
-        // Dialogue Box
+        // Dialogue Box - pinned at bottom
         VBox dialogueBox = new VBox(6);
         dialogueBox.getStyleClass().add("dialogue-box");
         dialogueBox.setPadding(new Insets(18, 24, 18, 24));
@@ -95,14 +90,15 @@ public class EncounterView extends StackPane {
 
         dialogueBox.getChildren().addAll(speakerLabel, dialogueLabel, reactionLabel);
 
-        bottomContainer.getChildren().addAll(choicesContainer, dialogueBox);
-
         // Load turn 1 choices
         loadChoices();
 
-        getChildren().addAll(bgView, topBar, bottomContainer);
+        getChildren().addAll(bgView, topBar, choicesContainer, dialogueBox);
         StackPane.setAlignment(topBar, Pos.TOP_CENTER);
-        StackPane.setAlignment(bottomContainer, Pos.BOTTOM_CENTER);
+        StackPane.setAlignment(choicesContainer, Pos.TOP_CENTER);
+        StackPane.setMargin(choicesContainer, new Insets(100, 0, 0, 0));
+        StackPane.setAlignment(dialogueBox, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(dialogueBox, new Insets(0, 100, 25, 100));
     }
 
     private void loadChoices() {
@@ -141,7 +137,8 @@ public class EncounterView extends StackPane {
 
             Button btn = new Button(buttonText);
             btn.getStyleClass().add("choice-button");
-            btn.setMaxWidth(800);
+            btn.setMaxWidth(560);
+            btn.setWrapText(true);
             btn.setDisable(!unlocked);
 
             btn.setOnAction(e -> handleChoiceSelected(choice));
@@ -169,3 +166,4 @@ public class EncounterView extends StackPane {
         momentumBadge.setText("Momentum: " + mSign + " (" + momentum.getMultiplier() + "x gains)");
     }
 }
+
