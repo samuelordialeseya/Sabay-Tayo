@@ -50,6 +50,7 @@ public class EncounterView extends StackPane {
         HBox topBar = new HBox(12);
         topBar.setPadding(new Insets(16, 24, 0, 24));
         topBar.setAlignment(Pos.CENTER_LEFT);
+        topBar.setMaxHeight(Region.USE_PREF_SIZE);
 
         momentumBadge = new Label("Momentum: 0");
         momentumBadge.setStyle("-fx-background-color: rgba(30, 15, 40, 0.85); -fx-text-fill: #ff94c2; "
@@ -66,16 +67,18 @@ public class EncounterView extends StackPane {
 
         topBar.getChildren().addAll(momentumBadge, spacer, viewEndingButton);
 
-        // Choices Container - moved up towards upper-center to leave ample space for character sprites below
+        // Choices Container - positioned at top-center, leaving plenty of vertical space for character sprites below
         choicesContainer = new VBox(10);
         choicesContainer.setAlignment(Pos.CENTER);
         choicesContainer.setMaxWidth(560);
+        choicesContainer.setMaxHeight(Region.USE_PREF_SIZE);
 
-        // Dialogue Box - pinned at bottom
+        // Dialogue Box - compact box pinned at the bottom
         VBox dialogueBox = new VBox(6);
         dialogueBox.getStyleClass().add("dialogue-box");
-        dialogueBox.setPadding(new Insets(18, 24, 18, 24));
-        dialogueBox.setMaxWidth(1000);
+        dialogueBox.setPadding(new Insets(16, 24, 16, 24));
+        dialogueBox.setMaxWidth(1080);
+        dialogueBox.setMaxHeight(Region.USE_PREF_SIZE);
 
         speakerLabel = new Label("Seatmate");
         speakerLabel.getStyleClass().add("speaker-label");
@@ -93,12 +96,12 @@ public class EncounterView extends StackPane {
         // Load turn 1 choices
         loadChoices();
 
-        getChildren().addAll(bgView, topBar, choicesContainer, dialogueBox);
+        getChildren().addAll(bgView, dialogueBox, choicesContainer, topBar);
         StackPane.setAlignment(topBar, Pos.TOP_CENTER);
         StackPane.setAlignment(choicesContainer, Pos.TOP_CENTER);
-        StackPane.setMargin(choicesContainer, new Insets(100, 0, 0, 0));
+        StackPane.setMargin(choicesContainer, new Insets(75, 0, 0, 0));
         StackPane.setAlignment(dialogueBox, Pos.BOTTOM_CENTER);
-        StackPane.setMargin(dialogueBox, new Insets(0, 100, 25, 100));
+        StackPane.setMargin(dialogueBox, new Insets(0, 100, 24, 100));
     }
 
     private void loadChoices() {

@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -31,6 +32,7 @@ public class EndingView extends StackPane {
         // Center result card
         VBox card = new VBox(16);
         card.setMaxWidth(600);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(32, 40, 32, 40));
         card.getStyleClass().add("dialogue-box");

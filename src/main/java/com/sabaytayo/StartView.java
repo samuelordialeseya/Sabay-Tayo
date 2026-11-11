@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -40,6 +41,7 @@ public class StartView extends StackPane {
         // Center card with anime-styled dialogue box class
         VBox card = new VBox(14);
         card.setMaxWidth(520);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(28, 36, 28, 36));
         card.getStyleClass().add("dialogue-box");
