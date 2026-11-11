@@ -1,5 +1,7 @@
 package com.sabaytayo;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,38 +19,11 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.File;
-
-// Start Menu view implementing the visual novel commute sim opening layout.
+// Opening game menu view recreated from the Sabay Tayo bus signboard & ticket concept
 public class StartView extends StackPane {
 
     private final GameApplication app;
     private final StackPane contentLayer;
-
-    // Palette constants from the specification
-    private static final String BTN_IDLE_STYLE =
-        "-fx-background-color: rgba(46, 38, 64, 0.88);" +
-        "-fx-text-fill: #f5f0fa;" +
-        "-fx-font-family: 'SansSerif';" +
-        "-fx-font-size: 15px;" +
-        "-fx-font-weight: bold;" +
-        "-fx-border-color: #f2a6bd;" +
-        "-fx-border-width: 2px;" +
-        "-fx-border-radius: 6px;" +
-        "-fx-background-radius: 6px;" +
-        "-fx-cursor: hand;";
-
-    private static final String BTN_HOVER_STYLE =
-        "-fx-background-color: rgba(64, 52, 86, 0.95);" +
-        "-fx-text-fill: #f4d38a;" +
-        "-fx-font-family: 'SansSerif';" +
-        "-fx-font-size: 15px;" +
-        "-fx-font-weight: bold;" +
-        "-fx-border-color: #f4d38a;" +
-        "-fx-border-width: 2px;" +
-        "-fx-border-radius: 6px;" +
-        "-fx-background-radius: 6px;" +
-        "-fx-cursor: hand;";
 
     // Persisted setup inputs
     private final TextField nameField;
@@ -56,51 +31,34 @@ public class StartView extends StackPane {
     private final ComboBox<String> strangerPronounsBox;
     private final Label errorLabel;
 
-    @SuppressWarnings("this-escape")
+    // Menu button rows for active highlight switching
+    private final List<Button> menuButtons = new ArrayList<>();
+    private final List<Label> leftArrows = new ArrayList<>();
+    private final List<Label> rightArrows = new ArrayList<>();
+
     public StartView(GameApplication app) {
         this.app = app;
 
-        // 1. Background Image Layer
-        ImageView backgroundView = new ImageView();
+        // 1. Bus interior twilight background image
+        ImageView bgView = new ImageView();
         try {
-            File bgFile = new File("start_menu_bg.png");
-            if (bgFile.exists()) {
-                backgroundView.setImage(new Image(bgFile.toURI().toString()));
-            } else {
-                // Fallback to existing bus backdrop
-                Image bg = new Image(getClass().getResourceAsStream("/com/sabaytayo/images/bg.jpg"));
-                backgroundView.setImage(bg);
-            }
+            Image bg = new Image(getClass().getResourceAsStream("/com/sabaytayo/images/bg.jpg"));
+            bgView.setImage(bg);
+            bgView.setFitWidth(1280);
+            bgView.setFitHeight(720);
+            bgView.setPreserveRatio(false);
         } catch (Exception e) {
-            System.err.println("Could not load background: " + e.getMessage());
+            System.err.println("Notice: Could not load bg.jpg, using default styling.");
         }
-        backgroundView.setPreserveRatio(false);
 
-        // Bind background size to window size
-        backgroundView.fitWidthProperty().bind(widthProperty());
-        backgroundView.fitHeightProperty().bind(heightProperty());
-
-        // Ambient dark overlay
-        Region darkOverlay = new Region();
-        darkOverlay.setStyle("-fx-background-color: rgba(30, 24, 42, 0.60);");
-
-        // 2. Foreground content layer
+        // 2. Dynamic content layer
         contentLayer = new StackPane();
 
         // Initialize reusable input components
         nameField = new TextField();
-        nameField.setPromptText("Enter your character's name...");
+        nameField.setPromptText("Enter your name (e.g. Sam)...");
         nameField.setMaxWidth(340);
-        nameField.setStyle(
-            "-fx-background-color: rgba(32, 26, 44, 0.95);" +
-            "-fx-text-fill: #ffffff;" +
-            "-fx-font-size: 14px;" +
-            "-fx-padding: 8px 12px;" +
-            "-fx-background-radius: 6px;" +
-            "-fx-border-color: #f2a6bd;" +
-            "-fx-border-radius: 6px;" +
-            "-fx-border-width: 1.5px;"
-        );
+        nameField.getStyleClass().add("input-field");
 
         playerPronounsBox = new ComboBox<>();
         playerPronounsBox.getItems().addAll("They/Them", "He/Him", "She/Her");
@@ -111,119 +69,220 @@ public class StartView extends StackPane {
         strangerPronounsBox.setValue("She/Her");
 
         errorLabel = new Label("");
-        errorLabel.setStyle("-fx-text-fill: #e57373; -fx-font-size: 13px; -fx-font-weight: bold;");
+        errorLabel.getStyleClass().add("error-text");
 
-        // Show opening main menu
+        // Display the opening menu
         showMainMenu();
 
-        getChildren().addAll(backgroundView, darkOverlay, contentLayer);
+        getChildren().addAll(bgView, contentLayer);
     }
 
-    // 1. Opening Menu: Logo/Title, Vertical Menu Buttons, and Bottom Route Bar
+    // 1. Recreated Start Menu: Signboard Plaque up top, 5 Commute Buttons in center, Tilted Bus Ticket at bottom-right
     public void showMainMenu() {
         contentLayer.getChildren().clear();
+        menuButtons.clear();
+        leftArrows.clear();
+        rightArrows.clear();
 
-        BorderPane uiLayout = new BorderPane();
-        uiLayout.setPadding(new Insets(30, 30, 20, 30));
+        // Top: Bus Signboard Plaque ("Sabay Tayo")
+        VBox signboard = createSignboard();
 
-        // Top: Logo / Title Display
-        VBox topBox = new VBox(8);
-        topBox.setAlignment(Pos.CENTER);
-        topBox.setPadding(new Insets(20, 0, 10, 0));
+        // Center: 5 Stacked Menu Buttons
+        VBox buttonsBox = new VBox(12);
+        buttonsBox.setAlignment(Pos.CENTER);
 
-        boolean logoLoaded = false;
-        try {
-            File logoFile = new File("logo.png");
-            if (logoFile.exists()) {
-                ImageView logoView = new ImageView(new Image(logoFile.toURI().toString()));
-                logoView.setFitWidth(380);
-                logoView.setPreserveRatio(true);
-                topBox.getChildren().add(logoView);
-                logoLoaded = true;
-            }
-        } catch (Exception e) {
-            System.err.println("Logo load error: " + e.getMessage());
-        }
+        HBox startRow = createMenuButtonRow("START COMMUTE", 0, () -> showCharacterSetup());
+        HBox continueRow = createMenuButtonRow("CONTINUE", 1, () -> app.showEncounter());
+        HBox galleryRow = createMenuButtonRow("GALLERY", 2, () -> showGallery());
+        HBox settingsRow = createMenuButtonRow("SETTINGS", 3, () -> showSettings());
+        HBox exitRow = createMenuButtonRow("EXIT", 4, () -> Platform.exit());
 
-        if (!logoLoaded) {
-            Label titleFallback = new Label("SABAY TAYO");
-            titleFallback.setStyle("-fx-text-fill: #f4d38a; -fx-font-size: 42px; -fx-font-weight: bold; -fx-font-family: 'SansSerif';");
+        buttonsBox.getChildren().addAll(startRow, continueRow, galleryRow, settingsRow, exitRow);
 
-            Label subtitleFallback = new Label("— A BUS COMMUTE SIMULATION —");
-            subtitleFallback.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-family: 'Monospaced'; -fx-letter-spacing: 2px;");
+        // Set START COMMUTE active by default (matching the reference image)
+        setActiveMenuButton(0);
 
-            topBox.getChildren().addAll(titleFallback, subtitleFallback);
-        }
-        uiLayout.setTop(topBox);
+        // Main center column combining Signboard + 5 Buttons
+        VBox centerColumn = new VBox(28, signboard, buttonsBox);
+        centerColumn.setAlignment(Pos.CENTER);
+        centerColumn.setMaxWidth(Region.USE_PREF_SIZE);
+        centerColumn.setMaxHeight(Region.USE_PREF_SIZE);
 
-        // Center: Vertical Menu Buttons
-        VBox menuBox = new VBox(12);
-        menuBox.setAlignment(Pos.CENTER);
+        // Bottom-Right: Tilted Vintage Bus Ticket ("ROUTE: BUENDIA - ALABANG")
+        HBox busTicket = createBusTicket();
+        StackPane.setAlignment(busTicket, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(busTicket, new Insets(0, 36, 26, 0));
 
-        Button btnStart    = createMenuButton("START COMMUTE");
-        Button btnContinue = createMenuButton("CONTINUE");
-        Button btnGallery  = createMenuButton("GALLERY");
-        Button btnSettings = createMenuButton("SETTINGS");
-        Button btnExit     = createMenuButton("EXIT");
-
-        btnStart.setOnAction(e -> showCharacterSetup());
-        btnSettings.setOnAction(e -> showSettings());
-        btnExit.setOnAction(e -> Platform.exit());
-
-        menuBox.getChildren().addAll(btnStart, btnContinue, btnGallery, btnSettings, btnExit);
-        uiLayout.setCenter(menuBox);
-
-        // Bottom: Route & Version Bar
-        HBox bottomBar = new HBox();
-        bottomBar.setAlignment(Pos.CENTER_LEFT);
-
-        Label routeTag = new Label("ROUTE: BUENDIA ➔ ALABANG (SLEX EXPRESS)");
-        routeTag.setStyle("-fx-text-fill: #f4d38a; -fx-font-family: 'Monospaced'; -fx-font-size: 13px; -fx-font-weight: bold;");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Label versionTag = new Label("v1.0.0 | OOP Final Project");
-        versionTag.setStyle("-fx-text-fill: #f5f0fa; -fx-font-family: 'Monospaced'; -fx-font-size: 12px;");
-
-        bottomBar.getChildren().addAll(routeTag, spacer, versionTag);
-        uiLayout.setBottom(bottomBar);
-
-        contentLayer.getChildren().add(uiLayout);
+        contentLayer.getChildren().addAll(centerColumn, busTicket);
+        StackPane.setAlignment(centerColumn, Pos.CENTER);
     }
 
-    // 2. Character Setup Screen
+    // Builds the double-bordered "Sabay Tayo" signboard plaque
+    private VBox createSignboard() {
+        VBox outerPlaque = new VBox();
+        outerPlaque.getStyleClass().add("signboard-outer");
+        outerPlaque.setMaxWidth(Region.USE_PREF_SIZE);
+        outerPlaque.setMaxHeight(Region.USE_PREF_SIZE);
+
+        VBox innerPlaque = new VBox(2);
+        innerPlaque.getStyleClass().add("signboard-inner");
+        innerPlaque.setAlignment(Pos.CENTER);
+
+        // Top ornament line: sparkles + transit arrows + bus icon
+        BorderPane topOrnament = new BorderPane();
+        Label topLeftStar = new Label("✦");
+        topLeftStar.getStyleClass().add("signboard-star");
+        Label topCenterRoute = new Label("───────►   🚌   ───────►");
+        topCenterRoute.getStyleClass().add("signboard-ornament");
+        Label topRightStar = new Label("✦ ✧");
+        topRightStar.getStyleClass().add("signboard-star");
+        topOrnament.setLeft(topLeftStar);
+        topOrnament.setCenter(topCenterRoute);
+        topOrnament.setRight(topRightStar);
+
+        // Center cursive script title
+        Label titleLabel = new Label("Sabay Tayo");
+        titleLabel.getStyleClass().add("signboard-title");
+
+        // Bottom ornament line: reverse transit arrows + bus icon
+        BorderPane bottomOrnament = new BorderPane();
+        Label bottomLeftStar = new Label("·");
+        bottomLeftStar.getStyleClass().add("signboard-ornament");
+        Label bottomCenterRoute = new Label("◄───────   ◄───────");
+        bottomCenterRoute.getStyleClass().add("signboard-ornament");
+        Label bottomRightBus = new Label("🚌 ✦");
+        bottomRightBus.getStyleClass().add("signboard-ornament");
+        bottomOrnament.setLeft(bottomLeftStar);
+        bottomOrnament.setCenter(bottomCenterRoute);
+        bottomOrnament.setRight(bottomRightBus);
+
+        innerPlaque.getChildren().addAll(topOrnament, titleLabel, bottomOrnament);
+        outerPlaque.getChildren().add(innerPlaque);
+        return outerPlaque;
+    }
+
+    // Creates one menu button row flanked by left (▶) and right (◀) pointer arrows
+    private HBox createMenuButtonRow(String text, int index, Runnable action) {
+        Label leftArrow = new Label("▶");
+        leftArrow.getStyleClass().add("menu-arrow");
+
+        Button btn = new Button(text);
+        btn.getStyleClass().add("commute-menu-btn");
+        btn.setPrefWidth(280);
+        btn.setPrefHeight(46);
+        btn.setOnAction(e -> action.run());
+
+        Label rightArrow = new Label("◀");
+        rightArrow.getStyleClass().add("menu-arrow");
+
+        menuButtons.add(btn);
+        leftArrows.add(leftArrow);
+        rightArrows.add(rightArrow);
+
+        btn.setOnMouseEntered(e -> setActiveMenuButton(index));
+
+        HBox row = new HBox(12, leftArrow, btn, rightArrow);
+        row.setAlignment(Pos.CENTER);
+        row.setMaxWidth(Region.USE_PREF_SIZE);
+        return row;
+    }
+
+    // Highlights the active button and shows its flanking ▶ / ◀ pointer arrows
+    private void setActiveMenuButton(int activeIndex) {
+        for (int i = 0; i < menuButtons.size(); i++) {
+            Button btn = menuButtons.get(i);
+            Label left = leftArrows.get(i);
+            Label right = rightArrows.get(i);
+
+            if (i == activeIndex) {
+                if (!btn.getStyleClass().contains("commute-menu-btn-active")) {
+                    btn.getStyleClass().add("commute-menu-btn-active");
+                }
+                left.setVisible(true);
+                right.setVisible(true);
+            } else {
+                btn.getStyleClass().remove("commute-menu-btn-active");
+                left.setVisible(false);
+                right.setVisible(false);
+            }
+        }
+    }
+
+    // Builds the tilted vintage bus ticket in the bottom-right corner
+    private HBox createBusTicket() {
+        HBox ticket = new HBox(10);
+        ticket.getStyleClass().add("bus-ticket");
+        ticket.setAlignment(Pos.CENTER_LEFT);
+        ticket.setMaxWidth(Region.USE_PREF_SIZE);
+        ticket.setMaxHeight(Region.USE_PREF_SIZE);
+        ticket.setRotate(-8);
+
+        // Left body of ticket
+        VBox mainStub = new VBox(4);
+        mainStub.setAlignment(Pos.CENTER_LEFT);
+
+        HBox topRow = new HBox();
+        topRow.setAlignment(Pos.CENTER_LEFT);
+        Label routeHeader = new Label("ROUTE:");
+        routeHeader.getStyleClass().add("ticket-route-label");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Label busIcon = new Label("🚌");
+        busIcon.getStyleClass().add("ticket-route-label");
+        topRow.getChildren().addAll(routeHeader, spacer, busIcon);
+
+        Label routeValue = new Label("BUENDIA - ALABANG");
+        routeValue.getStyleClass().add("ticket-route-value");
+
+        HBox bottomRow = new HBox();
+        bottomRow.setAlignment(Pos.CENTER_RIGHT);
+        Label ticketStamp = new Label("TICKET");
+        ticketStamp.getStyleClass().add("ticket-stamp");
+        ticketStamp.setRotate(-5);
+        bottomRow.getChildren().add(ticketStamp);
+
+        mainStub.getChildren().addAll(topRow, routeValue, bottomRow);
+
+        // Right barcode strip
+        VBox barcodeBox = new VBox(-2);
+        barcodeBox.getStyleClass().add("ticket-barcode");
+        barcodeBox.setAlignment(Pos.CENTER);
+        String[] bars = {"███", "█ █", "███", " █ ", "███", "██ "};
+        for (int i = 0; i < bars.length; i++) {
+            Label barLine = new Label(bars[i]);
+            barLine.setStyle("-fx-font-size: 7px; -fx-text-fill: #2b1d1c; -fx-font-family: 'Consolas';");
+            barcodeBox.getChildren().add(barLine);
+        }
+
+        ticket.getChildren().addAll(mainStub, barcodeBox);
+        return ticket;
+    }
+
+    // 2. Character Setup (Shown after clicking START COMMUTE)
     public void showCharacterSetup() {
         contentLayer.getChildren().clear();
 
-        VBox card = new VBox(14);
+        VBox card = new VBox(12);
         card.setMaxWidth(520);
         card.setMaxHeight(Region.USE_PREF_SIZE);
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(28, 36, 28, 36));
-        card.setStyle(
-            "-fx-background-color: rgba(36, 30, 50, 0.94);" +
-            "-fx-border-color: #f2a6bd;" +
-            "-fx-border-width: 2px;" +
-            "-fx-border-radius: 8px;" +
-            "-fx-background-radius: 8px;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 16, 0, 0, 4);"
-        );
+        card.setPadding(new Insets(30, 40, 30, 40));
+        card.getStyleClass().add("dialogue-box");
 
-        Label titleLabel = new Label("PASSENGER SETUP");
-        titleLabel.setStyle("-fx-text-fill: #f4d38a; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'SansSerif';");
+        Label titleLabel = new Label("Boarding Pass");
+        titleLabel.getStyleClass().add("title-header");
 
-        Label subtitleLabel = new Label("Set up your character before boarding");
-        subtitleLabel.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-style: italic;");
+        Label subtitleLabel = new Label("Setup your commuter profile before boarding the bus");
+        subtitleLabel.getStyleClass().add("sub-header");
 
         Label nameLabel = new Label("Your Name:");
-        nameLabel.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-weight: bold;");
+        nameLabel.getStyleClass().add("field-label");
 
         Label playerPronounLabel = new Label("Your Pronouns:");
-        playerPronounLabel.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-weight: bold;");
+        playerPronounLabel.getStyleClass().add("field-label");
 
         Label strangerPronounLabel = new Label("Stranger's Pronouns:");
-        strangerPronounLabel.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-weight: bold;");
+        strangerPronounLabel.getStyleClass().add("field-label");
 
         HBox pronounsRow = new HBox(16,
             new VBox(4, playerPronounLabel, playerPronounsBox),
@@ -235,10 +294,14 @@ public class StartView extends StackPane {
         buttonRow.setAlignment(Pos.CENTER);
         buttonRow.setPadding(new Insets(10, 0, 0, 0));
 
-        Button backButton = createSmallButton("← BACK");
+        Button backButton = new Button("← Back");
+        backButton.getStyleClass().add("menu-button");
+        backButton.setPrefWidth(130);
         backButton.setOnAction(e -> showMainMenu());
 
-        Button boardButton = createSmallButton("BOARD THE BUS ➔");
+        Button boardButton = new Button("Board the Bus ➔");
+        boardButton.getStyleClass().add("menu-button");
+        boardButton.setPrefWidth(200);
         boardButton.setOnAction(e -> handleBoarding());
 
         buttonRow.getChildren().addAll(backButton, boardButton);
@@ -257,7 +320,51 @@ public class StartView extends StackPane {
         StackPane.setAlignment(card, Pos.CENTER);
     }
 
-    // 3. Settings Screen
+    // 3. Gallery Screen (Shown after clicking GALLERY)
+    public void showGallery() {
+        contentLayer.getChildren().clear();
+
+        VBox card = new VBox(14);
+        card.setMaxWidth(520);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(30, 40, 30, 40));
+        card.getStyleClass().add("dialogue-box");
+
+        Label titleLabel = new Label("Commute Gallery");
+        titleLabel.getStyleClass().add("title-header");
+
+        Label subtitleLabel = new Label("Unlockable Endings & Route Memories");
+        subtitleLabel.getStyleClass().add("sub-header");
+
+        VBox endingsList = new VBox(8);
+        endingsList.setAlignment(Pos.CENTER_LEFT);
+        endingsList.setPadding(new Insets(8, 20, 8, 20));
+
+        String[] outcomes = {
+            "1. Lover Outcome — \"A Seat Saved Just For You\"",
+            "2. Best Friend Outcome — \"Same Bus Tomorrow?\"",
+            "3. Rival Outcome — \"Last Window Seat Standing\"",
+            "4. Acquaintance Outcome — \"A Polite Nod at the Terminal\"",
+            "5. Blocked Outcome — \"Earphones In, World Out\""
+        };
+        for (int i = 0; i < outcomes.length; i++) {
+            Label item = new Label(outcomes[i]);
+            item.getStyleClass().add("field-label");
+            endingsList.getChildren().add(item);
+        }
+
+        Button backButton = new Button("← Back to Menu");
+        backButton.getStyleClass().add("menu-button");
+        backButton.setPrefWidth(220);
+        backButton.setOnAction(e -> showMainMenu());
+
+        card.getChildren().addAll(titleLabel, subtitleLabel, endingsList, backButton);
+        contentLayer.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
+    }
+
+    // 4. Settings Screen (Shown after clicking SETTINGS)
     public void showSettings() {
         contentLayer.getChildren().clear();
 
@@ -265,30 +372,23 @@ public class StartView extends StackPane {
         card.setMaxWidth(520);
         card.setMaxHeight(Region.USE_PREF_SIZE);
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(28, 36, 28, 36));
-        card.setStyle(
-            "-fx-background-color: rgba(36, 30, 50, 0.94);" +
-            "-fx-border-color: #f2a6bd;" +
-            "-fx-border-width: 2px;" +
-            "-fx-border-radius: 8px;" +
-            "-fx-background-radius: 8px;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 16, 0, 0, 4);"
-        );
+        card.setPadding(new Insets(30, 40, 30, 40));
+        card.getStyleClass().add("dialogue-box");
 
-        Label titleLabel = new Label("SETTINGS");
-        titleLabel.setStyle("-fx-text-fill: #f4d38a; -fx-font-size: 24px; -fx-font-weight: bold; -fx-font-family: 'SansSerif';");
+        Label titleLabel = new Label("Settings");
+        titleLabel.getStyleClass().add("title-header");
 
-        Label subtitleLabel = new Label("Commute Preferences & Audio");
-        subtitleLabel.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-style: italic;");
+        Label subtitleLabel = new Label("Preferences & Audio");
+        subtitleLabel.getStyleClass().add("sub-header");
 
         Label volumeLabel = new Label("BGM Volume:");
-        volumeLabel.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-weight: bold;");
+        volumeLabel.getStyleClass().add("field-label");
 
         Slider volumeSlider = new Slider(0, 100, 80);
         volumeSlider.setMaxWidth(260);
 
         Label volumeValueLabel = new Label("80%");
-        volumeValueLabel.setStyle("-fx-text-fill: #f4d38a; -fx-font-size: 14px; -fx-font-weight: bold;");
+        volumeValueLabel.getStyleClass().add("stat-value");
         volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             volumeValueLabel.setText(newVal.intValue() + "%");
         });
@@ -297,7 +397,7 @@ public class StartView extends StackPane {
         volumeRow.setAlignment(Pos.CENTER);
 
         Label textSpeedLabel = new Label("Text Speed:");
-        textSpeedLabel.setStyle("-fx-text-fill: #f5f0fa; -fx-font-size: 13px; -fx-font-weight: bold;");
+        textSpeedLabel.getStyleClass().add("field-label");
 
         ComboBox<String> textSpeedBox = new ComboBox<>();
         textSpeedBox.getItems().addAll("Normal", "Fast", "Instant");
@@ -306,10 +406,12 @@ public class StartView extends StackPane {
         HBox speedRow = new HBox(12, textSpeedLabel, textSpeedBox);
         speedRow.setAlignment(Pos.CENTER);
 
-        Label displayLabel = new Label("Display Mode: Windowed (1280 x 720)");
-        displayLabel.setStyle("-fx-text-fill: #a2a8ba; -fx-font-size: 13px;");
+        Label displayLabel = new Label("Display: Windowed (1280 x 720)");
+        displayLabel.getStyleClass().add("sub-header");
 
-        Button backButton = createSmallButton("← BACK TO MENU");
+        Button backButton = new Button("← Back to Menu");
+        backButton.getStyleClass().add("menu-button");
+        backButton.setPrefWidth(220);
         backButton.setOnAction(e -> showMainMenu());
 
         card.getChildren().addAll(
@@ -324,31 +426,6 @@ public class StartView extends StackPane {
 
         contentLayer.getChildren().add(card);
         StackPane.setAlignment(card, Pos.CENTER);
-    }
-
-    private Button createMenuButton(String text) {
-        Button btn = new Button(text);
-        btn.setStyle(BTN_IDLE_STYLE);
-        btn.setPrefWidth(280);
-        btn.setPrefHeight(46);
-
-        // Hover events from specification
-        btn.setOnMouseEntered(e -> btn.setStyle(BTN_HOVER_STYLE));
-        btn.setOnMouseExited(e -> btn.setStyle(BTN_IDLE_STYLE));
-
-        return btn;
-    }
-
-    private Button createSmallButton(String text) {
-        Button btn = new Button(text);
-        btn.setStyle(BTN_IDLE_STYLE);
-        btn.setPrefWidth(180);
-        btn.setPrefHeight(40);
-
-        btn.setOnMouseEntered(e -> btn.setStyle(BTN_HOVER_STYLE));
-        btn.setOnMouseExited(e -> btn.setStyle(BTN_IDLE_STYLE));
-
-        return btn;
     }
 
     private void handleBoarding() {
