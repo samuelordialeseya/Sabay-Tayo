@@ -78,7 +78,7 @@ public class StartView extends StackPane {
         Label titleLabel = new Label("Sabay Tayo?");
         titleLabel.getStyleClass().add("main-title");
 
-        Label subtitleLabel = new Label("a branching bus-ride dialogue game");
+        Label subtitleLabel = new Label("— A BRANCHING BUS-RIDE DIALOGUE GAME —");
         subtitleLabel.getStyleClass().add("main-subtitle");
 
         titleBox.getChildren().addAll(titleLabel, subtitleLabel);
