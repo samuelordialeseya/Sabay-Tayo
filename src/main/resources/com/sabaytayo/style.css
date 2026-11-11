@@ -3,89 +3,57 @@
 }
 
 /* ==========================================================
-   SABAY TAYO? — VISUAL IDENTITY & THEME
-   Mood: Twilight Manila Bus Commute x Persona 5 Polish
+   SABAY TAYO? — BUS COMMUTE SIM VISUAL IDENTITY
    Palette:
-     - Midnight Indigo: #10121a (Deep bus interior shadows)
-     - Twilight Rose:   #b8335a (Signature warm romantic accent)
-     - Streetlamp Amber:#e5a93b (Warm sodium streetlight reflections)
-     - Slate Card:      #1a1d28 (Clean readable surfaces)
-     - Text Light:      #f4f5f8 (Crisp high-contrast dialogue)
-     - Text Muted:      #9aa1b5 (Secondary descriptions & hints)
+     - Dark Violet/Charcoal: rgba(30, 24, 42, 0.94)
+     - Button Idle Surface:  rgba(46, 38, 64, 0.88)
+     - Button Hover Surface: rgba(64, 52, 86, 0.95)
+     - Rose Border Accent:   #f2a6bd
+     - Streetlamp Gold:      #f4d38a
+     - Clean Text Light:     #f5f0fa
+     - Muted Text:           #a29bb0
    ========================================================== */
 
 /* 1. DIALOGUE CONTAINER */
 .dialogue-box {
-    -fx-background-color: rgba(14, 16, 24, 0.94);
-    -fx-background-radius: 12px;
-    -fx-border-color: rgba(184, 51, 90, 0.45);
-    -fx-border-radius: 12px;
-    -fx-border-width: 1.5px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 20, 0, 0, 6);
+    -fx-background-color: rgba(30, 24, 42, 0.94);
+    -fx-background-radius: 10px;
+    -fx-border-color: #f2a6bd;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1.8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 18, 0, 0, 5);
 }
 
-/* 2. TITLE SCREEN (Free-Floating Identity) */
-.main-title {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-font-size: 56px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
-    -fx-effect: dropshadow(gaussian, rgba(184, 51, 90, 0.6), 18, 0, 0, 3);
-}
-
-.main-subtitle {
-    -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
-    -fx-font-size: 15px;
-    -fx-text-fill: #e5a93b;
-    -fx-font-style: italic;
-    -fx-letter-spacing: 1.5px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 10, 0, 0, 2);
-}
-
-.title-header {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
-}
-
-.sub-header {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 13px;
-    -fx-text-fill: #9aa1b5;
-    -fx-font-style: italic;
-}
-
-/* 3. TRANSIT SPEAKER NAMEPLATE */
+/* 2. SPEAKER NAMEPLATE */
 .speaker-tag {
-    -fx-background-color: #b8335a;
+    -fx-background-color: rgba(46, 38, 64, 0.98);
     -fx-background-radius: 6px 6px 0px 0px;
-    -fx-border-color: #d44973;
-    -fx-border-width: 1px 1px 0px 1px;
+    -fx-border-color: #f2a6bd;
+    -fx-border-width: 1.5px 1.5px 0px 1.5px;
     -fx-border-radius: 6px 6px 0px 0px;
     -fx-padding: 4px 18px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);
 }
 
 .speaker-label {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 13px;
+    -fx-font-family: "SansSerif", "Trebuchet MS", sans-serif;
+    -fx-text-fill: #f4d38a;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 1px;
+    -fx-letter-spacing: 0.8px;
 }
 
-/* 4. DIALOGUE BODY & REACTION */
+/* 3. DIALOGUE BODY & REACTION */
 .dialogue-text {
     -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-text-fill: #f4f5f8;
+    -fx-text-fill: #f5f0fa;
     -fx-font-size: 16px;
     -fx-line-spacing: 4px;
 }
 
 .reaction-text {
     -fx-font-family: "Segoe UI", sans-serif;
-    -fx-text-fill: #e5a93b;
+    -fx-text-fill: #f4d38a;
     -fx-font-style: italic;
     -fx-font-size: 14px;
 }
@@ -93,32 +61,32 @@
 .rule-text {
     -fx-font-family: "Segoe UI", sans-serif;
     -fx-font-size: 13px;
-    -fx-text-fill: #e5a93b;
+    -fx-text-fill: #f4d38a;
     -fx-font-style: italic;
 }
 
-/* 5. FORM INPUTS & LABELS */
+/* 4. FORM INPUTS & LABELS */
 .field-label {
     -fx-font-family: "Segoe UI", sans-serif;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-text-fill: #d5d9e5;
+    -fx-text-fill: #f5f0fa;
 }
 
 .input-field {
     -fx-font-family: "Segoe UI", sans-serif;
     -fx-font-size: 14px;
     -fx-text-fill: #ffffff;
-    -fx-background-color: rgba(18, 20, 30, 0.95);
+    -fx-background-color: rgba(32, 26, 44, 0.95);
     -fx-padding: 8px 12px;
     -fx-background-radius: 6px;
-    -fx-border-color: rgba(184, 51, 90, 0.5);
+    -fx-border-color: #f2a6bd;
     -fx-border-radius: 6px;
-    -fx-border-width: 1px;
+    -fx-border-width: 1.5px;
 }
 
 .input-field:focused {
-    -fx-border-color: #e5a93b;
+    -fx-border-color: #f4d38a;
 }
 
 .error-text {
@@ -128,116 +96,92 @@
     -fx-text-fill: #e57373;
 }
 
-/* 6. STATS DISPLAY (ENDING SCREEN) */
+/* 5. STATS DISPLAY (ENDING SCREEN) */
 .stat-name {
     -fx-font-family: "Segoe UI", sans-serif;
-    -fx-text-fill: #9aa1b5;
+    -fx-text-fill: #a29bb0;
     -fx-font-size: 14px;
 }
 
 .stat-value {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-text-fill: #e5a93b;
+    -fx-font-family: "SansSerif", "Trebuchet MS", sans-serif;
+    -fx-text-fill: #f4d38a;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
 
-/* 7. MENU & CHOICE BUTTONS (Persona 5 Left-Accent Bar) */
-.menu-button {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-background-color: rgba(22, 25, 36, 0.94);
-    -fx-text-fill: #f4f5f8;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-padding: 12px 28px;
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(184, 51, 90, 0.5);
-    -fx-border-radius: 8px;
-    -fx-border-width: 1.2px;
-    -fx-cursor: hand;
-    -fx-alignment: CENTER;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 8, 0, 0, 2);
-}
-
-.menu-button:hover {
-    -fx-background-color: #2a2e40;
-    -fx-text-fill: #ffffff;
-    -fx-border-color: #e5a93b;
-    -fx-translate-y: -2px;
-    -fx-effect: dropshadow(gaussian, rgba(229, 169, 59, 0.35), 10, 0, 0, 1);
-}
-
+/* 6. CHOICE BUTTONS */
 .choice-button {
-    -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
-    -fx-background-color: rgba(20, 23, 34, 0.94);
-    -fx-text-fill: #eaecef;
+    -fx-font-family: "SansSerif", "Segoe UI", sans-serif;
+    -fx-background-color: rgba(46, 38, 64, 0.88);
+    -fx-text-fill: #f5f0fa;
     -fx-font-size: 14px;
+    -fx-font-weight: bold;
     -fx-padding: 10px 18px;
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(184, 51, 90, 0.4);
-    -fx-border-radius: 8px;
-    -fx-border-width: 1.2px 1.2px 1.2px 4px; /* Distinct left-stripe motif */
+    -fx-background-radius: 6px;
+    -fx-border-color: #f2a6bd;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1.5px 1.5px 1.5px 4px;
     -fx-cursor: hand;
     -fx-alignment: CENTER_LEFT;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 6, 0, 0, 2);
 }
 
 .choice-button:hover {
-    -fx-background-color: #282d3e;
-    -fx-text-fill: #ffffff;
-    -fx-border-color: #e5a93b;
-    -fx-border-width: 1.2px 1.2px 1.2px 5px;
-    -fx-translate-x: 5px;
-    -fx-effect: dropshadow(gaussian, rgba(229, 169, 59, 0.25), 8, 0, 0, 1);
+    -fx-background-color: rgba(64, 52, 86, 0.95);
+    -fx-text-fill: #f4d38a;
+    -fx-border-color: #f4d38a;
+    -fx-border-width: 1.5px 1.5px 1.5px 5px;
+    -fx-translate-x: 4px;
 }
 
 .choice-button:disabled {
-    -fx-background-color: rgba(16, 18, 26, 0.6);
-    -fx-text-fill: rgba(255, 255, 255, 0.3);
-    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-background-color: rgba(30, 24, 42, 0.6);
+    -fx-text-fill: rgba(245, 240, 250, 0.3);
+    -fx-border-color: rgba(242, 166, 189, 0.2);
     -fx-border-width: 1px;
     -fx-cursor: default;
 }
 
-/* 8. VN TOOLBAR */
+/* 7. VN TOOLBAR */
 .vn-sub-button {
     -fx-font-family: "Segoe UI", sans-serif;
     -fx-background-color: transparent;
-    -fx-text-fill: rgba(255, 255, 255, 0.45);
+    -fx-text-fill: rgba(245, 240, 250, 0.45);
     -fx-font-size: 11px;
     -fx-padding: 2px 8px;
     -fx-cursor: hand;
 }
 
 .vn-sub-button:hover {
-    -fx-text-fill: #e5a93b;
+    -fx-text-fill: #f4d38a;
 }
 
-/* 9. PERSONA 5 MOMENTUM HUD */
+/* 8. MOMENTUM HUD */
 .p5-hud-badge {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-background-color: rgba(16, 18, 26, 0.94);
-    -fx-text-fill: #f4f5f8;
+    -fx-font-family: "Monospaced", "SansSerif", sans-serif;
+    -fx-background-color: rgba(46, 38, 64, 0.92);
+    -fx-text-fill: #f4d38a;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-padding: 6px 14px;
     -fx-background-radius: 6px;
-    -fx-border-color: #b8335a;
+    -fx-border-color: #f2a6bd;
     -fx-border-radius: 6px;
-    -fx-border-width: 1.2px 1.2px 1.2px 4px;
+    -fx-border-width: 1.5px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 1);
 }
 
-/* 10. CHARACTER SPRITE FRAME */
+/* 9. CHARACTER SPRITE FRAME */
 .sprite-frame {
     -fx-font-family: "Segoe UI", sans-serif;
-    -fx-background-color: rgba(16, 18, 26, 0.88);
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(184, 51, 90, 0.4);
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
+    -fx-background-color: rgba(30, 24, 42, 0.9);
+    -fx-background-radius: 6px;
+    -fx-border-color: #f2a6bd;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1.5px;
     -fx-padding: 6px 14px;
-    -fx-text-fill: #e5a93b;
+    -fx-text-fill: #f4d38a;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
 }

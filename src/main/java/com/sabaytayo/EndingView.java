@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 // Ending screen: reveals final relationship stats, momentum, matched outcome, and a Play Again option.
 public class EndingView extends StackPane {
 
+    @SuppressWarnings("this-escape")
     public EndingView(GameApplication app, RelationshipStats stats, Momentum momentum) {
 
         // Background image
