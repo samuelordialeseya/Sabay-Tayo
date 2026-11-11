@@ -60,7 +60,6 @@ public class EncounterView extends StackPane {
 
         Button viewEndingButton = new Button("End Ride & See Outcome ➔");
         viewEndingButton.getStyleClass().add("choice-button");
-        viewEndingButton.setStyle("-fx-font-size: 13px; -fx-padding: 6px 14px; -fx-background-radius: 12px;");
         viewEndingButton.setOnAction(e -> app.showEnding());
 
         topBar.getChildren().addAll(momentumBadge, spacer, viewEndingButton);
@@ -74,7 +73,6 @@ public class EncounterView extends StackPane {
 
         expressionBadge = new Label("Seatmate • Listening");
         expressionBadge.getStyleClass().add("sprite-frame");
-        expressionBadge.setStyle("-fx-text-fill: #ff94c2; -fx-font-size: 13px; -fx-font-weight: bold;");
 
         spriteContainer.getChildren().add(expressionBadge);
 
@@ -107,7 +105,7 @@ public class EncounterView extends StackPane {
         dialogueLabel.setWrapText(true);
 
         reactionLabel = new Label("✦ Tip: Choose how you want to respond above.");
-        reactionLabel.setStyle("-fx-text-fill: #ffd166; -fx-font-style: italic; -fx-font-size: 14px;");
+        reactionLabel.getStyleClass().add("reaction-text");
         reactionLabel.setWrapText(true);
 
         // DDLC Visual Novel sub-bar (matching page 9 mockup)

@@ -45,38 +45,36 @@ public class StartView extends StackPane {
         card.setPadding(new Insets(28, 36, 28, 36));
         card.getStyleClass().add("dialogue-box");
 
-        // Game title & subtitle
+        // Game title & subtitle (Branded typography)
         Label titleLabel = new Label("Sabay Tayo?");
-        titleLabel.setStyle("-fx-font-size: 38px; -fx-font-weight: bold; -fx-text-fill: #ff94c2;");
+        titleLabel.getStyleClass().add("title-header");
 
         Label subtitleLabel = new Label("a branching bus-ride dialogue game");
-        subtitleLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #e0d0e6; -fx-font-style: italic;");
+        subtitleLabel.getStyleClass().add("sub-header");
 
         // Player Name Input
         Label nameLabel = new Label("Your Name:");
-        nameLabel.getStyleClass().add("dialogue-text");
+        nameLabel.getStyleClass().add("field-label");
 
         nameField = new TextField();
         nameField.setPromptText("Enter your name (e.g. Sam)...");
         nameField.setMaxWidth(360);
-        nameField.setStyle("-fx-font-size: 14px; -fx-padding: 8px; -fx-background-radius: 8px;");
+        nameField.getStyleClass().add("input-field");
 
         // Pronoun selections
         Label playerPronounLabel = new Label("Your Pronouns:");
-        playerPronounLabel.getStyleClass().add("dialogue-text");
+        playerPronounLabel.getStyleClass().add("field-label");
 
         playerPronounsBox = new ComboBox<>();
         playerPronounsBox.getItems().addAll("They/Them", "He/Him", "She/Her");
         playerPronounsBox.setValue("They/Them");
-        playerPronounsBox.setStyle("-fx-font-size: 13px;");
 
         Label strangerPronounLabel = new Label("Stranger's Pronouns:");
-        strangerPronounLabel.getStyleClass().add("dialogue-text");
+        strangerPronounLabel.getStyleClass().add("field-label");
 
         strangerPronounsBox = new ComboBox<>();
         strangerPronounsBox.getItems().addAll("She/Her", "He/Him", "They/Them");
         strangerPronounsBox.setValue("She/Her");
-        strangerPronounsBox.setStyle("-fx-font-size: 13px;");
 
         HBox pronounsRow = new HBox(20,
             new VBox(4, playerPronounLabel, playerPronounsBox),
@@ -85,7 +83,7 @@ public class StartView extends StackPane {
         pronounsRow.setAlignment(Pos.CENTER);
 
         errorLabel = new Label("");
-        errorLabel.setStyle("-fx-text-fill: #ff6b6b; -fx-font-size: 13px;");
+        errorLabel.getStyleClass().add("error-text");
 
         // Start Button
         Button startButton = new Button("Board the Bus");

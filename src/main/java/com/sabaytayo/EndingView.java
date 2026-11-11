@@ -69,14 +69,14 @@ public class EndingView extends StackPane {
         }
 
         Label title = new Label(outcomeTitle);
-        title.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ff94c2;");
+        title.getStyleClass().add("title-header");
 
         Label desc = new Label(outcomeDesc);
-        desc.setStyle("-fx-font-size: 15px; -fx-text-fill: #ffffff; -fx-text-alignment: center;");
+        desc.getStyleClass().add("sub-header");
         desc.setWrapText(true);
 
         Label ruleLabel = new Label(matchedRule);
-        ruleLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #ffd166; -fx-font-style: italic;");
+        ruleLabel.getStyleClass().add("rule-text");
 
         // Stats grid
         GridPane statsGrid = new GridPane();
@@ -104,10 +104,10 @@ public class EndingView extends StackPane {
 
     private void addStatRow(GridPane grid, int row, String name, String value) {
         Label nameLbl = new Label(name + ":");
-        nameLbl.setStyle("-fx-text-fill: #e0d0e6; -fx-font-size: 14px;");
+        nameLbl.getStyleClass().add("stat-name");
 
         Label valLbl = new Label(value);
-        valLbl.setStyle("-fx-text-fill: #ff94c2; -fx-font-size: 14px; -fx-font-weight: bold;");
+        valLbl.getStyleClass().add("stat-value");
 
         grid.add(nameLbl, 0, row);
         grid.add(valLbl, 1, row);

@@ -3,10 +3,11 @@
 }
 
 /* ==========================================================
-   DOKI DOKI LITERATURE CLUB x PERSONA 5 THEME
+   SABAY TAYO? BRANDING & TYPOGRAPHY SYSTEM
+   (Visual Novel: Doki Doki Literature Club x Persona 5)
    ========================================================== */
 
-/* Translucent Anime-Style Dialogue Box */
+/* 1. CONTAINERS & CARDS */
 .dialogue-box {
     -fx-background-color: linear-gradient(to bottom, rgba(32, 16, 44, 0.94), rgba(20, 8, 28, 0.97));
     -fx-background-radius: 18px;
@@ -16,7 +17,23 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 101, 163, 0.45), 18, 0, 0, 3);
 }
 
-/* DDLC Speaker Nameplate Badge */
+/* 2. HEADERS (Display / Title Hierarchy) */
+.title-header {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff94c2;
+    -fx-effect: dropshadow(gaussian, rgba(255, 148, 194, 0.45), 12, 0, 0, 2);
+}
+
+.sub-header {
+    -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+    -fx-font-size: 15px;
+    -fx-text-fill: #e8d8ef;
+    -fx-font-style: italic;
+}
+
+/* 3. DDLC SPEAKER NAMEPLATE TAG */
 .speaker-tag {
     -fx-background-color: linear-gradient(to right, #ff4081, #d81b60);
     -fx-background-radius: 8px 8px 0px 0px;
@@ -28,23 +45,87 @@
 }
 
 .speaker-label {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     -fx-text-fill: #ffffff;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 1px;
 }
 
+/* 4. VISUAL NOVEL BODY DIALOGUE */
 .dialogue-text {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
     -fx-text-fill: #fdfdfd;
     -fx-font-size: 17px;
     -fx-line-spacing: 4px;
 }
 
-/* Persona 5 Choice Response Cards */
+.reaction-text {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-text-fill: #ffd166;
+    -fx-font-style: italic;
+    -fx-font-size: 14px;
+}
+
+.rule-text {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #ffd166;
+    -fx-font-style: italic;
+}
+
+/* 5. FORM & INPUT ELEMENTS */
+.field-label {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f5e9f2;
+}
+
+.input-field {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #ffffff;
+    -fx-background-color: rgba(22, 10, 32, 0.85);
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 8px;
+    -fx-border-color: #d1568d;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1.5px;
+}
+
+.input-field:focused {
+    -fx-border-color: #ff65a3;
+    -fx-effect: dropshadow(gaussian, rgba(255, 101, 163, 0.4), 8, 0, 0, 0);
+}
+
+.error-text {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff6b6b;
+}
+
+/* 6. STATS DISPLAY (ENDING SCREEN) */
+.stat-name {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-text-fill: #e0d0e6;
+    -fx-font-size: 14px;
+}
+
+.stat-value {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    -fx-text-fill: #ff94c2;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+/* 7. PERSONA 5 CHOICE RESPONSE CARDS */
 .choice-button {
+    -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
     -fx-background-color: linear-gradient(to right, rgba(42, 16, 56, 0.95), rgba(64, 22, 84, 0.92));
     -fx-text-fill: #f5e9f2;
     -fx-font-size: 15px;
+    -fx-font-weight: normal;
     -fx-padding: 10px 18px;
     -fx-background-radius: 10px;
     -fx-border-color: #d1568d;
@@ -72,8 +153,9 @@
     -fx-cursor: default;
 }
 
-/* DDLC Visual Novel Bottom Action Buttons */
+/* 8. DDLC TOOLBAR BUTTONS */
 .vn-sub-button {
+    -fx-font-family: "Segoe UI", sans-serif;
     -fx-background-color: transparent;
     -fx-text-fill: rgba(255, 200, 230, 0.65);
     -fx-font-size: 11px;
@@ -87,8 +169,9 @@
     -fx-font-weight: bold;
 }
 
-/* Persona 5 Momentum HUD Badge */
+/* 9. PERSONA 5 MOMENTUM HUD */
 .p5-hud-badge {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     -fx-background-color: linear-gradient(to right, rgba(25, 10, 35, 0.92), rgba(45, 15, 60, 0.95));
     -fx-text-fill: #ff80ab;
     -fx-font-size: 13px;
@@ -101,12 +184,16 @@
     -fx-effect: dropshadow(gaussian, rgba(255, 64, 129, 0.4), 10, 0, 0, 1);
 }
 
-/* Character Sprite Expression Frame */
+/* 10. SPRITE FRAME */
 .sprite-frame {
+    -fx-font-family: "Segoe UI", sans-serif;
     -fx-background-color: rgba(20, 10, 30, 0.65);
     -fx-background-radius: 16px;
     -fx-border-color: rgba(255, 101, 163, 0.5);
     -fx-border-radius: 16px;
     -fx-border-width: 1.5px;
     -fx-padding: 8px 16px;
+    -fx-text-fill: #ff94c2;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
 }
