@@ -1,6 +1,5 @@
 package com.sabaytayo;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -11,16 +10,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-// Opening game menu & character setup view: inspired by visual novel main menus (DDLC & Persona 5).
+// Opening game menu view: title directly on top, two buttons below, free-floating without a container box.
 public class StartView extends StackPane {
 
     private final GameApplication app;
-    private final VBox card;
+    private final StackPane contentLayer;
 
     // Persisted setup inputs
     private final TextField nameField;
@@ -43,13 +41,8 @@ public class StartView extends StackPane {
             System.err.println("Notice: Could not load bg.jpg, using default styling.");
         }
 
-        // 2. Central interactive card
-        card = new VBox();
-        card.setMaxWidth(520);
-        card.setMaxHeight(Region.USE_PREF_SIZE);
-        card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(32, 40, 32, 40));
-        card.getStyleClass().add("dialogue-box");
+        // 2. Dynamic content layer
+        contentLayer = new StackPane();
 
         // Initialize reusable input components
         nameField = new TextField();
@@ -68,56 +61,62 @@ public class StartView extends StackPane {
         errorLabel = new Label("");
         errorLabel.getStyleClass().add("error-text");
 
-        // Display the opening main menu by default
+        // Display the opening menu (Title up top, two buttons below)
         showMainMenu();
 
-        getChildren().addAll(bgView, card);
-        StackPane.setAlignment(card, Pos.CENTER);
+        getChildren().addAll(bgView, contentLayer);
     }
 
-    // 1. Clean Opening Game Menu (Title, Start Game, Settings, Exit)
+    // 1. Free-floating Opening Screen: Title up top, two buttons below it (No enclosing box)
     public void showMainMenu() {
-        card.getChildren().clear();
-        card.setSpacing(14);
+        contentLayer.getChildren().clear();
+
+        // Title up top
+        VBox titleBox = new VBox(8);
+        titleBox.setAlignment(Pos.CENTER);
 
         Label titleLabel = new Label("Sabay Tayo?");
-        titleLabel.getStyleClass().add("title-header");
+        titleLabel.getStyleClass().add("main-title");
 
         Label subtitleLabel = new Label("a branching bus-ride dialogue game");
-        subtitleLabel.getStyleClass().add("sub-header");
+        subtitleLabel.getStyleClass().add("main-subtitle");
 
-        Region spacer = new Region();
-        spacer.setPrefHeight(16);
+        titleBox.getChildren().addAll(titleLabel, subtitleLabel);
+
+        // Two buttons directly below it
+        VBox buttonsBox = new VBox(16);
+        buttonsBox.setAlignment(Pos.CENTER);
 
         Button startButton = new Button("Start Game");
         startButton.getStyleClass().add("menu-button");
-        startButton.setPrefWidth(280);
+        startButton.setPrefWidth(260);
         startButton.setOnAction(e -> showCharacterSetup());
 
         Button settingsButton = new Button("Settings");
         settingsButton.getStyleClass().add("menu-button");
-        settingsButton.setPrefWidth(280);
+        settingsButton.setPrefWidth(260);
         settingsButton.setOnAction(e -> showSettings());
 
-        Button exitButton = new Button("Exit");
-        exitButton.getStyleClass().add("menu-button");
-        exitButton.setPrefWidth(280);
-        exitButton.setOnAction(e -> Platform.exit());
+        buttonsBox.getChildren().addAll(startButton, settingsButton);
 
-        card.getChildren().addAll(
-            titleLabel,
-            subtitleLabel,
-            spacer,
-            startButton,
-            settingsButton,
-            exitButton
-        );
+        // Vertical layout: Title up top, two buttons below
+        VBox menuLayout = new VBox(42, titleBox, buttonsBox);
+        menuLayout.setAlignment(Pos.CENTER);
+
+        contentLayer.getChildren().add(menuLayout);
+        StackPane.setAlignment(menuLayout, Pos.CENTER);
     }
 
-    // 2. Character Setup Screen (Entered after clicking Start Game)
+    // 2. Character Setup (Shown after clicking Start Game)
     public void showCharacterSetup() {
-        card.getChildren().clear();
-        card.setSpacing(12);
+        contentLayer.getChildren().clear();
+
+        VBox card = new VBox(12);
+        card.setMaxWidth(520);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(30, 40, 30, 40));
+        card.getStyleClass().add("dialogue-box");
 
         Label titleLabel = new Label("Boarding Pass");
         titleLabel.getStyleClass().add("title-header");
@@ -167,12 +166,21 @@ public class StartView extends StackPane {
             errorLabel,
             buttonRow
         );
+
+        contentLayer.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
     }
 
-    // 3. Settings Screen (Audio & Visual Novel Preferences)
+    // 3. Settings Screen (Shown after clicking Settings)
     public void showSettings() {
-        card.getChildren().clear();
-        card.setSpacing(14);
+        contentLayer.getChildren().clear();
+
+        VBox card = new VBox(14);
+        card.setMaxWidth(520);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(30, 40, 30, 40));
+        card.getStyleClass().add("dialogue-box");
 
         Label titleLabel = new Label("Settings");
         titleLabel.getStyleClass().add("title-header");
@@ -180,7 +188,6 @@ public class StartView extends StackPane {
         Label subtitleLabel = new Label("Preferences & Audio");
         subtitleLabel.getStyleClass().add("sub-header");
 
-        // Master BGM Volume Slider
         Label volumeLabel = new Label("BGM Volume:");
         volumeLabel.getStyleClass().add("field-label");
 
@@ -196,7 +203,6 @@ public class StartView extends StackPane {
         HBox volumeRow = new HBox(12, volumeSlider, volumeValueLabel);
         volumeRow.setAlignment(Pos.CENTER);
 
-        // Text Speed Preference
         Label textSpeedLabel = new Label("Text Speed:");
         textSpeedLabel.getStyleClass().add("field-label");
 
@@ -207,12 +213,8 @@ public class StartView extends StackPane {
         HBox speedRow = new HBox(12, textSpeedLabel, textSpeedBox);
         speedRow.setAlignment(Pos.CENTER);
 
-        // Display Mode
         Label displayLabel = new Label("Display: Windowed (1280 x 720)");
         displayLabel.getStyleClass().add("sub-header");
-
-        Region spacer = new Region();
-        spacer.setPrefHeight(10);
 
         Button backButton = new Button("← Back to Menu");
         backButton.getStyleClass().add("menu-button");
@@ -226,9 +228,11 @@ public class StartView extends StackPane {
             volumeRow,
             speedRow,
             displayLabel,
-            spacer,
             backButton
         );
+
+        contentLayer.getChildren().add(card);
+        StackPane.setAlignment(card, Pos.CENTER);
     }
 
     private void handleBoarding() {

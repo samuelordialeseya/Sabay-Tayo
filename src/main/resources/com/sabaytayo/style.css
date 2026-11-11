@@ -18,6 +18,22 @@
 }
 
 /* 2. HEADERS (Display / Title Hierarchy) */
+.main-title {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    -fx-font-size: 56px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff94c2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.95), 18, 0, 0, 4);
+}
+
+.main-subtitle {
+    -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+    -fx-font-size: 18px;
+    -fx-text-fill: #f5e9f2;
+    -fx-font-style: italic;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.85), 10, 0, 0, 2);
+}
+
 .title-header {
     -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     -fx-font-size: 36px;
