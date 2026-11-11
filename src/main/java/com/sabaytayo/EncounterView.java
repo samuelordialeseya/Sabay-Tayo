@@ -33,7 +33,6 @@ public class EncounterView extends StackPane {
         this.app = app;
         this.stats = stats;
         this.momentum = momentum;
-        setPrefSize(1280, 720);
 
         // 1. Bus background image
         ImageView bgView = new ImageView();

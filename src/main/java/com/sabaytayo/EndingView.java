@@ -15,7 +15,6 @@ import javafx.scene.layout.VBox;
 public class EndingView extends StackPane {
 
     public EndingView(GameApplication app, RelationshipStats stats, Momentum momentum) {
-        setPrefSize(1280, 720);
 
         // Background image
         ImageView bgView = new ImageView();

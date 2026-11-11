@@ -24,7 +24,6 @@ public class StartView extends StackPane {
 
     public StartView(GameApplication app) {
         this.app = app;
-        setPrefSize(1280, 720);
 
         // Background image
         ImageView bgView = new ImageView();
