@@ -1,0 +1,103 @@
+# ============================================================================
+# Sabay Tayo? - Pronoun-tagged dialogue script (UTF-8)
+# Format:  SCENE_ID | KIND | SPEAKER_OR_CHOICE | TEXT | SEATMATE_REPLY | T,A,An,R,M
+#
+# KIND:  NARRATION  -> narrator line (reply + stats empty)
+#        DIALOGUE   -> spoken line    (reply + stats empty)
+#        CHOICE     -> SPEAKER_OR_CHOICE is SINCERE / SARCASTIC / BLUNT / FLIRTY / CONTINUE
+#                      TEXT = what the player says, SEATMATE_REPLY = response,
+#                      stats = deltas for Trust, Attraction, Annoyance, Respect, Momentum
+#        EPILOGUE   -> NEW, proposed. English recap shown on EndingView (pronoun demo)
+#        PREVIEW    -> NEW, proposed. Text shown on StartView after setup
+#
+# TOKENS (resolved by TextFormatter):
+#   {player}  {seatmate}                  -> names
+#   {they} {them} {their} (+ capitalized) -> player's selected pronouns
+#
+# Starting stats: T 30 | A 10 | An 0 | R 30 | M 0   (M clamped -5..+5)
+# ROUTING NOTES (for Sam's Scene graph - not parsed):
+#   S01 -> S02 -> S03 -> S04 -> S05 -> (M>=0 ? S06A : S06B) -> S07 -> S08 -> ending
+#   S05 FLIRTY only appears when M >= +2
+#   Ending priority: BLOCKED -> LOVER -> BEST_FRIEND -> RIVAL -> ACQUAINTANCE
+# ============================================================================
+
+# ---------- START VIEW (proposed) ----------
+START_PREVIEW|PREVIEW|System|Welcome aboard, {player}! Your pronouns: {they}/{them}/{their}.||
+
+# ---------- S01 : Boarding (Scene 1) ----------
+S01_BOARDING|NARRATION|Narrator|(Punuan. Maulan, pagpasok may makikitang may bakanteng upuan sa katabi ng isang stranger na nakikinig sa music.)||
+S01_BOARDING|DIALOGUE|You|(naghahanap ng available seat) excuse me, may nakaupo?||
+S01_BOARDING|DIALOGUE|Seatmate|Wala naman, u can sit here.||
+S01_BOARDING|NARRATION|Narrator|(Umupo ka sa tabi niya. Tahimik siyang nakatingin sa labas habang natingin tingin sya sa phone nya at malalim ang iniisip.)||
+S01_BOARDING|CHOICE|CONTINUE|Continue||0,0,0,0,0
+
+# ---------- S02 : The Awkward Silence + Turn 1 ----------
+S02_TRAFFIC|NARRATION|Narrator|Umaandar ang bus habang mabigat ang daloy ng trapiko. Inalis ni {seatmate} ang isang earphone niya at napatingin sa daan.||
+S02_TRAFFIC|DIALOGUE|Seatmate|Grabe, ang traffic naman ngayon.||
+S02_TRAFFIC|CHOICE|SINCERE|Oo nga, sana naman mawala agad 'yan para makaalis na agad tayo.|Oo nga eh. Gusto ko na rin makauwi agad. Sana hindi na tayo masyadong matagalan dito.|8,3,0,4,1
+S02_TRAFFIC|CHOICE|SARCASTIC|Ano ka ba, dito na daw tayo magpapasko!|Ang kulit mo naman. Ganyan ka ba talaga sumagot?|2,5,6,6,0
+S02_TRAFFIC|CHOICE|BLUNT|Normal naman ang traffic kapag ganitong oras.|Totoo naman. Wala rin tayong magagawa.|1,0,3,6,-1
+
+# ---------- S03 : Turn 2 - Biglang nag preno ----------
+S03_BRAKE|NARRATION|Narrator|Habang tahimik kang nakaupo sa tabi ni {seatmate}, biglang pumreno ang bus dahil may sasakyang huminto sa harapan nito. Dahil sa lakas ng preno, napasubsob si {seatmate} at bahagyang nauntog ang ulo niya sa sandalan ng upuan sa harap.||
+S03_BRAKE|DIALOGUE|Seatmate|Araaayy! Grabe naman 'yon!||
+S03_BRAKE|NARRATION|Narrator|Napatingin sa kaniya ang ilang pasahero. Napansin mong napahawak siya sa ulo niya habang bahagyang nakakunot ang noo.||
+S03_BRAKE|CHOICE|SINCERE|Okay ka lang ba? nasaktan ka ba? baka nahihilo ka?|Oo, okay lang ako. Hindi naman ako nasaktan nang sobra. Salamat sa pag aalala.|10,4,0,4,1
+S03_BRAKE|CHOICE|SARCASTIC|Araymo! Si kuya driver talaga may pa-headbang pa e 'no.|Grabe ka, may commentary pa talaga. Pero sige, medyo natawa ako doon.|2,4,8,4,1
+S03_BRAKE|CHOICE|BLUNT|Mag ingat ka. baka mauntog ka ulit mamaya pag pumreno.|Oo nga, buti na lang may sinabi ka. Muntik na akong matulog ulit.|3,0,6,6,-1
+
+# ---------- S04 : Beat A ----------
+S04_BEAT_A|NARRATION|Narrator|Bumalik na ang bus sa dating takbo, pero mas malapit na kayo sa isa't isa dahil sa biglang pag-usog ng mga pasahero. Nagkatinginan kayo saglit, tapos parehong umiwas ng tingin.||
+S04_BEAT_A|CHOICE|CONTINUE|Continue||0,0,0,0,0
+
+# ---------- S05 : Turn 3 - Saan ka bababa? (FLIRTY gated: M >= +2) ----------
+S05_WHERE_TO|DIALOGUE|Seatmate|Ikaw, saan ka bababa?||
+S05_WHERE_TO|CHOICE|SINCERE|Sa may bandang SM pa. Ikaw, malayo pa ba ang byahe mo?|Mga tatlong stop pa. Medyo matagal pa tayo, kaya okay lang makipagkwentuhan.|8,4,0,4,1
+S05_WHERE_TO|CHOICE|SARCASTIC|Hindi ko alam, depende kung kailan ako pababain ng traffic na 'to.|Ay, sinusuwerte ka. Hindi ako sasagot hangga't hindi ka nagpapakilala.|2,4,6,4,0
+S05_WHERE_TO|CHOICE|BLUNT|Bakit mo tinatanong?|Curious lang. Bawal bang magtanong?|0,0,8,6,-2
+S05_WHERE_TO|CHOICE|FLIRTY|Bakit, balak mo bang sumabay sa 'kin pababa?|Hmm, depende. Kung maganda ang kwento mo hanggang doon, baka sumabay nga ako.|2,14,4,2,2
+
+# ---------- S06A : Turn 4A - Warm (M >= 0) ----------
+S06A_WARM|NARRATION|Narrator|Mas relaxed na ang usapan ninyo. Ibinaba ni {seatmate} ang phone at humarap sa inyo.||
+S06A_WARM|DIALOGUE|Seatmate|Nga pala, ano'ng pangalan mo ulit? Hindi ko pa naitanong kanina.||
+S06A_WARM|CHOICE|SINCERE|{player}. Ikaw?|Masaya akong makilala ka.|10,5,0,4,1
+S06A_WARM|CHOICE|SARCASTIC|Ngayon ka lang nagtanong, pero sige, {player}.|Ang yabang mo naman, pero sige, tatandaan ko.|3,5,6,6,0
+S06A_WARM|CHOICE|BLUNT|{player}.|Okay, {player}. Madali lang tandaan.|2,0,4,8,0
+
+# ---------- S06B : Turn 4B - Cold (M < 0) ----------
+S06B_COLD|NARRATION|Narrator|Humina ang usapan. Bumalik si {seatmate} sa phone, at tanging ugong ng makina at busina sa labas ang naririnig.||
+S06B_COLD|DIALOGUE|Seatmate|(Nakatingin sa bintana) Ang tagal pa ng byahe.||
+S06B_COLD|CHOICE|SINCERE|Pasensya na kung naging awkward kanina. Gusto ko lang naman maging friendly.|Okay lang hehe. Nice meeting you.|6,2,0,4,1
+S06B_COLD|CHOICE|SARCASTIC|Nakaka-excite nga ang view, di ba? Kitang-kita ang bumper ng jeep.|Haha, sige na nga, panalo ka sa isang iyon.|0,2,8,4,-1
+S06B_COLD|CHOICE|BLUNT|Oo. Wala rin akong masabi.|Buti na lang aminado ka.|-2,0,10,2,-2
+
+# ---------- S07 : Beat B ----------
+S07_BEAT_B|NARRATION|Narrator|Napansin ni {seatmate} ang paligid sa labas at dahan-dahang inayos ang bag niya. Malapit na ang stop niya.||
+S07_BEAT_B|CHOICE|CONTINUE|Continue||0,0,0,0,0
+
+# ---------- S08 : Turn 5 - Huling usapan ----------
+S08_FAREWELL|DIALOGUE|Seatmate|Dito na ako bababa. Hanggang dito na lang pala tayo.||
+S08_FAREWELL|CHOICE|SINCERE|Ingat ka. Sana magkita ulit tayo, kahit sa bus lang.|Salamat sa masayang kwentuhan. Ingat ikaw ;)|8,6,0,4,1
+S08_FAREWELL|CHOICE|SARCASTIC|Sayang, bitin pa naman ang kwentuhan natin.|Haha, ikaw talaga. Sige, bahala ka na jan.|2,6,6,6,0
+S08_FAREWELL|CHOICE|BLUNT|Sige, ingat.|Sige. Bye.|1,0,4,4,-1
+
+# ---------- ENDINGS ----------
+END_BLOCKED|NARRATION|Narrator|Bumaba si {seatmate} nang hindi lumilingon. Pagbukas mo ng phone, may notification: "Hindi ka na makakapagpadala ng mensahe sa taong ito."||
+END_BLOCKED|EPILOGUE|System|{seatmate} blocked {player} before the bus even reached the next stop. Maybe {they} should have chosen {their} words more carefully.||
+
+END_LOVER|NARRATION|Narrator|Bago tuluyang bumaba, iniabot ni {seatmate} ang phone niya.||
+END_LOVER|DIALOGUE|Seatmate|Ilagay mo na ang number mo.||
+END_LOVER|NARRATION|Narrator|Pagkasara ng pinto, napangiti ka. Hindi mo akalaing ang pinakamalalang traffic ang magdadala sa 'yo ng pinakamagandang araw.||
+END_LOVER|EPILOGUE|System|{player} and {seatmate} swapped numbers before the doors closed. {They} could not stop smiling, and {their} first date was already being planned.||
+
+END_BEST_FRIEND|DIALOGUE|Seatmate|Uy, add mo ako sa socials. Sabay ulit tayo sa susunod na biyahe, ha?||
+END_BEST_FRIEND|NARRATION|Narrator|Hindi man romantic, pakiramdam mo may bago kang kaibigan na kasing-gaan kausap ng matagal mo nang kakilala.||
+END_BEST_FRIEND|EPILOGUE|System|{player} never expected a traffic jam to bring {them} a new best friend. Next ride, {they} will not sit alone.||
+
+END_RIVAL|DIALOGUE|Seatmate|Ang tapang mo, ha. Sige, tingnan natin kung sino ang mananalo sa susunod nating pagkikita.||
+END_RIVAL|NARRATION|Narrator|Bumaba siyang nakangisi. Hindi kayo magkaibigan, pero tiyak na hindi ka niya makakalimutan.||
+END_RIVAL|EPILOGUE|System|{player} made an impression, just not a friendly one. {They} will remember {seatmate}'s grin, and {their} next meeting will be worth waiting for.||
+
+END_ACQUAINTANCE|DIALOGUE|Seatmate|Sige, ingat ka.||
+END_ACQUAINTANCE|NARRATION|Narrator|Tumango ka lang. Isa lang siya sa maraming taong nakasabay mo, pero minsan, ang simpleng pagkikita ay sapat na para maalala mo ang araw na iyon.||
+END_ACQUAINTANCE|EPILOGUE|System|{player} nodded goodbye. {They} might forget the name by tomorrow, but {their} ride became a small memory worth keeping.||
