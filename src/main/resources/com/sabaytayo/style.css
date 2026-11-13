@@ -13,341 +13,344 @@
      - Ticket Cream:    #dfc9b0 (Vintage bus ticket paper)
    ========================================================== */
 
-/* 1. START MENU — SIGNBOARD TITLE PLAQUE */
-.signboard-outer {
-    -fx-background-color: #161020, #1b1d2b;
-    -fx-background-insets: 0, 0 0 5 0;
-    -fx-background-radius: 12px, 10px;
-    -fx-border-color: #c87d76;
-    -fx-border-width: 3px;
-    -fx-border-radius: 10px;
-    -fx-padding: 6px;
-    -fx-effect: dropshadow(gaussian, rgba(10, 6, 16, 0.85), 18, 0.2, 0, 8);
-}
 
-.signboard-inner {
-    -fx-background-color: #1b1d2b;
-    -fx-background-radius: 6px;
-    -fx-border-color: #7a5462;
-    -fx-border-width: 1.2px;
-    -fx-border-radius: 6px;
-    -fx-padding: 8px 34px 10px 34px;
-}
+    /* 1. START MENU — SIGNBOARD TITLE PLAQUE */
+    .signboard-outer {
+        -fx-background-color: #161020, #1b1d2b;
+        -fx-background-insets: 0, 0 0 5 0;
+        -fx-background-radius: 12px, 10px;
+        -fx-border-color: #c87d76;
+        -fx-border-width: 3px;
+        -fx-border-radius: 10px;
+        -fx-padding: 6px;
+        -fx-effect: dropshadow(gaussian, rgba(10, 6, 16, 0.85), 18, 0.2, 0, 8);
+    }
 
-.signboard-title {
-    -fx-font-family: "Brush Script MT", "Segoe Script", "Georgia", serif;
-    -fx-font-size: 68px;
-    -fx-font-weight: bold;
-    -fx-font-style: italic;
-    -fx-text-fill: linear-gradient(to bottom, #fde09b 0%, #f29f7b 52%, #c45b6c 100%);
-    -fx-padding: -10px 8px -12px 8px;
-    -fx-effect: dropshadow(one-pass-box, #150c21, 0, 1.0, 4, 5);
-}
 
-.signboard-ornament {
-    -fx-font-family: "Consolas", "Segoe UI Symbol", monospace;
-    -fx-font-size: 12px;
-    -fx-text-fill: #9b6b75;
-    -fx-letter-spacing: 1.5px;
-}
+        .signboard-inner {
+            -fx-background-color: #1b1d2b;
+            -fx-background-radius: 6px;
+            -fx-border-color: #7a5462;
+            -fx-border-width: 1.2px;
+            -fx-border-radius: 6px;
+            -fx-padding: 8px 34px 10px 34px;
+        }
 
-.signboard-star {
-    -fx-font-size: 14px;
-    -fx-text-fill: #fad689;
-}
+        .signboard-title {
+            -fx-font-family: "Brush Script MT", "Segoe Script", "Georgia", serif;
+            -fx-font-size: 68px;
+            -fx-font-weight: bold;
+            -fx-font-style: italic;
+            -fx-text-fill: linear-gradient(to bottom, #fde09b 0%, #f29f7b 52%, #c45b6c 100%);
+            -fx-padding: -10px 8px -12px 8px;
+            -fx-effect: dropshadow(one-pass-box, #150c21, 0, 1.0, 4, 5);
+        }
 
-/* 2. START MENU — STACKED COMMUTE BUTTONS */
-.commute-menu-btn {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-background-color: #1c1022, #3b253b;
-    -fx-background-insets: 0, 0 0 4 0;
-    -fx-background-radius: 8px, 7px;
-    -fx-border-color: #9e687e, #6d465b;
-    -fx-border-insets: 0, 4;
-    -fx-border-width: 2.5px, 1px;
-    -fx-border-radius: 8px, 5px;
-    -fx-text-fill: #f5d5b8;
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-letter-spacing: 2px;
-    -fx-padding: 10px 24px 12px 24px;
-    -fx-cursor: hand;
-    -fx-alignment: CENTER;
-    -fx-effect: dropshadow(gaussian, rgba(10, 5, 15, 0.75), 8, 0.1, 0, 3);
-}
 
-.commute-menu-btn:hover,
-.commute-menu-btn-active {
-    -fx-background-color: #24142b, #4a2e48;
-    -fx-background-insets: 0, 0 0 4 0;
-    -fx-border-color: #f9b98c, #b8766c;
-    -fx-border-insets: 0, 4;
-    -fx-border-width: 2.5px, 1px;
-    -fx-border-radius: 8px, 5px;
-    -fx-text-fill: #fff0dc;
-    -fx-effect: dropshadow(gaussian, rgba(249, 185, 140, 0.55), 14, 0.35, 0, 0);
-}
+            .signboard-ornament {
+                -fx-font-family: "Consolas", "Segoe UI Symbol", monospace;
+                -fx-font-size: 12px;
+                -fx-text-fill: #9b6b75;
+                -fx-letter-spacing: 1.5px;
+            }
 
-.menu-arrow {
-    -fx-font-size: 16px;
-    -fx-text-fill: #f7b28b;
-    -fx-effect: dropshadow(one-pass-box, #1c1022, 0, 1.0, 2, 2);
-}
+            .signboard-star {
+                -fx-font-size: 14px;
+                -fx-text-fill: #fad689;
+            }
 
-/* 3. START MENU — BOTTOM-RIGHT VINTAGE BUS TICKET */
-.bus-ticket {
-    -fx-background-color: #dfc9b0;
-    -fx-background-radius: 4px;
-    -fx-border-color: #8c6f56, #b89b7e;
-    -fx-border-insets: 0, 3;
-    -fx-border-width: 2px, 1px;
-    -fx-border-radius: 4px, 2px;
-    -fx-padding: 8px 10px 8px 12px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 12, 0.2, 2, 5);
-}
+            /* 2. START MENU — STACKED COMMUTE BUTTONS */
+            .commute-menu-btn {
+                -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+                -fx-background-color: #1c1022, #3b253b;
+                -fx-background-insets: 0, 0 0 4 0;
+                -fx-background-radius: 8px, 7px;
+                -fx-border-color: #9e687e, #6d465b;
+                -fx-border-insets: 0, 4;
+                -fx-border-width: 2.5px, 1px;
+                -fx-border-radius: 8px, 5px;
+                -fx-text-fill: #f5d5b8;
+                -fx-font-size: 16px;
+                -fx-font-weight: bold;
+                -fx-letter-spacing: 2px;
+                -fx-padding: 10px 24px 12px 24px;
+                -fx-cursor: hand;
+                -fx-alignment: CENTER;
+                -fx-effect: dropshadow(gaussian, rgba(10, 5, 15, 0.75), 8, 0.1, 0, 3);
+            }
 
-.ticket-route-label {
-    -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #7a443c;
-}
+            .commute-menu-btn:hover,
+            .commute-menu-btn-active {
+                -fx-background-color: #24142b, #4a2e48;
+                -fx-background-insets: 0, 0 0 4 0;
+                -fx-border-color: #f9b98c, #b8766c;
+                -fx-border-insets: 0, 4;
+                -fx-border-width: 2.5px, 1px;
+                -fx-border-radius: 8px, 5px;
+                -fx-text-fill: #fff0dc;
+                -fx-effect: dropshadow(gaussian, rgba(249, 185, 140, 0.55), 14, 0.35, 0, 0);
+            }
 
-.ticket-route-value {
-    -fx-font-family: "Trebuchet MS", "Arial Narrow", sans-serif;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2b1d1c;
-    -fx-border-color: #9e8167 transparent #9e8167 transparent;
-    -fx-border-width: 1px 0 1px 0;
-    -fx-padding: 3px 0 3px 0;
-}
+            .menu-arrow {
+                -fx-font-size: 16px;
+                -fx-text-fill: #f7b28b;
+                -fx-effect: dropshadow(one-pass-box, #1c1022, 0, 1.0, 2, 2);
+            }
 
-.ticket-stamp {
-    -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #8c3b35;
-    -fx-border-color: #8c3b35;
-    -fx-border-width: 1.2px;
-    -fx-border-radius: 2px;
-    -fx-padding: 1px 5px;
-}
+            /* 3. START MENU — BOTTOM-RIGHT VINTAGE BUS TICKET */
+            .bus-ticket {
+                -fx-background-color: #dfc9b0;
+                -fx-background-radius: 4px;
+                -fx-border-color: #8c6f56, #b89b7e;
+                -fx-border-insets: 0, 3;
+                -fx-border-width: 2px, 1px;
+                -fx-border-radius: 4px, 2px;
+                -fx-padding: 8px 10px 8px 12px;
+                -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.75), 12, 0.2, 2, 5);
+            }
 
-.ticket-barcode {
-    -fx-font-family: "Consolas", monospace;
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2b1d1c;
-    -fx-border-color: transparent transparent transparent #9e8167;
-    -fx-border-width: 0 0 0 1px;
-    -fx-border-style: dashed;
-    -fx-padding: 0 0 0 6px;
-}
+            .ticket-route-label {
+                -fx-font-family: "Consolas", "Courier New", monospace;
+                -fx-font-size: 10px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #7a443c;
+            }
 
-/* 4. DIALOGUE & MODAL CONTAINERS */
-.dialogue-box {
-    -fx-background-color: rgba(24, 20, 34, 0.95);
-    -fx-background-radius: 10px;
-    -fx-border-color: #c87d76, #6d465b;
-    -fx-border-insets: 0, 4;
-    -fx-border-radius: 10px, 7px;
-    -fx-border-width: 2.5px, 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.85), 20, 0, 0, 6);
-}
+            .ticket-route-value {
+                -fx-font-family: "Trebuchet MS", "Arial Narrow", sans-serif;
+                -fx-font-size: 12px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #2b1d1c;
+                -fx-border-color: #9e8167 transparent #9e8167 transparent;
+                -fx-border-width: 1px 0 1px 0;
+                -fx-padding: 3px 0 3px 0;
+            }
 
-.title-header {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #fde09b;
-}
+            .ticket-stamp {
+                -fx-font-family: "Consolas", "Courier New", monospace;
+                -fx-font-size: 9px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #8c3b35;
+                -fx-border-color: #8c3b35;
+                -fx-border-width: 1.2px;
+                -fx-border-radius: 2px;
+                -fx-padding: 1px 5px;
+            }
 
-.sub-header {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 13px;
-    -fx-text-fill: #c9b1bd;
-    -fx-font-style: italic;
-}
+            .ticket-barcode {
+                -fx-font-family: "Consolas", monospace;
+                -fx-font-size: 9px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #2b1d1c;
+                -fx-border-color: transparent transparent transparent #9e8167;
+                -fx-border-width: 0 0 0 1px;
+                -fx-border-style: dashed;
+                -fx-padding: 0 0 0 6px;
+            }
 
-/* 5. TRANSIT SPEAKER NAMEPLATE */
-.speaker-tag {
-    -fx-background-color: #3b253b;
-    -fx-background-radius: 6px 6px 0px 0px;
-    -fx-border-color: #c87d76;
-    -fx-border-width: 2px 2px 0px 2px;
-    -fx-border-radius: 6px 6px 0px 0px;
-    -fx-padding: 4px 18px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);
-}
+            /* 4. DIALOGUE & MODAL CONTAINERS */
+            .dialogue-box {
+                -fx-background-color: rgba(24, 20, 34, 0.95);
+                -fx-background-radius: 10px;
+                -fx-border-color: #c87d76, #6d465b;
+                -fx-border-insets: 0, 4;
+                -fx-border-radius: 10px, 7px;
+                -fx-border-width: 2.5px, 1px;
+                -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.85), 20, 0, 0, 6);
+            }
 
-.speaker-label {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-text-fill: #fde09b;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-letter-spacing: 1px;
-}
+            .title-header {
+                -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+                -fx-font-size: 26px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #fde09b;
+            }
 
-/* 6. DIALOGUE BODY & REACTION */
-.dialogue-text {
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-text-fill: #f5e6d8;
-    -fx-font-size: 16px;
-    -fx-line-spacing: 4px;
-}
+            .sub-header {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-font-size: 13px;
+                -fx-text-fill: #c9b1bd;
+                -fx-font-style: italic;
+            }
 
-.reaction-text {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-text-fill: #f7b28b;
-    -fx-font-style: italic;
-    -fx-font-size: 14px;
-}
+            /* 5. TRANSIT SPEAKER NAMEPLATE */
+            .speaker-tag {
+                -fx-background-color: #3b253b;
+                -fx-background-radius: 6px 6px 0px 0px;
+                -fx-border-color: #c87d76;
+                -fx-border-width: 2px 2px 0px 2px;
+                -fx-border-radius: 6px 6px 0px 0px;
+                -fx-padding: 4px 18px;
+                -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);
+            }
 
-.rule-text {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 13px;
-    -fx-text-fill: #f7b28b;
-    -fx-font-style: italic;
-}
+            .speaker-label {
+                -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+                -fx-text-fill: #fde09b;
+                -fx-font-size: 13px;
+                -fx-font-weight: bold;
+                -fx-letter-spacing: 1px;
+            }
 
-/* 7. FORM INPUTS & LABELS */
-.field-label {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f5d5b8;
-}
+            /* 6. DIALOGUE BODY & REACTION */
+            .dialogue-text {
+                -fx-font-family: "Segoe UI", "Arial", sans-serif;
+                -fx-text-fill: #f5e6d8;
+                -fx-font-size: 16px;
+                -fx-line-spacing: 4px;
+            }
 
-.input-field {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 14px;
-    -fx-text-fill: #fff0dc;
-    -fx-background-color: #1b1d2b;
-    -fx-padding: 8px 12px;
-    -fx-background-radius: 6px;
-    -fx-border-color: #9e687e;
-    -fx-border-radius: 6px;
-    -fx-border-width: 1.5px;
-}
+            .reaction-text {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-text-fill: #f7b28b;
+                -fx-font-style: italic;
+                -fx-font-size: 14px;
+            }
 
-.input-field:focused {
-    -fx-border-color: #f9b98c;
-}
+            .rule-text {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-font-size: 13px;
+                -fx-text-fill: #f7b28b;
+                -fx-font-style: italic;
+            }
 
-.error-text {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f28b82;
-}
+            /* 7. FORM INPUTS & LABELS */
+            .field-label {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-font-size: 13px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #f5d5b8;
+            }
 
-/* 8. STATS DISPLAY (ENDING SCREEN) */
-.stat-name {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-text-fill: #c9b1bd;
-    -fx-font-size: 14px;
-}
+            .input-field {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-font-size: 14px;
+                -fx-text-fill: #fff0dc;
+                -fx-background-color: #1b1d2b;
+                -fx-padding: 8px 12px;
+                -fx-background-radius: 6px;
+                -fx-border-color: #9e687e;
+                -fx-border-radius: 6px;
+                -fx-border-width: 1.5px;
+            }
 
-.stat-value {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-text-fill: #fde09b;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-}
+            .input-field:focused {
+                -fx-border-color: #f9b98c;
+            }
 
-/* 9. MENU & CHOICE BUTTONS */
-.menu-button {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-background-color: #1c1022, #3b253b;
-    -fx-background-insets: 0, 0 0 3 0;
-    -fx-background-radius: 8px, 7px;
-    -fx-border-color: #9e687e, #6d465b;
-    -fx-border-insets: 0, 3;
-    -fx-border-width: 2px, 1px;
-    -fx-border-radius: 8px, 5px;
-    -fx-text-fill: #f5d5b8;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-padding: 10px 24px;
-    -fx-cursor: hand;
-    -fx-alignment: CENTER;
-}
+            .error-text {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-font-size: 13px;
+                -fx-font-weight: bold;
+                -fx-text-fill: #f28b82;
+            }
 
-.menu-button:hover {
-    -fx-background-color: #24142b, #4a2e48;
-    -fx-border-color: #f9b98c, #b8766c;
-    -fx-text-fill: #fff0dc;
-}
+            /* 8. STATS DISPLAY (ENDING SCREEN) */
+            .stat-name {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-text-fill: #c9b1bd;
+                -fx-font-size: 14px;
+            }
 
-.choice-button {
-    -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
-    -fx-background-color: #261829;
-    -fx-text-fill: #f5d5b8;
-    -fx-font-size: 14px;
-    -fx-padding: 10px 18px;
-    -fx-background-radius: 8px;
-    -fx-border-color: #9e687e;
-    -fx-border-radius: 8px;
-    -fx-border-width: 1.5px 1.5px 1.5px 4px;
-    -fx-cursor: hand;
-    -fx-alignment: CENTER_LEFT;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 6, 0, 0, 2);
-}
+            .stat-value {
+                -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+                -fx-text-fill: #fde09b;
+                -fx-font-size: 15px;
+                -fx-font-weight: bold;
+            }
 
-.choice-button:hover {
-    -fx-background-color: #3b253b;
-    -fx-text-fill: #fff0dc;
-    -fx-border-color: #f9b98c;
-    -fx-border-width: 1.5px 1.5px 1.5px 5px;
-    -fx-translate-x: 4px;
-}
+            /* 9. MENU & CHOICE BUTTONS */
+            .menu-button {
+                -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+                -fx-background-color: #1c1022, #3b253b;
+                -fx-background-insets: 0, 0 0 3 0;
+                -fx-background-radius: 8px, 7px;
+                -fx-border-color: #9e687e, #6d465b;
+                -fx-border-insets: 0, 3;
+                -fx-border-width: 2px, 1px;
+                -fx-border-radius: 8px, 5px;
+                -fx-text-fill: #f5d5b8;
+                -fx-font-size: 14px;
+                -fx-font-weight: bold;
+                -fx-padding: 10px 24px;
+                -fx-cursor: hand;
+                -fx-alignment: CENTER;
+            }
 
-.choice-button:disabled {
-    -fx-background-color: rgba(27, 29, 43, 0.6);
-    -fx-text-fill: rgba(245, 213, 184, 0.35);
-    -fx-border-color: rgba(158, 104, 126, 0.25);
-    -fx-border-width: 1px;
-    -fx-cursor: default;
-}
+            .menu-button:hover {
+                -fx-background-color: #24142b, #4a2e48;
+                -fx-border-color: #f9b98c, #b8766c;
+                -fx-text-fill: #fff0dc;
+            }
 
-/* 10. VN TOOLBAR & HUD */
-.vn-sub-button {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-background-color: transparent;
-    -fx-text-fill: rgba(245, 213, 184, 0.55);
-    -fx-font-size: 11px;
-    -fx-padding: 2px 8px;
-    -fx-cursor: hand;
-}
+            .choice-button {
+                -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+                -fx-background-color: #261829;
+                -fx-text-fill: #f5d5b8;
+                -fx-font-size: 14px;
+                -fx-padding: 10px 18px;
+                -fx-background-radius: 8px;
+                -fx-border-color: #9e687e;
+                -fx-border-radius: 8px;
+                -fx-border-width: 1.5px 1.5px 1.5px 4px;
+                -fx-cursor: hand;
+                -fx-alignment: CENTER_LEFT;
+                -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 6, 0, 0, 2);
+            }
 
-.vn-sub-button:hover {
-    -fx-text-fill: #f9b98c;
-}
+            .choice-button:hover {
+                -fx-background-color: #3b253b;
+                -fx-text-fill: #fff0dc;
+                -fx-border-color: #f9b98c;
+                -fx-border-width: 1.5px 1.5px 1.5px 5px;
+                -fx-translate-x: 4px;
+            }
 
-.p5-hud-badge {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-background-color: #1b1d2b;
-    -fx-text-fill: #f5d5b8;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-padding: 6px 14px;
-    -fx-background-radius: 6px;
-    -fx-border-color: #c87d76;
-    -fx-border-radius: 6px;
-    -fx-border-width: 1.5px 1.5px 1.5px 4px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 6, 0, 0, 2);
-}
+            .choice-button:disabled {
+                -fx-background-color: rgba(27, 29, 43, 0.6);
+                -fx-text-fill: rgba(245, 213, 184, 0.35);
+                -fx-border-color: rgba(158, 104, 126, 0.25);
+                -fx-border-width: 1px;
+                -fx-cursor: default;
+            }
 
-.sprite-frame {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-background-color: rgba(27, 29, 43, 0.9);
-    -fx-background-radius: 8px;
-    -fx-border-color: #c87d76;
-    -fx-border-radius: 8px;
-    -fx-border-width: 1.5px;
-    -fx-padding: 6px 14px;
-    -fx-text-fill: #fde09b;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-}
+            /* 10. VN TOOLBAR & HUD */
+            .vn-sub-button {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-background-color: transparent;
+                -fx-text-fill: rgba(245, 213, 184, 0.55);
+                -fx-font-size: 11px;
+                -fx-padding: 2px 8px;
+                -fx-cursor: hand;
+            }
+
+            .vn-sub-button:hover {
+                -fx-text-fill: #f9b98c;
+            }
+
+            .p5-hud-badge {
+                -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+                -fx-background-color: #1b1d2b;
+                -fx-text-fill: #f5d5b8;
+                -fx-font-size: 13px;
+                -fx-font-weight: bold;
+                -fx-padding: 6px 14px;
+                -fx-background-radius: 6px;
+                -fx-border-color: #c87d76;
+                -fx-border-radius: 6px;
+                -fx-border-width: 1.5px 1.5px 1.5px 4px;
+                -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 6, 0, 0, 2);
+            }
+
+            .sprite-frame {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-background-color: rgba(27, 29, 43, 0.9);
+                -fx-background-radius: 8px;
+                -fx-border-color: #c87d76;
+                -fx-border-radius: 8px;
+                -fx-border-width: 1.5px;
+                -fx-padding: 6px 14px;
+                -fx-text-fill: #fde09b;
+                -fx-font-size: 13px;
+                -fx-font-weight: bold;
+            }

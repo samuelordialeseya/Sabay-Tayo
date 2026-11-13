@@ -29,7 +29,6 @@ public class EncounterView extends StackPane {
     private final Label expressionBadge;
     private final VBox choicesContainer;
 
-    @SuppressWarnings("this-escape")
     public EncounterView(GameApplication app, RelationshipStats stats, Momentum momentum) {
         this.app = app;
         this.stats = stats;

@@ -8,7 +8,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -77,7 +76,7 @@ public class StartView extends StackPane {
         getChildren().addAll(bgView, contentLayer);
     }
 
-    // 1. Recreated Start Menu: Signboard Plaque up top, 5 Commute Buttons in center, Tilted Bus Ticket at bottom-right
+    // 1. Recreated Start Menu: Signboard Plaque up top, Commute Buttons in center, Tilted Bus Ticket at bottom-right
     public void showMainMenu() {
         contentLayer.getChildren().clear();
         menuButtons.clear();
@@ -87,19 +86,16 @@ public class StartView extends StackPane {
         // Top: Bus Signboard Plaque ("Sabay Tayo")
         VBox signboard = createSignboard();
 
-        // Center: 5 Stacked Menu Buttons
-        VBox buttonsBox = new VBox(12);
+        // Center: Menu Buttons
+        VBox buttonsBox = new VBox(14);
         buttonsBox.setAlignment(Pos.CENTER);
 
         HBox startRow = createMenuButtonRow("START COMMUTE", 0, () -> showCharacterSetup());
-        HBox continueRow = createMenuButtonRow("CONTINUE", 1, () -> app.showEncounter());
-        HBox galleryRow = createMenuButtonRow("GALLERY", 2, () -> showGallery());
-        HBox settingsRow = createMenuButtonRow("SETTINGS", 3, () -> showSettings());
-        HBox exitRow = createMenuButtonRow("EXIT", 4, () -> Platform.exit());
+        HBox exitRow = createMenuButtonRow("EXIT", 1, () -> Platform.exit());
 
-        buttonsBox.getChildren().addAll(startRow, continueRow, galleryRow, settingsRow, exitRow);
+        buttonsBox.getChildren().addAll(startRow, exitRow);
 
-        // Set START COMMUTE active by default (matching the reference image)
+        // Set START COMMUTE active by default
         setActiveMenuButton(0);
 
         // Main center column combining Signboard + 5 Buttons
@@ -116,6 +112,7 @@ public class StartView extends StackPane {
         contentLayer.getChildren().addAll(centerColumn, busTicket);
         StackPane.setAlignment(centerColumn, Pos.CENTER);
     }
+
 
     // Builds the double-bordered "Sabay Tayo" signboard plaque
     private VBox createSignboard() {
@@ -320,113 +317,7 @@ public class StartView extends StackPane {
         StackPane.setAlignment(card, Pos.CENTER);
     }
 
-    // 3. Gallery Screen (Shown after clicking GALLERY)
-    public void showGallery() {
-        contentLayer.getChildren().clear();
 
-        VBox card = new VBox(14);
-        card.setMaxWidth(520);
-        card.setMaxHeight(Region.USE_PREF_SIZE);
-        card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(30, 40, 30, 40));
-        card.getStyleClass().add("dialogue-box");
-
-        Label titleLabel = new Label("Commute Gallery");
-        titleLabel.getStyleClass().add("title-header");
-
-        Label subtitleLabel = new Label("Unlockable Endings & Route Memories");
-        subtitleLabel.getStyleClass().add("sub-header");
-
-        VBox endingsList = new VBox(8);
-        endingsList.setAlignment(Pos.CENTER_LEFT);
-        endingsList.setPadding(new Insets(8, 20, 8, 20));
-
-        String[] outcomes = {
-            "1. Lover Outcome — \"A Seat Saved Just For You\"",
-            "2. Best Friend Outcome — \"Same Bus Tomorrow?\"",
-            "3. Rival Outcome — \"Last Window Seat Standing\"",
-            "4. Acquaintance Outcome — \"A Polite Nod at the Terminal\"",
-            "5. Blocked Outcome — \"Earphones In, World Out\""
-        };
-        for (int i = 0; i < outcomes.length; i++) {
-            Label item = new Label(outcomes[i]);
-            item.getStyleClass().add("field-label");
-            endingsList.getChildren().add(item);
-        }
-
-        Button backButton = new Button("← Back to Menu");
-        backButton.getStyleClass().add("menu-button");
-        backButton.setPrefWidth(220);
-        backButton.setOnAction(e -> showMainMenu());
-
-        card.getChildren().addAll(titleLabel, subtitleLabel, endingsList, backButton);
-        contentLayer.getChildren().add(card);
-        StackPane.setAlignment(card, Pos.CENTER);
-    }
-
-    // 4. Settings Screen (Shown after clicking SETTINGS)
-    public void showSettings() {
-        contentLayer.getChildren().clear();
-
-        VBox card = new VBox(14);
-        card.setMaxWidth(520);
-        card.setMaxHeight(Region.USE_PREF_SIZE);
-        card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(30, 40, 30, 40));
-        card.getStyleClass().add("dialogue-box");
-
-        Label titleLabel = new Label("Settings");
-        titleLabel.getStyleClass().add("title-header");
-
-        Label subtitleLabel = new Label("Preferences & Audio");
-        subtitleLabel.getStyleClass().add("sub-header");
-
-        Label volumeLabel = new Label("BGM Volume:");
-        volumeLabel.getStyleClass().add("field-label");
-
-        Slider volumeSlider = new Slider(0, 100, 80);
-        volumeSlider.setMaxWidth(260);
-
-        Label volumeValueLabel = new Label("80%");
-        volumeValueLabel.getStyleClass().add("stat-value");
-        volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            volumeValueLabel.setText(newVal.intValue() + "%");
-        });
-
-        HBox volumeRow = new HBox(12, volumeSlider, volumeValueLabel);
-        volumeRow.setAlignment(Pos.CENTER);
-
-        Label textSpeedLabel = new Label("Text Speed:");
-        textSpeedLabel.getStyleClass().add("field-label");
-
-        ComboBox<String> textSpeedBox = new ComboBox<>();
-        textSpeedBox.getItems().addAll("Normal", "Fast", "Instant");
-        textSpeedBox.setValue("Normal");
-
-        HBox speedRow = new HBox(12, textSpeedLabel, textSpeedBox);
-        speedRow.setAlignment(Pos.CENTER);
-
-        Label displayLabel = new Label("Display: Windowed (1280 x 720)");
-        displayLabel.getStyleClass().add("sub-header");
-
-        Button backButton = new Button("← Back to Menu");
-        backButton.getStyleClass().add("menu-button");
-        backButton.setPrefWidth(220);
-        backButton.setOnAction(e -> showMainMenu());
-
-        card.getChildren().addAll(
-            titleLabel,
-            subtitleLabel,
-            volumeLabel,
-            volumeRow,
-            speedRow,
-            displayLabel,
-            backButton
-        );
-
-        contentLayer.getChildren().add(card);
-        StackPane.setAlignment(card, Pos.CENTER);
-    }
 
     private void handleBoarding() {
         String enteredName = nameField.getText().trim();
