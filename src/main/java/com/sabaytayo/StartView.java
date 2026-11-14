@@ -13,7 +13,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -76,7 +75,7 @@ public class StartView extends StackPane {
         getChildren().addAll(bgView, contentLayer);
     }
 
-    // 1. Recreated Start Menu: Signboard Plaque up top, Commute Buttons in center, Tilted Bus Ticket at bottom-right
+    // 1. Recreated Start Menu: Signboard Plaque up top, Commute Buttons in center
     public void showMainMenu() {
         contentLayer.getChildren().clear();
         menuButtons.clear();
@@ -98,18 +97,13 @@ public class StartView extends StackPane {
         // Set START COMMUTE active by default
         setActiveMenuButton(0);
 
-        // Main center column combining Signboard + 5 Buttons
+        // Main center column combining Signboard + Buttons
         VBox centerColumn = new VBox(28, signboard, buttonsBox);
         centerColumn.setAlignment(Pos.CENTER);
         centerColumn.setMaxWidth(Region.USE_PREF_SIZE);
         centerColumn.setMaxHeight(Region.USE_PREF_SIZE);
 
-        // Bottom-Right: Tilted Vintage Bus Ticket ("ROUTE: BUENDIA - ALABANG")
-        HBox busTicket = createBusTicket();
-        StackPane.setAlignment(busTicket, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(busTicket, new Insets(0, 36, 26, 0));
-
-        contentLayer.getChildren().addAll(centerColumn, busTicket);
+        contentLayer.getChildren().add(centerColumn);
         StackPane.setAlignment(centerColumn, Pos.CENTER);
     }
 
@@ -203,56 +197,6 @@ public class StartView extends StackPane {
                 right.setVisible(false);
             }
         }
-    }
-
-    // Builds the tilted vintage bus ticket in the bottom-right corner
-    private HBox createBusTicket() {
-        HBox ticket = new HBox(10);
-        ticket.getStyleClass().add("bus-ticket");
-        ticket.setAlignment(Pos.CENTER_LEFT);
-        ticket.setMaxWidth(Region.USE_PREF_SIZE);
-        ticket.setMaxHeight(Region.USE_PREF_SIZE);
-        ticket.setRotate(-8);
-
-        // Left body of ticket
-        VBox mainStub = new VBox(4);
-        mainStub.setAlignment(Pos.CENTER_LEFT);
-
-        HBox topRow = new HBox();
-        topRow.setAlignment(Pos.CENTER_LEFT);
-        Label routeHeader = new Label("ROUTE:");
-        routeHeader.getStyleClass().add("ticket-route-label");
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-        Label busIcon = new Label("🚌");
-        busIcon.getStyleClass().add("ticket-route-label");
-        topRow.getChildren().addAll(routeHeader, spacer, busIcon);
-
-        Label routeValue = new Label("BUENDIA - ALABANG");
-        routeValue.getStyleClass().add("ticket-route-value");
-
-        HBox bottomRow = new HBox();
-        bottomRow.setAlignment(Pos.CENTER_RIGHT);
-        Label ticketStamp = new Label("TICKET");
-        ticketStamp.getStyleClass().add("ticket-stamp");
-        ticketStamp.setRotate(-5);
-        bottomRow.getChildren().add(ticketStamp);
-
-        mainStub.getChildren().addAll(topRow, routeValue, bottomRow);
-
-        // Right barcode strip
-        VBox barcodeBox = new VBox(-2);
-        barcodeBox.getStyleClass().add("ticket-barcode");
-        barcodeBox.setAlignment(Pos.CENTER);
-        String[] bars = {"███", "█ █", "███", " █ ", "███", "██ "};
-        for (int i = 0; i < bars.length; i++) {
-            Label barLine = new Label(bars[i]);
-            barLine.setStyle("-fx-font-size: 7px; -fx-text-fill: #2b1d1c; -fx-font-family: 'Consolas';");
-            barcodeBox.getChildren().add(barLine);
-        }
-
-        ticket.getChildren().addAll(mainStub, barcodeBox);
-        return ticket;
     }
 
     // 2. Character Setup (Shown after clicking START COMMUTE)
