@@ -57,36 +57,50 @@ public class Encounter {
         ));
         scenes.put("S02", s02);
 
-        // S03: Sudden Brake - Turn 2 (Sincere / Sarcastic / Blunt)
+        // S03: Sudden Brake - Turn 2 with choice branching to S04A, S04B, S04C
         Scene s03 = new Scene("S03");
         s03.addDialogueLine("(Scene 3 - Sudden Brake) The bus brakes hard. The stranger bumps their head on the seat in front.");
         s03.addDialogueLine("Stranger: \"Aray! Grabe naman 'yon!\"");
         s03.addChoice(new SincereChoice(
             "[Sincere] \"Okay ka lang? Baka nasaktan ka. (Scene 3)\"",
-            "S04",
+            "S04A",
             "They look surprised but grateful. \"Salamat sa pag-aalala. Okay lang.\"",
             "They wave it off. \"Okay lang naman.\""
         ));
         s03.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Si kuya driver, may pa-headbang pa! (Scene 3)\"",
-            "S04",
+            "S04B",
             "They laugh despite themselves. \"Ay, natawa naman ako doon.\"",
             "They give you a flat look. \"May commentary pa talaga.\""
         ));
         s03.addChoice(new BluntChoice(
             "[Blunt] \"Mag-ingat ka, baka mauntog ka ulit. (Scene 3)\"",
-            "S04",
+            "S04C",
             "They blink. \"Oo nga, salamat.\"",
             "They look unimpressed. \"...Okay.\""
         ));
         scenes.put("S03", s03);
 
-        // S04: Beat A (Narration + Continue)
-        Scene s04 = new Scene("S04");
-        s04.addDialogueLine("(Scene 4 - Beat A) The bus steadies. Passengers shuffle closer together. You and the stranger accidentally make eye contact, then both look away.");
-        s04.addChoice(new ContinueChoice("Continue...", "S05"));
-        s04.setDefaultNextSceneId("S05");
-        scenes.put("S04", s04);
+        // S04A: Beat after Sincere choice (Turn 2 Branch A)
+        Scene s04a = new Scene("S04A");
+        s04a.addDialogueLine("(Scene 4A - Caring Beat) The stranger seems touched by your concern. The bus smooths out and you settle back in.");
+        s04a.addChoice(new ContinueChoice("Continue...", "S05"));
+        s04a.setDefaultNextSceneId("S05");
+        scenes.put("S04A", s04a);
+
+        // S04B: Beat after Sarcastic choice (Turn 2 Branch B)
+        Scene s04b = new Scene("S04B");
+        s04b.addDialogueLine("(Scene 4B - Playful Beat) Both of you chuckle at the sudden jolt. The awkwardness begins to melt away.");
+        s04b.addChoice(new ContinueChoice("Continue...", "S05"));
+        s04b.setDefaultNextSceneId("S05");
+        scenes.put("S04B", s04b);
+
+        // S04C: Beat after Blunt choice (Turn 2 Branch C)
+        Scene s04c = new Scene("S04C");
+        s04c.addDialogueLine("(Scene 4C - Quiet Beat) A brief silence follows your blunt advice. Both of you steady yourselves on the seats.");
+        s04c.addChoice(new ContinueChoice("Continue...", "S05"));
+        s04c.setDefaultNextSceneId("S05");
+        scenes.put("S04C", s04c);
 
         // S05: Saan Ka Bababa? - Turn 3 (Sincere / Sarcastic / Blunt + Flirty gated M >= 2)
         Scene s05 = new Scene("S05");
@@ -122,60 +136,67 @@ public class Encounter {
         // S05_DONE: Invisible transition node (momentum branch happens here)
         // Handled in advanceAfterS05() - no actual scene needed
 
-        // S06A: Warm Path - Turn 4A (Sincere / Sarcastic / Blunt)
+        // S06A: Warm Path - Turn 4A (Sincere / Sarcastic / Blunt) -> leads to S07A
         Scene s06a = new Scene("S06A");
         s06a.addDialogueLine("(Scene 6A - Warm) The conversation has loosened up. The stranger puts their phone away and faces you.");
         s06a.addDialogueLine("Stranger: \"Nga pala, ano'ng pangalan mo? Hindi ko pa naitanong.\"");
         s06a.addChoice(new SincereChoice(
             "[Sincere] Say your name warmly. (Scene 6A)",
-            "S07",
+            "S07A",
             "They smile back. \"Masaya akong makilala ka.\"",
             "They nod. \"Okay, nice to meet you.\""
         ));
         s06a.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Ngayon ka lang nagtanong, ha? (Scene 6A)\"",
-            "S07",
+            "S07A",
             "They chuckle. \"Ang yabang mo, pero sige, tatandaan ko.\"",
             "They give a half-smile. \"Sige na nga.\""
         ));
         s06a.addChoice(new BluntChoice(
             "[Blunt] Just say your name. (Scene 6A)",
-            "S07",
+            "S07A",
             "They nod. \"Madali lang tandaan. Okay.\"",
             "They look away again. \"Alright.\""
         ));
         scenes.put("S06A", s06a);
 
-        // S06B: Cold Path - Turn 4B (Sincere / Sarcastic / Blunt)
+        // S06B: Cold Path - Turn 4B (Sincere / Sarcastic / Blunt) -> leads to S07B
         Scene s06b = new Scene("S06B");
         s06b.addDialogueLine("(Scene 6B - Cold) The conversation has gone quiet. The stranger is back on their phone, staring out the window.");
         s06b.addDialogueLine("Stranger: \"(Staring out) Ang tagal pa ng byahe.\"");
         s06b.addChoice(new SincereChoice(
             "[Sincere] \"Pasensya na kung naging awkward kanina. (Scene 6B)\"",
-            "S07",
+            "S07B",
             "They glance at you. \"Okay lang naman hehe. Nice meeting you.\"",
             "They stay quiet. \"...It's fine.\""
         ));
         s06b.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Nakaka-excite nga ang view, 'di ba? (Scene 6B)\"",
-            "S07",
+            "S07B",
             "They snort. \"Haha, sige na nga, panalo ka doon.\"",
             "They stare at you. \"...Okay.\""
         ));
         s06b.addChoice(new BluntChoice(
             "[Blunt] \"Oo. Wala rin akong masabi. (Scene 6B)\"",
-            "S07",
+            "S07B",
             "They shrug. \"Buti na lang aminado ka.\"",
             "They look away. \"Same.\""
         ));
         scenes.put("S06B", s06b);
 
-        // S07: Beat B (Narration + Continue)
-        Scene s07 = new Scene("S07");
-        s07.addDialogueLine("(Scene 7 - Beat B) The stranger glances outside and starts fixing their bag. Their stop is coming up.");
-        s07.addChoice(new ContinueChoice("Continue...", "S08"));
-        s07.setDefaultNextSceneId("S08");
-        scenes.put("S07", s07);
+        // S07A: Beat after Warm turn (Narration + Continue)
+        Scene s07a = new Scene("S07A");
+        s07a.addDialogueLine("(Scene 7A - Friendly Beat) You share a brief comfortable silence as the bus nears the next stop. The stranger gently packs their things.");
+        s07a.addChoice(new ContinueChoice("Continue...", "S08"));
+        s07a.setDefaultNextSceneId("S08");
+        scenes.put("S07A", s07a);
+
+        // S07B: Beat after Cold turn (Narration + Continue)
+        Scene s07b = new Scene("S07B");
+        s07b.addDialogueLine("(Scene 7B - Distant Beat) The bus engine hums loudly as the stranger stares at their phone screen. Their stop is just ahead.");
+        s07b.addChoice(new ContinueChoice("Continue...", "S08"));
+        s07b.setDefaultNextSceneId("S08");
+        scenes.put("S07B", s07b);
 
         // S08: Farewell - Turn 5 (Sincere / Sarcastic / Blunt) -> game over after choice
         Scene s08 = new Scene("S08");
