@@ -194,9 +194,6 @@ public class EncounterView extends StackPane {
 
         // Show the stranger's reaction in the dialogue box
         String reaction = choice.getReaction(momentum);
-        if (!reaction.isEmpty()) {
-            reactionLabel.setText("✦ Stranger: \"" + reaction + "\"");
-        }
 
         // Update the expression badge based on choice type
         updateExpressionBadge(choice);
@@ -204,11 +201,29 @@ public class EncounterView extends StackPane {
         // Update HUD
         updateHUD();
 
-        // Determine where to go next
-        String nextId = choice.getNextSceneId();
+        // If it's a continue choice or has no reaction, advance immediately
+        if (reaction.isEmpty()) {
+            proceedToNextScene(choice.getNextSceneId());
+            return;
+        }
 
+        // Otherwise show the reaction and a Continue button so the player can read it
+        reactionLabel.setText("✦ Stranger: \"" + reaction + "\"");
+        choicesContainer.getChildren().clear();
+
+        String nextId = choice.getNextSceneId();
+        String nextButtonText = "ENDING".equals(nextId) ? "See Ending Outcome ➔" : "Continue ➔";
+        Button nextBtn = new Button(nextButtonText);
+        nextBtn.getStyleClass().add("choice-button");
+        nextBtn.setMaxWidth(620);
+        nextBtn.setOnAction(e -> proceedToNextScene(nextId));
+        choicesContainer.getChildren().add(nextBtn);
+    }
+
+    // Advances the dialogue graph to the next scene or ending.
+    private void proceedToNextScene(String nextId) {
         if ("ENDING".equals(nextId)) {
-            // S08 choice was made — end the encounter
+            // S08 choice was made — transition to EndingView
             app.showEnding();
             return;
         }
