@@ -50,7 +50,8 @@ public class GameApplication extends Application {
 
     // Switches the screen to the bus encounter dialogue view
     public void showEncounter() {
-        EncounterView encounterView = new EncounterView(this, stats, momentum);
+        Encounter encounter = new Encounter();
+        EncounterView encounterView = new EncounterView(this, stats, momentum, encounter);
         activeScene.setRoot(encounterView);
     }
 
