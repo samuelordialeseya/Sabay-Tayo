@@ -88,10 +88,10 @@ public class EncounterView extends StackPane {
         topBar.getChildren().addAll(momentumBadge, spacer, skipButton);
 
         // 3. Character Sprite Placeholders (Left: MC, Right: FEM-C)
-        maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 365);
+        maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 380);
         maleSpriteView.setEffect(maleTone);
 
-        femSpriteView = createSpriteView("/assets/FEM-C/fem_neutral.png", 415);
+        femSpriteView = createSpriteView("/assets/FEM-C/fem_neutral.png", 405);
         femSpriteView.setEffect(femTone);
         expressionBadge = new Label("Stranger • Listening");
         expressionBadge.getStyleClass().add("sprite-frame");
@@ -101,7 +101,7 @@ public class EncounterView extends StackPane {
         femaleSpriteContainer.setMaxHeight(Region.USE_PREF_SIZE);
         StackPane.setAlignment(femSpriteView, Pos.BOTTOM_CENTER);
         StackPane.setAlignment(expressionBadge, Pos.BOTTOM_CENTER);
-        StackPane.setMargin(expressionBadge, new Insets(0, 0, 28, 0));
+        StackPane.setMargin(expressionBadge, new Insets(0, 0, 42, 0));
 
         // 4. Choices Container (centered between the two character sprites)
         choicesContainer = new VBox(8);
@@ -159,9 +159,9 @@ public class EncounterView extends StackPane {
         StackPane.setAlignment(choicesContainer, Pos.TOP_CENTER);
         StackPane.setMargin(choicesContainer, new Insets(76, 0, 0, 0));
         StackPane.setAlignment(maleSpriteView, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 152, 40));
+        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 138, 108));
         StackPane.setAlignment(femaleSpriteContainer, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 52, 152, 0));
+        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 112, 138, 0));
         StackPane.setAlignment(dialogueCard, Pos.BOTTOM_CENTER);
         StackPane.setMargin(dialogueCard, new Insets(0, 90, 16, 90));
 
