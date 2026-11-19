@@ -89,10 +89,10 @@ public class EncounterView extends StackPane {
         topBar.getChildren().addAll(momentumBadge, spacer, skipButton);
 
         // 3. Character Sprite Placeholders (Left: MC, Right: FEM-C)
-        maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 380);
+        maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 435);
         maleSpriteView.setEffect(maleTone);
 
-        femSpriteView = createSpriteView("/assets/FEM-C/fem_neutral.png", 405);
+        femSpriteView = createSpriteView("/assets/FEM-C/fem_neutral.png", 460);
         femSpriteView.setEffect(femTone);
         expressionBadge = new Label("Stranger • Listening");
         expressionBadge.getStyleClass().add("sprite-frame");
@@ -107,7 +107,7 @@ public class EncounterView extends StackPane {
         // 4. Choices Container (centered between the two character sprites)
         choicesContainer = new VBox(6);
         choicesContainer.setAlignment(Pos.CENTER);
-        choicesContainer.setMaxWidth(435);
+        choicesContainer.setMaxWidth(420);
         choicesContainer.setMaxHeight(Region.USE_PREF_SIZE);
 
         // 5. Dialogue Box (bottom)
@@ -160,9 +160,9 @@ public class EncounterView extends StackPane {
         StackPane.setAlignment(choicesContainer, Pos.TOP_CENTER);
         StackPane.setMargin(choicesContainer, new Insets(24, 0, 0, 0));
         StackPane.setAlignment(maleSpriteView, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 138, 185));
+        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 138, 150));
         StackPane.setAlignment(femaleSpriteContainer, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 170, 138, 0));
+        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 135, 138, 0));
         StackPane.setAlignment(dialogueCard, Pos.BOTTOM_CENTER);
         StackPane.setMargin(dialogueCard, new Insets(0, 90, 16, 90));
 
@@ -235,7 +235,7 @@ public class EncounterView extends StackPane {
 
             Button btn = new Button(buttonText);
             btn.getStyleClass().add("choice-button");
-            btn.setMaxWidth(435);
+            btn.setMaxWidth(420);
             btn.setWrapText(true);
             btn.setDisable(!unlocked);
 
@@ -281,7 +281,7 @@ public class EncounterView extends StackPane {
         playTypewriter(reactionLabel, reactionText, () -> {
             Button nextBtn = new Button(nextButtonText);
             nextBtn.getStyleClass().add("choice-button");
-            nextBtn.setMaxWidth(435);
+            nextBtn.setMaxWidth(420);
             nextBtn.setOnAction(e -> proceedToNextScene(nextId));
             choicesContainer.getChildren().add(nextBtn);
         });
