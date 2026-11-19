@@ -54,16 +54,16 @@ public class EncounterView extends StackPane {
         this.momentum = momentum;
         this.encounter = encounter;
 
-        // 1. Bus background image
+        // 1. Bus background image (two-seat talking view)
         ImageView bgView = new ImageView();
         try {
-            Image bg = new Image(getClass().getResourceAsStream("/com/sabaytayo/images/bg.jpg"));
+            Image bg = new Image(getClass().getResourceAsStream("/assets/BACKGROUNDS/bg_bus_night_empty.png"));
             bgView.setImage(bg);
             bgView.setFitWidth(1280);
             bgView.setFitHeight(720);
             bgView.setPreserveRatio(false);
         } catch (Exception e) {
-            System.err.println("Notice: Could not load bg.jpg, using default styling.");
+            System.err.println("Notice: Could not load bg_bus_night_empty.png, using default styling.");
         }
 
         // 2. Top HUD Bar
