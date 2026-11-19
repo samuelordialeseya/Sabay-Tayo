@@ -71,6 +71,7 @@ public class EncounterView extends StackPane {
         topBar.setPadding(new Insets(16, 28, 0, 28));
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setMaxHeight(Region.USE_PREF_SIZE);
+        topBar.setPickOnBounds(false);
 
         momentumBadge = new Label("⚡ MOMENTUM: 0 (1.0x GAIN)");
         momentumBadge.getStyleClass().add("p5-hud-badge");
@@ -104,9 +105,9 @@ public class EncounterView extends StackPane {
         StackPane.setMargin(expressionBadge, new Insets(0, 0, 42, 0));
 
         // 4. Choices Container (centered between the two character sprites)
-        choicesContainer = new VBox(8);
+        choicesContainer = new VBox(6);
         choicesContainer.setAlignment(Pos.CENTER);
-        choicesContainer.setMaxWidth(500);
+        choicesContainer.setMaxWidth(435);
         choicesContainer.setMaxHeight(Region.USE_PREF_SIZE);
 
         // 5. Dialogue Box (bottom)
@@ -152,16 +153,16 @@ public class EncounterView extends StackPane {
         // Clicking the dialogue box completes the current typing animation immediately
         dialogueCard.setOnMouseClicked(e -> finishTypingImmediately());
 
-        // Assemble layers (sprites sit behind dialogueCard)
-        getChildren().addAll(bgView, maleSpriteView, femaleSpriteContainer, dialogueCard, choicesContainer, topBar);
+        // Assemble layers (sprites sit behind dialogueCard; choices sit above topBar's empty center)
+        getChildren().addAll(bgView, maleSpriteView, femaleSpriteContainer, dialogueCard, topBar, choicesContainer);
 
         StackPane.setAlignment(topBar, Pos.TOP_CENTER);
         StackPane.setAlignment(choicesContainer, Pos.TOP_CENTER);
-        StackPane.setMargin(choicesContainer, new Insets(76, 0, 0, 0));
+        StackPane.setMargin(choicesContainer, new Insets(24, 0, 0, 0));
         StackPane.setAlignment(maleSpriteView, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 138, 108));
+        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 138, 185));
         StackPane.setAlignment(femaleSpriteContainer, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 112, 138, 0));
+        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 170, 138, 0));
         StackPane.setAlignment(dialogueCard, Pos.BOTTOM_CENTER);
         StackPane.setMargin(dialogueCard, new Insets(0, 90, 16, 90));
 
@@ -234,7 +235,7 @@ public class EncounterView extends StackPane {
 
             Button btn = new Button(buttonText);
             btn.getStyleClass().add("choice-button");
-            btn.setMaxWidth(500);
+            btn.setMaxWidth(435);
             btn.setWrapText(true);
             btn.setDisable(!unlocked);
 
@@ -280,7 +281,7 @@ public class EncounterView extends StackPane {
         playTypewriter(reactionLabel, reactionText, () -> {
             Button nextBtn = new Button(nextButtonText);
             nextBtn.getStyleClass().add("choice-button");
-            nextBtn.setMaxWidth(500);
+            nextBtn.setMaxWidth(435);
             nextBtn.setOnAction(e -> proceedToNextScene(nextId));
             choicesContainer.getChildren().add(nextBtn);
         });
