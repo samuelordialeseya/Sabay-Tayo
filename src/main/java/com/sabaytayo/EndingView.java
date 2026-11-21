@@ -36,46 +36,23 @@ public class EndingView extends StackPane {
         card.setPadding(new Insets(32, 40, 32, 40));
         card.getStyleClass().add("dialogue-box");
 
-        // Determine ending based on project proposal thresholds
-        int trust = stats.get(RelationshipStats.TRUST);
-        int attraction = stats.get(RelationshipStats.ATTRACTION);
-        int respect = stats.get(RelationshipStats.RESPECT);
-        int annoyance = stats.get(RelationshipStats.ANNOYANCE);
+        // Classify the ending polymorphically using OutcomeClassifier
+        int trust = stats.getTrust();
+        int attraction = stats.getAttraction();
+        int respect = stats.getRespect();
+        int annoyance = stats.getAnnoyance();
 
-        String outcomeTitle;
-        String outcomeDesc;
-        String matchedRule;
+        OutcomeClassifier classifier = new OutcomeClassifier();
+        Outcome outcome = classifier.classify(stats);
 
-        if (annoyance >= 34) {
-            outcomeTitle = "🚫 Blocked";
-            outcomeDesc = "The conversation grew too frustrating. The stranger moved to another seat.";
-            matchedRule = "Rule: Annoyance >= 34";
-        } else if (trust >= 58 && attraction >= 40 && annoyance < 24) {
-            outcomeTitle = "💕 Lovers";
-            outcomeDesc = "Sparks flew in the crowded bus. You exchanged contacts before getting off.";
-            matchedRule = "Rule: Trust >= 58, Attraction >= 40, Annoyance < 24";
-        } else if (trust >= 60 && respect >= 50 && annoyance < 24) {
-            outcomeTitle = "🤝 Best Friends";
-            outcomeDesc = "An effortless bond formed. You talked like you've known each other for years.";
-            matchedRule = "Rule: Trust >= 60, Respect >= 50, Annoyance < 24";
-        } else if (respect >= 50 && annoyance >= 22 && trust < 50) {
-            outcomeTitle = "⚡ Rivals";
-            outcomeDesc = "A sharp, bantering dynamic. You challenged each other the whole ride.";
-            matchedRule = "Rule: Respect >= 50, Annoyance >= 22, Trust < 50";
-        } else {
-            outcomeTitle = "🚏 Just Strangers";
-            outcomeDesc = "A pleasant, quiet ride. You parted ways as normal fellow passengers.";
-            matchedRule = "Rule: Default / Fallback";
-        }
-
-        Label title = new Label(outcomeTitle);
+        Label title = new Label(outcome.getTitle());
         title.getStyleClass().add("title-header");
 
-        Label desc = new Label(outcomeDesc);
+        Label desc = new Label(outcome.getDescription());
         desc.getStyleClass().add("sub-header");
         desc.setWrapText(true);
 
-        Label ruleLabel = new Label(matchedRule);
+        Label ruleLabel = new Label(outcome.getRuleSummary());
         ruleLabel.getStyleClass().add("rule-text");
 
         // Stats grid

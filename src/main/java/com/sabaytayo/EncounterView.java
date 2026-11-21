@@ -1,14 +1,27 @@
 package com.sabaytayo;
 
+import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.event.EventHandler;
+import javafx.event.EventTarget;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.MotionBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -26,27 +39,58 @@ public class EncounterView extends StackPane {
     private static final double LISTENING_BRIGHTNESS = -0.28;
     private static final double NARRATION_BRIGHTNESS = -0.10;
     private static final int TYPING_DELAY_MS = 18;
+    private static final int AUTO_BASE_DELAY_MS = 1200;
+    private static final int AUTO_MS_PER_CHAR = 18;
+    private static final int AUTO_MIN_DELAY_MS = 1500;
+    private static final int AUTO_MAX_DELAY_MS = 4000;
 
     private final GameApplication app;
     private final RelationshipStats stats;
     private final Momentum momentum;
     private final Encounter encounter;
 
+    private final ImageView bgView;
+    private final Image bgWideShotImage;
+    private final Image bgCloseUpImage;
     private final ImageView maleSpriteView;
     private final ImageView femSpriteView;
+    private final Image maleNeutralImage;
+    private final Image maleSincereImage;
+    private final Image maleSmirkImage;
+    private final Image maleAwkwardImage;
+    private final Image maleDeadpanImage;
+    private final Image femNeutralImage;
+    private final Image femShyImage;
+    private final Image femWarmSmileImage;
+    private final Image femFlusteredImage;
+    private final Image femLaughingImage;
+    private final Image femAnnoyedImage;
+    private final Image femSurprisedImage;
     private final ColorAdjust maleTone = new ColorAdjust();
     private final ColorAdjust femTone = new ColorAdjust();
+    private final MotionBlur maleBlur = new MotionBlur(0, 0);
+    private final MotionBlur femBlur = new MotionBlur(0, 0);
     private final Label speakerLabel;
     private final Label dialogueLabel;
     private final Label reactionLabel;
+    private final Label continueHintLabel;
     private final Label momentumBadge;
     private final Label expressionBadge;
     private final VBox choicesContainer;
 
+    private Button autoButton;
     private Timeline typingTimeline;
+    private Timeline femAnimTimeline;
+    private Timeline maleAnimTimeline;
+    private Timeline bgAnimTimeline;
+    private PauseTransition autoAdvanceTimer;
     private Label activeTypingLabel;
     private String activeFullText;
     private Runnable onTypingFinished;
+    private boolean autoMode = false;
+    private String pendingNextSceneId = null;
+    private String pendingDisplayedText = "";
+    private final EventHandler<KeyEvent> keyAdvanceHandler = this::handleKeyAdvance;
 
     public EncounterView(GameApplication app, RelationshipStats stats, Momentum momentum, Encounter encounter) {
         this.app = app;
@@ -54,17 +98,14 @@ public class EncounterView extends StackPane {
         this.momentum = momentum;
         this.encounter = encounter;
 
-        // 1. Bus background image (two-seat talking view)
-        ImageView bgView = new ImageView();
-        try {
-            Image bg = new Image(getClass().getResourceAsStream("/assets/BACKGROUNDS/bg_bus_night_empty.png"));
-            bgView.setImage(bg);
-            bgView.setFitWidth(1280);
-            bgView.setFitHeight(720);
-            bgView.setPreserveRatio(false);
-        } catch (Exception e) {
-            System.err.println("Notice: Could not load bg_bus_night_empty.png, using default styling.");
-        }
+        // 1. Bus background images (wide-shot for boarding approach, close-up for talking)
+        bgWideShotImage = loadSpriteImage("/assets/BACKGROUNDS/bg_bus_wide-shot.png");
+        bgCloseUpImage = loadSpriteImage("/assets/BACKGROUNDS/bg_bus_close-up.png");
+        bgView = new ImageView();
+        bgView.setFitWidth(1280);
+        bgView.setFitHeight(720);
+        bgView.setPreserveRatio(false);
+        setBackground(bgWideShotImage != null ? bgWideShotImage : loadSpriteImage("/assets/BACKGROUNDS/bg_bus_night_empty.png"));
 
         // 2. Top HUD Bar
         HBox topBar = new HBox(14);
@@ -81,19 +122,38 @@ public class EncounterView extends StackPane {
 
         Button skipButton = new Button("Skip to Ending ➔");
         skipButton.getStyleClass().add("choice-button");
+        skipButton.setFocusTraversable(false);
         skipButton.setOnAction(e -> {
             stopTypingAnimation();
+            stopAutoAdvance();
             app.showEnding();
         });
 
         topBar.getChildren().addAll(momentumBadge, spacer, skipButton);
 
-        // 3. Character Sprite Placeholders (Left: MC, Right: FEM-C)
-        maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 435);
-        maleSpriteView.setEffect(maleTone);
+        // 3. Character Sprites (Left: MC, Right: FEM-C)
+        maleNeutralImage = loadSpriteImage("/assets/MC/male_neutral.png");
+        maleSincereImage = loadSpriteImage("/assets/MC/male_sincere.png");
+        maleSmirkImage = loadSpriteImage("/assets/MC/male_smirk.png");
+        maleAwkwardImage = loadSpriteImage("/assets/MC/male_awkward.png");
+        maleDeadpanImage = loadSpriteImage("/assets/MC/male_deadpan.png");
 
+        // Chain MotionBlur on top of ColorAdjust so speaker dimming and motion blur work together
+        maleBlur.setInput(maleTone);
+        maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 435);
+        maleSpriteView.setEffect(maleBlur);
+
+        femNeutralImage = loadSpriteImage("/assets/FEM-C/fem_neutral.png");
+        femShyImage = loadSpriteImage("/assets/FEM-C/fem_shy_apologetic.png");
+        femWarmSmileImage = loadSpriteImage("/assets/FEM-C/fem_warm_smile.png");
+        femFlusteredImage = loadSpriteImage("/assets/FEM-C/fem_flustered.png");
+        femLaughingImage = loadSpriteImage("/assets/FEM-C/fem_laughing.png");
+        femAnnoyedImage = loadSpriteImage("/assets/FEM-C/fem_annoyed.png");
+        femSurprisedImage = loadSpriteImage("/assets/FEM-C/fem_surprised.png");
+
+        femBlur.setInput(femTone);
         femSpriteView = createSpriteView("/assets/FEM-C/fem_neutral.png", 460);
-        femSpriteView.setEffect(femTone);
+        femSpriteView.setEffect(femBlur);
         expressionBadge = new Label("Stranger • Listening");
         expressionBadge.getStyleClass().add("sprite-frame");
 
@@ -135,23 +195,52 @@ public class EncounterView extends StackPane {
         reactionLabel.getStyleClass().add("reaction-text");
         reactionLabel.setWrapText(true);
 
-        // VN sub-bar
-        HBox vnSubBar = new HBox(12);
-        vnSubBar.setAlignment(Pos.CENTER_RIGHT);
-        vnSubBar.setPadding(new Insets(4, 0, 0, 0));
+        // VN sub-bar (continue hint on the left, VN controls on the right)
+        continueHintLabel = new Label("");
+        continueHintLabel.getStyleClass().add("continue-hint");
+        continueHintLabel.setVisible(false);
 
-        String[] subActions = { "History", "Skip", "Auto", "Save", "Load", "Settings" };
+        Region subBarSpacer = new Region();
+        HBox.setHgrow(subBarSpacer, Priority.ALWAYS);
+
+        HBox vnSubBar = new HBox(12);
+        vnSubBar.setAlignment(Pos.CENTER_LEFT);
+        vnSubBar.setPadding(new Insets(4, 0, 0, 0));
+        vnSubBar.getChildren().addAll(continueHintLabel, subBarSpacer);
+
+        String[] subActions = { "History", "Skip", "Auto", "Music", "Save", "Load", "Settings" };
         for (String action : subActions) {
+            if ("Music".equals(action)) {
+                vnSubBar.getChildren().add(app.createMusicControlBar());
+                continue;
+            }
             Button subBtn = new Button(action);
             subBtn.getStyleClass().add("vn-sub-button");
+            subBtn.setFocusTraversable(false);
+            if ("Auto".equals(action)) {
+                autoButton = subBtn;
+                subBtn.setOnAction(e -> toggleAutoMode());
+            }
             vnSubBar.getChildren().add(subBtn);
         }
 
         textCard.getChildren().addAll(dialogueLabel, reactionLabel, vnSubBar);
         dialogueCard.getChildren().addAll(nameplate, textCard);
 
-        // Clicking the dialogue box completes the current typing animation immediately
-        dialogueCard.setOnMouseClicked(e -> finishTypingImmediately());
+        // Left-clicking anywhere on the screen finishes typing or advances when ready
+        setOnMouseClicked(this::handleScreenClick);
+
+        // Support Space and Enter to finish typing or advance when this view is active
+        sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (oldScene != null) {
+                oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, keyAdvanceHandler);
+                stopTypingAnimation();
+                stopAutoAdvance();
+            }
+            if (newScene != null) {
+                newScene.addEventFilter(KeyEvent.KEY_PRESSED, keyAdvanceHandler);
+            }
+        });
 
         // Assemble layers (sprites sit behind dialogueCard; choices sit above topBar's empty center)
         getChildren().addAll(bgView, maleSpriteView, femaleSpriteContainer, dialogueCard, topBar, choicesContainer);
@@ -170,21 +259,30 @@ public class EncounterView extends StackPane {
         loadScene();
     }
 
+    // Helper to load a sprite image safely from resources.
+    private Image loadSpriteImage(String resourcePath) {
+        try {
+            InputStream stream = getClass().getResourceAsStream(resourcePath);
+            if (stream != null) {
+                return new Image(stream);
+            } else {
+                System.err.println("Notice: Could not find sprite " + resourcePath);
+            }
+        } catch (Exception e) {
+            System.err.println("Notice: Could not load sprite " + resourcePath);
+        }
+        return null;
+    }
+
     // Loads a character sprite image cleanly with pixel-art smoothing disabled.
     private ImageView createSpriteView(String resourcePath, double fitHeight) {
         ImageView view = new ImageView();
         view.setPreserveRatio(true);
         view.setFitHeight(fitHeight);
         view.setSmooth(false);
-        try {
-            InputStream stream = getClass().getResourceAsStream(resourcePath);
-            if (stream != null) {
-                view.setImage(new Image(stream));
-            } else {
-                System.err.println("Notice: Could not find sprite " + resourcePath);
-            }
-        } catch (Exception e) {
-            System.err.println("Notice: Could not load sprite " + resourcePath);
+        Image img = loadSpriteImage(resourcePath);
+        if (img != null) {
+            view.setImage(img);
         }
         return view;
     }
@@ -194,8 +292,14 @@ public class EncounterView extends StackPane {
         Scene current = encounter.getCurrentScene();
         if (current == null) return;
 
+        stopAutoAdvance();
+        pendingNextSceneId = null;
+        pendingDisplayedText = "";
+        updateContinueHint();
+
         List<String> lines = current.getDialogueLines();
-        String fullDialogue = !lines.isEmpty() ? String.join("\n\n", lines) : "...";
+        String rawDialogue = !lines.isEmpty() ? String.join("\n\n", lines) : "...";
+        String fullDialogue = ScriptFormatter.format(rawDialogue, app.getPlayer(), app.getStranger());
         boolean strangerSpeaks = fullDialogue.contains("Stranger:");
 
         // Clear reaction and choices while the new scene line types in
@@ -210,14 +314,22 @@ public class EncounterView extends StackPane {
             setBothBalanced();
         }
 
+        // Play scene-specific visual novel sprite effects based on the current beat
+        playSceneEntranceEffect(current.getSceneId());
+
         // Update HUD
         updateHUD();
 
-        // Type out the scene text, then reveal the player's choices
+        // Type out the scene text, then either reveal player choices or arm click/Auto advance
         playTypewriter(dialogueLabel, fullDialogue, () -> {
-            renderChoices(current);
             if (hasPlayerReplyChoices(current)) {
+                renderChoices(current);
                 setSpeakerFocus(true, false);
+            } else {
+                String nextId = resolveContinueNextSceneId(current);
+                if (nextId != null) {
+                    prepareNextSceneAdvance(nextId, fullDialogue);
+                }
             }
         });
     }
@@ -228,10 +340,11 @@ public class EncounterView extends StackPane {
 
         for (DialogueChoice choice : scene.getChoices()) {
             boolean unlocked = choice.isUnlocked(momentum);
+            String formattedChoiceText = ScriptFormatter.format(choice.getText(), app.getPlayer(), app.getStranger());
 
             String buttonText = unlocked
-                    ? choice.getText()
-                    : choice.getText() + "  [🔒 Locked: Momentum >= " + choice.getMinMomentum() + "]";
+                    ? formattedChoiceText
+                    : formattedChoiceText + "  [🔒 Locked: Momentum >= " + choice.getMinMomentum() + "]";
 
             Button btn = new Button(buttonText);
             btn.getStyleClass().add("choice-button");
@@ -250,12 +363,17 @@ public class EncounterView extends StackPane {
     // Called when the player clicks a choice.
     private void handleChoiceSelected(DialogueChoice choice) {
         stopTypingAnimation();
+        stopAutoAdvance();
+        pendingNextSceneId = null;
+        pendingDisplayedText = "";
+        updateContinueHint();
 
         // Apply the choice's effect on stats and momentum
         choice.applyEffect(stats, momentum);
 
         // Show the stranger's reaction in the dialogue box
-        String reaction = choice.getReaction(momentum);
+        String rawReaction = choice.getReaction(momentum);
+        String reaction = ScriptFormatter.format(rawReaction, app.getPlayer(), app.getStranger());
 
         // Update the expression badge based on choice type
         updateExpressionBadge(choice);
@@ -263,28 +381,182 @@ public class EncounterView extends StackPane {
         // Update HUD
         updateHUD();
 
-        // If it's a continue choice or has no reaction, advance immediately
+        // If it's a pure Continue transition with no reaction, advance immediately
         if (reaction.isEmpty()) {
             proceedToNextScene(choice.getNextSceneId());
             return;
         }
 
-        // Shift subtle focus to Stranger while she reacts
-        speakerLabel.setText("Stranger");
-        setSpeakerFocus(false, true);
         choicesContainer.getChildren().clear();
-
-        String reactionText = "✦ Stranger: \"" + reaction + "\"";
         String nextId = choice.getNextSceneId();
-        String nextButtonText = "ENDING".equals(nextId) ? "See Ending Outcome ➔" : "Continue ➔";
+        String reactionText;
+
+        if ("Continue".equals(choice.getTone())) {
+            // Stay Quiet choice: narrator describes the quiet moment with balanced focus
+            speakerLabel.setText("Narrator");
+            setBothBalanced();
+            playChoiceReactionEffect(choice, reaction);
+            reactionText = "✦ " + reaction;
+        } else {
+            // Spoken choice: shift focus to Stranger while she reacts
+            speakerLabel.setText("Stranger");
+            setSpeakerFocus(false, true);
+            playChoiceReactionEffect(choice, reaction);
+            reactionText = "✦ Stranger: " + reaction;
+        }
 
         playTypewriter(reactionLabel, reactionText, () -> {
-            Button nextBtn = new Button(nextButtonText);
-            nextBtn.getStyleClass().add("choice-button");
-            nextBtn.setMaxWidth(420);
-            nextBtn.setOnAction(e -> proceedToNextScene(nextId));
-            choicesContainer.getChildren().add(nextBtn);
+            prepareNextSceneAdvance(nextId, reactionText);
         });
+    }
+
+    // Handles left-clicking anywhere on the encounter screen.
+    private void handleScreenClick(MouseEvent e) {
+        if (e.getButton() != MouseButton.PRIMARY) {
+            return;
+        }
+        if (isClickOnButton(e.getTarget())) {
+            return;
+        }
+        triggerAdvanceAction();
+    }
+
+    // Handles Space or Enter key presses to finish typing or advance to the next scene.
+    private void handleKeyAdvance(KeyEvent e) {
+        if (e.getCode() != KeyCode.SPACE && e.getCode() != KeyCode.ENTER) {
+            return;
+        }
+        if (typingTimeline != null || pendingNextSceneId != null) {
+            e.consume();
+            triggerAdvanceAction();
+        }
+    }
+
+    // Finishes typing if active, otherwise advances to the pending next scene.
+    private void triggerAdvanceAction() {
+        if (typingTimeline != null) {
+            finishTypingImmediately();
+        } else if (pendingNextSceneId != null) {
+            String nextId = pendingNextSceneId;
+            proceedToNextScene(nextId);
+        }
+    }
+
+    // Returns true if the mouse click originated on an interactive button or slider control.
+    private boolean isClickOnButton(EventTarget target) {
+        if (!(target instanceof Node)) {
+            return false;
+        }
+        Node current = (Node) target;
+        while (current != null && current != this) {
+            if (current instanceof ButtonBase || current instanceof Slider) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
+    }
+
+    // Resolves the next scene ID for narration/continue beats without showing a Continue button.
+    private String resolveContinueNextSceneId(Scene scene) {
+        if (scene.getDefaultNextSceneId() != null) {
+            return scene.getDefaultNextSceneId();
+        }
+        for (DialogueChoice choice : scene.getChoices()) {
+            if (choice instanceof ContinueChoice) {
+                return choice.getNextSceneId();
+            }
+        }
+        return null;
+    }
+
+    // Arms click/key advancement and starts the Auto timer if Auto mode is enabled.
+    private void prepareNextSceneAdvance(String nextId, String displayedText) {
+        pendingNextSceneId = nextId;
+        pendingDisplayedText = displayedText != null ? displayedText : "";
+        updateContinueHint();
+
+        if (autoMode) {
+            scheduleAutoAdvance(pendingDisplayedText);
+        }
+    }
+
+    // Toggles Auto mode ON/OFF from the VN sub-bar.
+    private void toggleAutoMode() {
+        autoMode = !autoMode;
+
+        if (autoButton != null) {
+            autoButton.setText(autoMode ? "Auto: ON" : "Auto");
+            if (autoMode) {
+                if (!autoButton.getStyleClass().contains("vn-sub-button-active")) {
+                    autoButton.getStyleClass().add("vn-sub-button-active");
+                }
+            } else {
+                autoButton.getStyleClass().remove("vn-sub-button-active");
+            }
+        }
+
+        updateContinueHint();
+
+        if (autoMode && typingTimeline == null && pendingNextSceneId != null) {
+            scheduleAutoAdvance(pendingDisplayedText);
+        } else if (!autoMode) {
+            stopAutoAdvance();
+        }
+    }
+
+    // Schedules automatic advancement with a reading pause scaled to the dialogue length.
+    private void scheduleAutoAdvance(String text) {
+        stopAutoAdvance();
+        if (pendingNextSceneId == null) {
+            return;
+        }
+
+        int textLength = text != null ? text.length() : 0;
+        int delayMs = AUTO_BASE_DELAY_MS + (textLength * AUTO_MS_PER_CHAR);
+        if (delayMs < AUTO_MIN_DELAY_MS) {
+            delayMs = AUTO_MIN_DELAY_MS;
+        } else if (delayMs > AUTO_MAX_DELAY_MS) {
+            delayMs = AUTO_MAX_DELAY_MS;
+        }
+
+        String targetNextId = pendingNextSceneId;
+        autoAdvanceTimer = new PauseTransition(Duration.millis(delayMs));
+        autoAdvanceTimer.setOnFinished(e -> {
+            autoAdvanceTimer = null;
+            if (autoMode && targetNextId.equals(pendingNextSceneId)) {
+                proceedToNextScene(targetNextId);
+            }
+        });
+        autoAdvanceTimer.play();
+    }
+
+    // Cancels any pending Auto-advance timer.
+    private void stopAutoAdvance() {
+        if (autoAdvanceTimer != null) {
+            autoAdvanceTimer.stop();
+            autoAdvanceTimer = null;
+        }
+    }
+
+    // Updates the subtle continue/auto hint label inside the dialogue box.
+    private void updateContinueHint() {
+        if (pendingNextSceneId == null) {
+            continueHintLabel.setVisible(false);
+            continueHintLabel.setText("");
+            return;
+        }
+
+        if ("ENDING".equals(pendingNextSceneId)) {
+            continueHintLabel.setText(autoMode
+                    ? "Auto → Ending..."
+                    : "Click or press Space / Enter for ending ▾");
+        } else {
+            continueHintLabel.setText(autoMode
+                    ? "Auto → Next scene..."
+                    : "Click or press Space / Enter to continue ▾");
+        }
+        continueHintLabel.setVisible(true);
     }
 
     // Checks if a scene has actual dialogue choices (not just Continue).
@@ -376,18 +648,30 @@ public class EncounterView extends StackPane {
 
     // Advances the dialogue graph to the next scene or ending.
     private void proceedToNextScene(String nextId) {
+        stopTypingAnimation();
+        stopAutoAdvance();
+        pendingNextSceneId = null;
+        pendingDisplayedText = "";
+        updateContinueHint();
+
         if ("ENDING".equals(nextId)) {
             // S08 choice was made — transition to EndingView
             app.showEnding();
             return;
         }
 
-        // After S05 choices, apply momentum branching to decide S06A or S06B
-        if ("S05_DONE".equals(nextId)) {
-            String branch = encounter.getMomentumBranch(momentum);
-            encounter.advanceTo(branch);
-        } else {
-            encounter.advanceTo(nextId);
+        // After post-brake beats (S04A/B/C), apply momentum branching to enter Warm (S05A) or Cold (S05B) lane
+        try {
+            if ("S04_DONE".equals(nextId) || "S05_DONE".equals(nextId)) {
+                String branch = encounter.getMomentumBranch(momentum);
+                encounter.advanceTo(branch);
+            } else {
+                encounter.advanceTo(nextId);
+            }
+        } catch (SceneNotFoundException e) {
+            System.err.println("Error advancing scene: " + e.getMessage());
+            app.showEnding();
+            return;
         }
 
         // Reload the view for the new scene
@@ -398,7 +682,7 @@ public class EncounterView extends StackPane {
     private void updateExpressionBadge(DialogueChoice choice) {
         if (choice instanceof FlirtyChoice) {
             expressionBadge.setText(momentum.getValue() >= 2
-                    ? "Stranger • Flustered (Soft Grin)"
+                    ? "Stranger • Flustered (Soft Smile)"
                     : "Stranger • Caught Off Guard");
         } else if (choice instanceof SincereChoice) {
             expressionBadge.setText(momentum.getValue() >= 0
@@ -406,12 +690,12 @@ public class EncounterView extends StackPane {
                     : "Stranger • Politely Nodding");
         } else if (choice instanceof SarcasticChoice) {
             expressionBadge.setText(momentum.getValue() >= 2
-                    ? "Stranger • Laughing Playfully"
-                    : "Stranger • Rolling Eyes");
+                    ? "Stranger • Amused / Chuckling"
+                    : "Stranger • Unamused");
         } else if (choice instanceof BluntChoice) {
             expressionBadge.setText("Stranger • Reserved / Quiet");
         } else if (choice instanceof ContinueChoice) {
-            expressionBadge.setText("Stranger • Listening");
+            expressionBadge.setText("Stranger • Looking Outside");
         }
     }
 
@@ -420,5 +704,553 @@ public class EncounterView extends StackPane {
         int m = momentum.getValue();
         String mSign = m > 0 ? "+" + m : String.valueOf(m);
         momentumBadge.setText("⚡ MOMENTUM: " + mSign + " (" + momentum.getMultiplier() + "x GAINS)");
+    }
+
+    // -------------------------------------------------------------------------
+    // Visual Novel Sprite Reaction Effects (Shakes, Motion Blur, Kilig & Moods)
+    // -------------------------------------------------------------------------
+
+    // Triggers scene-specific character sprites, backgrounds, and animations aligned to each beat.
+    private void playSceneEntranceEffect(String sceneId) {
+        resetSpriteTransforms();
+
+        // Wide-shot while approaching in S01; close-up two-seat view for all talking scenes (S02+)
+        if ("S01".equals(sceneId)) {
+            setBackground(bgWideShotImage);
+        } else {
+            setBackground(bgCloseUpImage);
+        }
+
+        switch (sceneId) {
+            case "S01":
+                // Boarding in the rain: MC approaches & sits; Stranger shifts bag & gives small nod
+                setMaleSprite(maleNeutralImage);
+                setFemSprite(femNeutralImage);
+                playEntranceSlide();
+                break;
+            case "S02":
+                // Slow afternoon traffic: gentle bus sway while MC wonders whether to speak
+                setMaleSprite(maleDeadpanImage);
+                setFemSprite(femNeutralImage);
+                playTrafficSway();
+                break;
+            case "S03":
+                // Sudden bus brake: shake the whole bus + jolt both sprites with motion blur
+                setMaleSprite(maleAwkwardImage);
+                setFemSprite(femSurprisedImage);
+                playBusBrakeJolt();
+                break;
+            case "S04A":
+                // After the Incident (Sincere): Stranger glances over gratefully
+                setMaleSprite(maleSincereImage);
+                setFemSprite(femWarmSmileImage);
+                playWarmLeanIn();
+                break;
+            case "S04B":
+                // After the Incident (Sarcastic): Stranger steadies herself on the seat
+                setMaleSprite(maleAwkwardImage);
+                setFemSprite(femShyImage);
+                playGentleNod();
+                break;
+            case "S04C":
+                // After the Incident (Blunt / Quiet): quiet distance looking at the rainy window
+                setMaleSprite(maleDeadpanImage);
+                setFemSprite(femAnnoyedImage);
+                playAwkwardSlump();
+                break;
+            case "S05A":
+                // Warm Lane Part 1 (Proper Introduction): both nod & lean in warmly exchanging names
+                setMaleSprite(maleSincereImage);
+                setFemSprite(femWarmSmileImage);
+                playWarmGreeting();
+                break;
+            case "S05B":
+                // Cold Lane Part 1 (Unspoken Distance): Stranger keeps earphones in and shifts away
+                setMaleSprite(maleAwkwardImage);
+                setFemSprite(femNeutralImage);
+                playColdShiftAway();
+                break;
+            case "S06A":
+                // Warm Lane Part 2 (Warmer Conversation): removes earphone and faces MC
+                setMaleSprite(maleSincereImage);
+                setFemSprite(femWarmSmileImage);
+                playWarmLeanIn();
+                break;
+            case "S06B":
+                // Cold Lane Part 2 (Still-Awkward Conversation): quiet, guarded posture
+                setMaleSprite(maleAwkwardImage);
+                setFemSprite(femAnnoyedImage);
+                playAwkwardSlump();
+                break;
+            case "S07":
+                // Merge (Almost There): bus slows down as passengers prepare for their stops
+                setMaleSprite(maleNeutralImage);
+                setFemSprite(momentum.getValue() >= 2 ? femWarmSmileImage : femSurprisedImage);
+                playStopSlowdown();
+                break;
+            case "S08":
+                // Final Interaction (Before the Ride Ends): MC stands up and looks back one last time
+                setMaleSprite(momentum.getValue() >= 0 ? maleSincereImage : maleNeutralImage);
+                setFemSprite(momentum.getValue() >= 0 ? femShyImage : femNeutralImage);
+                playStandUpPrepare();
+                break;
+            default:
+                setMaleSprite(maleNeutralImage);
+                setFemSprite(femNeutralImage);
+                break;
+        }
+    }
+
+    // Triggers both MC and Stranger sprite swaps & animations when the player picks a choice.
+    private void playChoiceReactionEffect(DialogueChoice choice, String reaction) {
+        resetSpriteTransforms();
+        boolean isWarm = momentum.getValue() >= 0;
+        boolean isHighMomentum = momentum.getValue() >= 2;
+        String lower = reaction.toLowerCase();
+
+        if (choice instanceof FlirtyChoice) {
+            // Kilig / flustered reaction: MC smirks, Stranger flusters (or looks surprised if low momentum)
+            if (isHighMomentum || lower.contains("nagulat") || lower.contains("smile") || lower.contains("sure") || lower.contains("ohh")) {
+                setMaleSprite(maleSmirkImage);
+                setFemSprite(femFlusteredImage);
+                playKiligFluster();
+            } else {
+                setMaleSprite(maleAwkwardImage);
+                setFemSprite(femSurprisedImage);
+                playFemShakeWithBlur(12);
+            }
+        } else if (choice instanceof SincereChoice) {
+            setMaleSprite(maleSincereImage);
+            if (isWarm) {
+                boolean extraWarm = lower.contains("smile") || lower.contains("thank you")
+                        || lower.contains("salamat") || lower.contains("nice meeting")
+                        || lower.contains("napangiti") || lower.contains("masaya") || lower.contains("oo nga");
+                setFemSprite(extraWarm ? femWarmSmileImage : femShyImage);
+                playWarmLeanIn();
+            } else {
+                setFemSprite(femShyImage);
+                playGentleNod();
+            }
+        } else if (choice instanceof SarcasticChoice) {
+            if (isHighMomentum || lower.contains("natawa") || lower.contains("napangiti")
+                    || lower.contains("haha") || lower.contains("laugh") || lower.contains("smirk")) {
+                setMaleSprite(maleSmirkImage);
+                setFemSprite(femLaughingImage);
+                playPlayfulHop();
+            } else {
+                setMaleSprite(maleAwkwardImage);
+                setFemSprite(femAnnoyedImage);
+                playFemShakeWithBlur(9);
+            }
+        } else if (choice instanceof BluntChoice) {
+            setMaleSprite(maleDeadpanImage);
+            setFemSprite(femAnnoyedImage);
+            playAwkwardSlump();
+        } else if (choice instanceof ContinueChoice) {
+            // Stay Quiet choice: calm, reserved settle as both look out the window
+            setMaleSprite(maleDeadpanImage);
+            setFemSprite(femNeutralImage);
+            playQuietLookAway();
+        }
+    }
+
+    // Safely swaps the bus background image.
+    private void setBackground(Image img) {
+        if (img != null) {
+            bgView.setImage(img);
+        }
+    }
+
+    // Safely swaps the male protagonist's sprite image.
+    private void setMaleSprite(Image img) {
+        if (img != null) {
+            maleSpriteView.setImage(img);
+        }
+    }
+
+    // Safely swaps the female character's sprite image.
+    private void setFemSprite(Image img) {
+        if (img != null) {
+            femSpriteView.setImage(img);
+        }
+    }
+
+    // Stops any running sprite animations and resets positions/blurs so nothing drifts.
+    private void resetSpriteTransforms() {
+        if (femAnimTimeline != null) {
+            femAnimTimeline.stop();
+            femAnimTimeline = null;
+        }
+        if (maleAnimTimeline != null) {
+            maleAnimTimeline.stop();
+            maleAnimTimeline = null;
+        }
+        if (bgAnimTimeline != null) {
+            bgAnimTimeline.stop();
+            bgAnimTimeline = null;
+        }
+
+        femSpriteView.setTranslateX(0);
+        femSpriteView.setTranslateY(0);
+        femSpriteView.setScaleX(1.0);
+        femSpriteView.setScaleY(1.0);
+        femBlur.setRadius(0);
+
+        maleSpriteView.setTranslateX(0);
+        maleSpriteView.setTranslateY(0);
+        maleSpriteView.setScaleX(1.0);
+        maleSpriteView.setScaleY(1.0);
+        maleBlur.setRadius(0);
+
+        bgView.setTranslateX(0);
+        bgView.setTranslateY(0);
+        bgView.setScaleX(1.0);
+        bgView.setScaleY(1.0);
+    }
+
+    // Smooth ease-out slide-in when boarding the bus in Scene 1.
+    private void playEntranceSlide() {
+        maleSpriteView.setTranslateX(-45);
+        maleBlur.setAngle(0);
+        maleBlur.setRadius(12);
+
+        femSpriteView.setTranslateX(45);
+        femBlur.setAngle(0);
+        femBlur.setRadius(12);
+
+        maleAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(360),
+                new KeyValue(maleSpriteView.translateXProperty(), 0, Interpolator.EASE_OUT),
+                new KeyValue(maleBlur.radiusProperty(), 0, Interpolator.EASE_OUT))
+        );
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(380),
+                new KeyValue(femSpriteView.translateXProperty(), 0, Interpolator.EASE_OUT),
+                new KeyValue(femBlur.radiusProperty(), 0, Interpolator.EASE_OUT))
+        );
+        maleAnimTimeline.play();
+        femAnimTimeline.play();
+    }
+
+    // Kilig / flustered reaction: quick startled hop, soft blush-shake with motion blur, and a close lean-in.
+    private void playKiligFluster() {
+        femBlur.setAngle(0);
+
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(femSpriteView.translateXProperty(), 0),
+                new KeyValue(femSpriteView.translateYProperty(), 0),
+                new KeyValue(femSpriteView.scaleXProperty(), 1.0),
+                new KeyValue(femSpriteView.scaleYProperty(), 1.0),
+                new KeyValue(femBlur.radiusProperty(), 0)),
+            new KeyFrame(Duration.millis(70),
+                new KeyValue(femSpriteView.translateYProperty(), -16, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.translateXProperty(), -9),
+                new KeyValue(femBlur.radiusProperty(), 11)),
+            new KeyFrame(Duration.millis(130),
+                new KeyValue(femSpriteView.translateYProperty(), -4),
+                new KeyValue(femSpriteView.translateXProperty(), 9),
+                new KeyValue(femBlur.radiusProperty(), 12)),
+            new KeyFrame(Duration.millis(190),
+                new KeyValue(femSpriteView.translateYProperty(), 0),
+                new KeyValue(femSpriteView.translateXProperty(), -6),
+                new KeyValue(femBlur.radiusProperty(), 7)),
+            new KeyFrame(Duration.millis(250),
+                new KeyValue(femSpriteView.translateXProperty(), 6),
+                new KeyValue(femBlur.radiusProperty(), 5)),
+            new KeyFrame(Duration.millis(310),
+                new KeyValue(femSpriteView.translateXProperty(), -3),
+                new KeyValue(femBlur.radiusProperty(), 2)),
+            new KeyFrame(Duration.millis(420),
+                new KeyValue(femSpriteView.translateXProperty(), 0, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.translateYProperty(), -4, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.scaleXProperty(), 1.045, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.scaleYProperty(), 1.045, Interpolator.EASE_OUT),
+                new KeyValue(femBlur.radiusProperty(), 0))
+        );
+        femAnimTimeline.play();
+    }
+
+    // Romantic / heartwarming reaction: gentle heart-flutter bounce + soft lean-in closer.
+    private void playWarmLeanIn() {
+        femBlur.setAngle(90);
+
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(femSpriteView.translateYProperty(), 0),
+                new KeyValue(femSpriteView.scaleXProperty(), 1.0),
+                new KeyValue(femSpriteView.scaleYProperty(), 1.0),
+                new KeyValue(femBlur.radiusProperty(), 0)),
+            new KeyFrame(Duration.millis(120),
+                new KeyValue(femSpriteView.translateYProperty(), -10, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.scaleXProperty(), 1.03, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.scaleYProperty(), 1.03, Interpolator.EASE_OUT),
+                new KeyValue(femBlur.radiusProperty(), 4)),
+            new KeyFrame(Duration.millis(260),
+                new KeyValue(femSpriteView.translateYProperty(), -2, Interpolator.EASE_IN),
+                new KeyValue(femSpriteView.scaleXProperty(), 1.045, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.scaleYProperty(), 1.045, Interpolator.EASE_OUT),
+                new KeyValue(femBlur.radiusProperty(), 0))
+        );
+        femAnimTimeline.play();
+    }
+
+    // Playful laughing double-hop with vertical motion blur.
+    private void playPlayfulHop() {
+        femBlur.setAngle(90);
+
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(femSpriteView.translateYProperty(), 0),
+                new KeyValue(femBlur.radiusProperty(), 0)),
+            new KeyFrame(Duration.millis(90),
+                new KeyValue(femSpriteView.translateYProperty(), -22, Interpolator.EASE_OUT),
+                new KeyValue(femBlur.radiusProperty(), 9)),
+            new KeyFrame(Duration.millis(180),
+                new KeyValue(femSpriteView.translateYProperty(), 0, Interpolator.EASE_IN),
+                new KeyValue(femBlur.radiusProperty(), 5)),
+            new KeyFrame(Duration.millis(250),
+                new KeyValue(femSpriteView.translateYProperty(), -10, Interpolator.EASE_OUT),
+                new KeyValue(femBlur.radiusProperty(), 4)),
+            new KeyFrame(Duration.millis(330),
+                new KeyValue(femSpriteView.translateYProperty(), 0, Interpolator.EASE_IN),
+                new KeyValue(femBlur.radiusProperty(), 0))
+        );
+        femAnimTimeline.play();
+    }
+
+    // Horizontal startled shake with directional motion blur.
+    private void playFemShakeWithBlur(double intensity) {
+        femBlur.setAngle(0);
+
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(femSpriteView.translateXProperty(), 0),
+                new KeyValue(femBlur.radiusProperty(), 0)),
+            new KeyFrame(Duration.millis(45),
+                new KeyValue(femSpriteView.translateXProperty(), -intensity),
+                new KeyValue(femBlur.radiusProperty(), 14)),
+            new KeyFrame(Duration.millis(95),
+                new KeyValue(femSpriteView.translateXProperty(), intensity),
+                new KeyValue(femBlur.radiusProperty(), 16)),
+            new KeyFrame(Duration.millis(145),
+                new KeyValue(femSpriteView.translateXProperty(), -intensity * 0.7),
+                new KeyValue(femBlur.radiusProperty(), 10)),
+            new KeyFrame(Duration.millis(195),
+                new KeyValue(femSpriteView.translateXProperty(), intensity * 0.6),
+                new KeyValue(femBlur.radiusProperty(), 8)),
+            new KeyFrame(Duration.millis(245),
+                new KeyValue(femSpriteView.translateXProperty(), -intensity * 0.3),
+                new KeyValue(femBlur.radiusProperty(), 4)),
+            new KeyFrame(Duration.millis(300),
+                new KeyValue(femSpriteView.translateXProperty(), 0),
+                new KeyValue(femBlur.radiusProperty(), 0))
+        );
+        femAnimTimeline.play();
+    }
+
+    // Subtle polite nod for calm neutral replies.
+    private void playGentleNod() {
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0), new KeyValue(femSpriteView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(120), new KeyValue(femSpriteView.translateYProperty(), 9, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(260), new KeyValue(femSpriteView.translateYProperty(), 0, Interpolator.EASE_IN))
+        );
+        femAnimTimeline.play();
+    }
+
+    // Awkward / reserved slump for blunt or cold moments.
+    private void playAwkwardSlump() {
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(femSpriteView.translateYProperty(), 0),
+                new KeyValue(femSpriteView.scaleXProperty(), 1.0),
+                new KeyValue(femSpriteView.scaleYProperty(), 1.0)),
+            new KeyFrame(Duration.millis(320),
+                new KeyValue(femSpriteView.translateYProperty(), 14, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.scaleXProperty(), 0.97, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.scaleYProperty(), 0.97, Interpolator.EASE_OUT))
+        );
+        femAnimTimeline.play();
+    }
+
+    // Scene 3 Sudden Bus Brake: shakes the bus background and jolts both characters with motion blur.
+    private void playBusBrakeJolt() {
+        // Scale background slightly during the shake so edges never expose blank gaps
+        bgView.setScaleX(1.04);
+        bgView.setScaleY(1.04);
+
+        bgAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(bgView.translateXProperty(), 0),   new KeyValue(bgView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(45),  new KeyValue(bgView.translateXProperty(), -16), new KeyValue(bgView.translateYProperty(), 5)),
+            new KeyFrame(Duration.millis(90),  new KeyValue(bgView.translateXProperty(), 14),  new KeyValue(bgView.translateYProperty(), -4)),
+            new KeyFrame(Duration.millis(140), new KeyValue(bgView.translateXProperty(), -10), new KeyValue(bgView.translateYProperty(), 3)),
+            new KeyFrame(Duration.millis(190), new KeyValue(bgView.translateXProperty(), 7),   new KeyValue(bgView.translateYProperty(), -2)),
+            new KeyFrame(Duration.millis(240), new KeyValue(bgView.translateXProperty(), -4),  new KeyValue(bgView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(310),
+                new KeyValue(bgView.translateXProperty(), 0),
+                new KeyValue(bgView.translateYProperty(), 0),
+                new KeyValue(bgView.scaleXProperty(), 1.0, Interpolator.EASE_OUT),
+                new KeyValue(bgView.scaleYProperty(), 1.0, Interpolator.EASE_OUT))
+        );
+
+        // MC jolts sideways with brief motion blur
+        maleBlur.setAngle(0);
+        maleAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(maleSpriteView.translateXProperty(), 0),   new KeyValue(maleBlur.radiusProperty(), 0)),
+            new KeyFrame(Duration.millis(55),  new KeyValue(maleSpriteView.translateXProperty(), 18),  new KeyValue(maleBlur.radiusProperty(), 16)),
+            new KeyFrame(Duration.millis(120), new KeyValue(maleSpriteView.translateXProperty(), -12), new KeyValue(maleBlur.radiusProperty(), 12)),
+            new KeyFrame(Duration.millis(190), new KeyValue(maleSpriteView.translateXProperty(), 7),   new KeyValue(maleBlur.radiusProperty(), 6)),
+            new KeyFrame(Duration.millis(270), new KeyValue(maleSpriteView.translateXProperty(), 0),   new KeyValue(maleBlur.radiusProperty(), 0))
+        );
+
+        // Stranger lurches harder as she bumps her head ("Aray! Grabe naman 'yon!")
+        femBlur.setAngle(0);
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(femSpriteView.translateXProperty(), 0),
+                new KeyValue(femSpriteView.translateYProperty(), 0),
+                new KeyValue(femBlur.radiusProperty(), 0)),
+            new KeyFrame(Duration.millis(55),
+                new KeyValue(femSpriteView.translateXProperty(), -22),
+                new KeyValue(femSpriteView.translateYProperty(), 10),
+                new KeyValue(femBlur.radiusProperty(), 20)),
+            new KeyFrame(Duration.millis(115),
+                new KeyValue(femSpriteView.translateXProperty(), 16),
+                new KeyValue(femSpriteView.translateYProperty(), -12),
+                new KeyValue(femBlur.radiusProperty(), 18)),
+            new KeyFrame(Duration.millis(175),
+                new KeyValue(femSpriteView.translateXProperty(), -12),
+                new KeyValue(femSpriteView.translateYProperty(), 4),
+                new KeyValue(femBlur.radiusProperty(), 12)),
+            new KeyFrame(Duration.millis(235),
+                new KeyValue(femSpriteView.translateXProperty(), 7),
+                new KeyValue(femSpriteView.translateYProperty(), -2),
+                new KeyValue(femBlur.radiusProperty(), 6)),
+            new KeyFrame(Duration.millis(320),
+                new KeyValue(femSpriteView.translateXProperty(), 0),
+                new KeyValue(femSpriteView.translateYProperty(), 0),
+                new KeyValue(femBlur.radiusProperty(), 0))
+        );
+
+        bgAnimTimeline.play();
+        maleAnimTimeline.play();
+        femAnimTimeline.play();
+    }
+
+    // Scene 2 Traffic: gentle slow bus sway while MC wonders whether to speak.
+    private void playTrafficSway() {
+        bgView.setScaleX(1.015);
+        bgView.setScaleY(1.015);
+
+        bgAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(bgView.translateXProperty(), 0)),
+            new KeyFrame(Duration.millis(420), new KeyValue(bgView.translateXProperty(), -4, Interpolator.EASE_BOTH)),
+            new KeyFrame(Duration.millis(840), new KeyValue(bgView.translateXProperty(), 3, Interpolator.EASE_BOTH)),
+            new KeyFrame(Duration.millis(1200),
+                new KeyValue(bgView.translateXProperty(), 0, Interpolator.EASE_OUT),
+                new KeyValue(bgView.scaleXProperty(), 1.0, Interpolator.EASE_OUT),
+                new KeyValue(bgView.scaleYProperty(), 1.0, Interpolator.EASE_OUT))
+        );
+
+        // MC glances slightly toward the seatmate
+        maleAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(maleSpriteView.translateXProperty(), 0)),
+            new KeyFrame(Duration.millis(320), new KeyValue(maleSpriteView.translateXProperty(), 8, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(700), new KeyValue(maleSpriteView.translateXProperty(), 0, Interpolator.EASE_BOTH))
+        );
+
+        bgAnimTimeline.play();
+        maleAnimTimeline.play();
+    }
+
+    // Scene 5A Warm Lane (Proper Introduction): both characters lean in slightly with a friendly nod.
+    private void playWarmGreeting() {
+        maleAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(maleSpriteView.translateXProperty(), 0), new KeyValue(maleSpriteView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(180), new KeyValue(maleSpriteView.translateXProperty(), 12, Interpolator.EASE_OUT), new KeyValue(maleSpriteView.translateYProperty(), 5, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(380), new KeyValue(maleSpriteView.translateXProperty(), 4, Interpolator.EASE_BOTH), new KeyValue(maleSpriteView.translateYProperty(), 0, Interpolator.EASE_IN))
+        );
+
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(femSpriteView.translateXProperty(), 0), new KeyValue(femSpriteView.translateYProperty(), 0), new KeyValue(femSpriteView.scaleXProperty(), 1.0), new KeyValue(femSpriteView.scaleYProperty(), 1.0)),
+            new KeyFrame(Duration.millis(200), new KeyValue(femSpriteView.translateXProperty(), -10, Interpolator.EASE_OUT), new KeyValue(femSpriteView.translateYProperty(), 6, Interpolator.EASE_OUT), new KeyValue(femSpriteView.scaleXProperty(), 1.03, Interpolator.EASE_OUT), new KeyValue(femSpriteView.scaleYProperty(), 1.03, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(420), new KeyValue(femSpriteView.translateXProperty(), -3, Interpolator.EASE_BOTH), new KeyValue(femSpriteView.translateYProperty(), 0, Interpolator.EASE_IN), new KeyValue(femSpriteView.scaleXProperty(), 1.03, Interpolator.EASE_OUT), new KeyValue(femSpriteView.scaleYProperty(), 1.03, Interpolator.EASE_OUT))
+        );
+
+        maleAnimTimeline.play();
+        femAnimTimeline.play();
+    }
+
+    // Scene 5B Cold Lane (Unspoken Distance): Stranger subtly shifts away toward the window.
+    private void playColdShiftAway() {
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(femSpriteView.translateXProperty(), 0),
+                new KeyValue(femSpriteView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(360),
+                new KeyValue(femSpriteView.translateXProperty(), 16, Interpolator.EASE_OUT),
+                new KeyValue(femSpriteView.translateYProperty(), 6, Interpolator.EASE_OUT))
+        );
+        femAnimTimeline.play();
+    }
+
+    // Scene 7 Merge (Almost There): gentle bus deceleration sway as stops approach.
+    private void playStopSlowdown() {
+        bgView.setScaleX(1.02);
+        bgView.setScaleY(1.02);
+
+        bgAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(bgView.translateXProperty(), 0)),
+            new KeyFrame(Duration.millis(180), new KeyValue(bgView.translateXProperty(), -7, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(420),
+                new KeyValue(bgView.translateXProperty(), 0, Interpolator.EASE_BOTH),
+                new KeyValue(bgView.scaleXProperty(), 1.0, Interpolator.EASE_OUT),
+                new KeyValue(bgView.scaleYProperty(), 1.0, Interpolator.EASE_OUT))
+        );
+
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(femSpriteView.translateXProperty(), 0)),
+            new KeyFrame(Duration.millis(200), new KeyValue(femSpriteView.translateXProperty(), -6, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(420), new KeyValue(femSpriteView.translateXProperty(), 0, Interpolator.EASE_BOTH))
+        );
+
+        bgAnimTimeline.play();
+        femAnimTimeline.play();
+    }
+
+    // Scene 8 Final Interaction (Before the Ride Ends): MC rises slightly preparing to step off.
+    private void playStandUpPrepare() {
+        maleAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),
+                new KeyValue(maleSpriteView.translateYProperty(), 0),
+                new KeyValue(maleSpriteView.translateXProperty(), 0)),
+            new KeyFrame(Duration.millis(280),
+                new KeyValue(maleSpriteView.translateYProperty(), -16, Interpolator.EASE_OUT),
+                new KeyValue(maleSpriteView.translateXProperty(), 8, Interpolator.EASE_OUT))
+        );
+
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(femSpriteView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(220), new KeyValue(femSpriteView.translateYProperty(), -5, Interpolator.EASE_OUT)),
+            new KeyFrame(Duration.millis(400), new KeyValue(femSpriteView.translateYProperty(), 0, Interpolator.EASE_IN))
+        );
+
+        maleAnimTimeline.play();
+        femAnimTimeline.play();
+    }
+
+    // Stay Quiet reaction: both characters settle calmly back into their seats looking outside.
+    private void playQuietLookAway() {
+        maleAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(maleSpriteView.translateXProperty(), 0), new KeyValue(maleSpriteView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(320), new KeyValue(maleSpriteView.translateXProperty(), -8, Interpolator.EASE_OUT), new KeyValue(maleSpriteView.translateYProperty(), 5, Interpolator.EASE_OUT))
+        );
+        femAnimTimeline = new Timeline(
+            new KeyFrame(Duration.millis(0),   new KeyValue(femSpriteView.translateXProperty(), 0), new KeyValue(femSpriteView.translateYProperty(), 0)),
+            new KeyFrame(Duration.millis(320), new KeyValue(femSpriteView.translateXProperty(), 8, Interpolator.EASE_OUT), new KeyValue(femSpriteView.translateYProperty(), 4, Interpolator.EASE_OUT))
+        );
+        maleAnimTimeline.play();
+        femAnimTimeline.play();
     }
 }
