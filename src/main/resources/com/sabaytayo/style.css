@@ -328,6 +328,23 @@
                 -fx-text-fill: #f9b98c;
             }
 
+            .vn-sub-button-active {
+                -fx-text-fill: #fde09b;
+                -fx-font-weight: bold;
+                -fx-background-color: rgba(249, 185, 140, 0.16);
+                -fx-background-radius: 4px;
+                -fx-border-color: #f9b98c;
+                -fx-border-radius: 4px;
+                -fx-border-width: 1px;
+            }
+
+            .continue-hint {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-font-size: 11px;
+                -fx-font-style: italic;
+                -fx-text-fill: rgba(247, 178, 139, 0.85);
+            }
+
             .p5-hud-badge {
                 -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
                 -fx-background-color: #1b1d2b;
@@ -353,4 +370,41 @@
                 -fx-text-fill: #fde09b;
                 -fx-font-size: 13px;
                 -fx-font-weight: bold;
+            }
+
+            .music-pill {
+                -fx-background-color: rgba(27, 29, 43, 0.88);
+                -fx-background-radius: 8px;
+                -fx-border-color: #c87d76;
+                -fx-border-radius: 8px;
+                -fx-border-width: 1.5px;
+                -fx-padding: 5px 10px;
+                -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 8, 0, 0, 2);
+            }
+
+            .volume-slider {
+                -fx-cursor: hand;
+            }
+
+            .volume-slider .track {
+                -fx-background-color: #3b253b;
+                -fx-background-radius: 4px;
+                -fx-pref-height: 5px;
+                -fx-border-color: #7a5462;
+                -fx-border-radius: 4px;
+                -fx-border-width: 1px;
+            }
+
+            .volume-slider .thumb {
+                -fx-background-color: #f7b28b;
+                -fx-background-radius: 6px;
+                -fx-pref-width: 11px;
+                -fx-pref-height: 11px;
+                -fx-border-color: #1b1d2b;
+                -fx-border-radius: 6px;
+                -fx-border-width: 1px;
+            }
+
+            .volume-slider .thumb:hover {
+                -fx-background-color: #fde09b;
             }

@@ -11,7 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -25,8 +24,8 @@ public class StartView extends StackPane {
 
     // Persisted setup inputs
     private final TextField nameField;
-    private final ComboBox<String> playerPronounsBox;
-    private final ComboBox<String> strangerPronounsBox;
+    private final ComboBox<Pronouns> playerPronounsBox;
+    private final ComboBox<Pronouns> strangerPronounsBox;
     private final Label errorLabel;
 
     // Menu button rows for active highlight switching
@@ -59,12 +58,12 @@ public class StartView extends StackPane {
         nameField.getStyleClass().add("input-field");
 
         playerPronounsBox = new ComboBox<>();
-        playerPronounsBox.getItems().addAll("They/Them", "He/Him", "She/Her");
-        playerPronounsBox.setValue("They/Them");
+        playerPronounsBox.getItems().addAll(Pronouns.THEY_THEM, Pronouns.HE_HIM, Pronouns.SHE_HER);
+        playerPronounsBox.setValue(Pronouns.THEY_THEM);
 
         strangerPronounsBox = new ComboBox<>();
-        strangerPronounsBox.getItems().addAll("She/Her", "He/Him", "They/Them");
-        strangerPronounsBox.setValue("She/Her");
+        strangerPronounsBox.getItems().addAll(Pronouns.SHE_HER, Pronouns.HE_HIM, Pronouns.THEY_THEM);
+        strangerPronounsBox.setValue(Pronouns.SHE_HER);
 
         errorLabel = new Label("");
         errorLabel.getStyleClass().add("error-text");
@@ -72,7 +71,12 @@ public class StartView extends StackPane {
         // Display the opening menu
         showMainMenu();
 
-        getChildren().addAll(bgView, contentLayer);
+        HBox musicBar = app.createMusicControlBar();
+        musicBar.getStyleClass().add("music-pill");
+
+        getChildren().addAll(bgView, contentLayer, musicBar);
+        StackPane.setAlignment(musicBar, Pos.TOP_RIGHT);
+        StackPane.setMargin(musicBar, new Insets(16, 20, 0, 0));
     }
 
     // 1. Recreated Start Menu: Signboard Plaque up top, Commute Buttons in center
@@ -82,8 +86,8 @@ public class StartView extends StackPane {
         leftArrows.clear();
         rightArrows.clear();
 
-        // Top: Bus Signboard Plaque ("Sabay Tayo")
-        VBox signboard = createSignboard();
+        // Top: Pixel-art "Sabay Tayo" signboard logo asset
+        ImageView logoView = createLogoView();
 
         // Center: Menu Buttons
         VBox buttonsBox = new VBox(14);
@@ -97,8 +101,8 @@ public class StartView extends StackPane {
         // Set START COMMUTE active by default
         setActiveMenuButton(0);
 
-        // Main center column combining Signboard + Buttons
-        VBox centerColumn = new VBox(28, signboard, buttonsBox);
+        // Main center column combining Signboard Logo + Buttons
+        VBox centerColumn = new VBox(24, logoView, buttonsBox);
         centerColumn.setAlignment(Pos.CENTER);
         centerColumn.setMaxWidth(Region.USE_PREF_SIZE);
         centerColumn.setMaxHeight(Region.USE_PREF_SIZE);
@@ -107,49 +111,19 @@ public class StartView extends StackPane {
         StackPane.setAlignment(centerColumn, Pos.CENTER);
     }
 
-
-    // Builds the double-bordered "Sabay Tayo" signboard plaque
-    private VBox createSignboard() {
-        VBox outerPlaque = new VBox();
-        outerPlaque.getStyleClass().add("signboard-outer");
-        outerPlaque.setMaxWidth(Region.USE_PREF_SIZE);
-        outerPlaque.setMaxHeight(Region.USE_PREF_SIZE);
-
-        VBox innerPlaque = new VBox(2);
-        innerPlaque.getStyleClass().add("signboard-inner");
-        innerPlaque.setAlignment(Pos.CENTER);
-
-        // Top ornament line: sparkles + transit arrows + bus icon
-        BorderPane topOrnament = new BorderPane();
-        Label topLeftStar = new Label("✦");
-        topLeftStar.getStyleClass().add("signboard-star");
-        Label topCenterRoute = new Label("───────►   🚌   ───────►");
-        topCenterRoute.getStyleClass().add("signboard-ornament");
-        Label topRightStar = new Label("✦ ✧");
-        topRightStar.getStyleClass().add("signboard-star");
-        topOrnament.setLeft(topLeftStar);
-        topOrnament.setCenter(topCenterRoute);
-        topOrnament.setRight(topRightStar);
-
-        // Center cursive script title
-        Label titleLabel = new Label("Sabay Tayo");
-        titleLabel.getStyleClass().add("signboard-title");
-
-        // Bottom ornament line: reverse transit arrows + bus icon
-        BorderPane bottomOrnament = new BorderPane();
-        Label bottomLeftStar = new Label("·");
-        bottomLeftStar.getStyleClass().add("signboard-ornament");
-        Label bottomCenterRoute = new Label("◄───────   ◄───────");
-        bottomCenterRoute.getStyleClass().add("signboard-ornament");
-        Label bottomRightBus = new Label("🚌 ✦");
-        bottomRightBus.getStyleClass().add("signboard-ornament");
-        bottomOrnament.setLeft(bottomLeftStar);
-        bottomOrnament.setCenter(bottomCenterRoute);
-        bottomOrnament.setRight(bottomRightBus);
-
-        innerPlaque.getChildren().addAll(topOrnament, titleLabel, bottomOrnament);
-        outerPlaque.getChildren().add(innerPlaque);
-        return outerPlaque;
+    // Loads the pixel-art "Sabay Tayo" signboard logo image.
+    private ImageView createLogoView() {
+        ImageView logoView = new ImageView();
+        logoView.setPreserveRatio(true);
+        logoView.setFitWidth(560);
+        logoView.setSmooth(false);
+        try {
+            Image logo = new Image(getClass().getResourceAsStream("/assets/BACKGROUNDS/logo_sabay_tayo2.png"));
+            logoView.setImage(logo);
+        } catch (Exception e) {
+            System.err.println("Notice: Could not load logo_sabay_tayo2.png.");
+        }
+        return logoView;
     }
 
     // Creates one menu button row flanked by left (▶) and right (◀) pointer arrows
@@ -264,19 +238,16 @@ public class StartView extends StackPane {
 
 
     private void handleBoarding() {
-        String enteredName = nameField.getText().trim();
-        if (enteredName.isEmpty()) {
-            errorLabel.setText("Please enter your name before boarding.");
-            return;
-        }
-        if (enteredName.length() > 20) {
-            errorLabel.setText("Name cannot be longer than 20 characters.");
-            return;
-        }
+        try {
+            Player player = new Player(nameField.getText(), playerPronounsBox.getValue());
+            Stranger stranger = new Stranger(strangerPronounsBox.getValue());
 
-        app.setPlayerName(enteredName);
-        app.setPlayerPronouns(playerPronounsBox.getValue());
-        app.setStrangerPronouns(strangerPronounsBox.getValue());
-        app.showEncounter();
+            errorLabel.setText("");
+            app.setPlayer(player);
+            app.setStranger(stranger);
+            app.showEncounter();
+        } catch (InvalidNameException e) {
+            errorLabel.setText(e.getMessage());
+        }
     }
 }
