@@ -30,11 +30,11 @@ public class EndingView extends StackPane {
         }
 
         // Center result card
-        VBox card = new VBox(16);
-        card.setMaxWidth(600);
+        VBox card = new VBox(18);
+        card.maxWidthProperty().bind(widthProperty().multiply(0.55));
         card.setMaxHeight(Region.USE_PREF_SIZE);
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(32, 40, 32, 40));
+        card.setPadding(new Insets(38, 48, 38, 48));
         card.getStyleClass().add("dialogue-box");
 
         // Classify the ending polymorphically using OutcomeClassifier
@@ -71,7 +71,7 @@ public class EndingView extends StackPane {
         // Play Again button
         Button playAgainButton = new Button("Play Again ↺");
         playAgainButton.getStyleClass().add("choice-button");
-        playAgainButton.setPrefWidth(220);
+        playAgainButton.setPrefWidth(260);
         playAgainButton.setAlignment(Pos.CENTER);
         playAgainButton.setOnAction(e -> app.showStart());
 
@@ -81,7 +81,7 @@ public class EndingView extends StackPane {
 
         getChildren().addAll(bgView, card, windowControls);
         StackPane.setAlignment(windowControls, Pos.TOP_RIGHT);
-        StackPane.setMargin(windowControls, new Insets(16, 20, 0, 0));
+        StackPane.setMargin(windowControls, new Insets(20, 28, 0, 0));
     }
 
     private void addStatRow(GridPane grid, int row, String name, String value) {

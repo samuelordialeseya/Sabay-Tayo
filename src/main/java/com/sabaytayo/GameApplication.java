@@ -50,11 +50,21 @@ public class GameApplication extends Application {
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setResizable(true);
 
-        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        Rectangle2D bounds = Screen.getPrimary().getBounds();
         stage.setX(bounds.getMinX());
         stage.setY(bounds.getMinY());
         stage.setWidth(bounds.getWidth());
         stage.setHeight(bounds.getHeight());
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
+        stage.setFullScreenExitKeyCombination(javafx.scene.input.KeyCombination.NO_MATCH);
+
+        // Keep fullscreen when restored from taskbar
+        stage.iconifiedProperty().addListener((obs, wasIconified, isIconified) -> {
+            if (!isIconified) {
+                stage.setFullScreen(true);
+            }
+        });
 
         startBackgroundMusic();
         showStart();
@@ -196,7 +206,7 @@ public class GameApplication extends Application {
         StartView startView = new StartView(this);
 
         if (activeScene == null) {
-            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            Rectangle2D bounds = Screen.getPrimary().getBounds();
             activeScene = new Scene(startView, bounds.getWidth(), bounds.getHeight());
             try {
                 String css = getClass().getResource("/com/sabaytayo/style.css").toExternalForm();

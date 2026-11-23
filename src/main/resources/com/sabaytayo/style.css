@@ -38,7 +38,7 @@
 
         .signboard-title {
             -fx-font-family: "Brush Script MT", "Segoe Script", "Georgia", serif;
-            -fx-font-size: 68px;
+            -fx-font-size: 80px;
             -fx-font-weight: bold;
             -fx-font-style: italic;
             -fx-text-fill: linear-gradient(to bottom, #fde09b 0%, #f29f7b 52%, #c45b6c 100%);
@@ -70,10 +70,10 @@
                 -fx-border-width: 2.5px, 1px;
                 -fx-border-radius: 8px, 5px;
                 -fx-text-fill: #f5d5b8;
-                -fx-font-size: 16px;
+                -fx-font-size: 19px;
                 -fx-font-weight: bold;
                 -fx-letter-spacing: 2px;
-                -fx-padding: 10px 24px 12px 24px;
+                -fx-padding: 13px 32px 15px 32px;
                 -fx-cursor: hand;
                 -fx-alignment: CENTER;
                 -fx-effect: dropshadow(gaussian, rgba(10, 5, 15, 0.75), 8, 0.1, 0, 3);
@@ -92,7 +92,7 @@
             }
 
             .menu-arrow {
-                -fx-font-size: 16px;
+                -fx-font-size: 19px;
                 -fx-text-fill: #f7b28b;
                 -fx-effect: dropshadow(one-pass-box, #1c1022, 0, 1.0, 2, 2);
             }
@@ -161,14 +161,14 @@
 
             .title-header {
                 -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-                -fx-font-size: 26px;
+                -fx-font-size: 34px;
                 -fx-font-weight: bold;
                 -fx-text-fill: #fde09b;
             }
 
             .sub-header {
                 -fx-font-family: "Segoe UI", sans-serif;
-                -fx-font-size: 13px;
+                -fx-font-size: 16px;
                 -fx-text-fill: #c9b1bd;
                 -fx-font-style: italic;
             }
@@ -180,14 +180,14 @@
                 -fx-border-color: #c87d76;
                 -fx-border-width: 2px 2px 0px 2px;
                 -fx-border-radius: 6px 6px 0px 0px;
-                -fx-padding: 4px 18px;
+                -fx-padding: 6px 22px;
                 -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 6, 0, 0, 2);
             }
 
             .speaker-label {
                 -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
                 -fx-text-fill: #fde09b;
-                -fx-font-size: 13px;
+                -fx-font-size: 17px;
                 -fx-font-weight: bold;
                 -fx-letter-spacing: 1px;
             }
@@ -196,20 +196,20 @@
             .dialogue-text {
                 -fx-font-family: "Segoe UI", "Arial", sans-serif;
                 -fx-text-fill: #f5e6d8;
-                -fx-font-size: 16px;
-                -fx-line-spacing: 4px;
+                -fx-font-size: 20px;
+                -fx-line-spacing: 5px;
             }
 
             .reaction-text {
                 -fx-font-family: "Segoe UI", sans-serif;
                 -fx-text-fill: #f7b28b;
                 -fx-font-style: italic;
-                -fx-font-size: 14px;
+                -fx-font-size: 16px;
             }
 
             .rule-text {
                 -fx-font-family: "Segoe UI", sans-serif;
-                -fx-font-size: 13px;
+                -fx-font-size: 15px;
                 -fx-text-fill: #f7b28b;
                 -fx-font-style: italic;
             }
@@ -217,17 +217,17 @@
             /* 7. FORM INPUTS & LABELS */
             .field-label {
                 -fx-font-family: "Segoe UI", sans-serif;
-                -fx-font-size: 13px;
+                -fx-font-size: 15px;
                 -fx-font-weight: bold;
                 -fx-text-fill: #f5d5b8;
             }
 
             .input-field {
                 -fx-font-family: "Segoe UI", sans-serif;
-                -fx-font-size: 14px;
+                -fx-font-size: 16px;
                 -fx-text-fill: #fff0dc;
                 -fx-background-color: #1b1d2b;
-                -fx-padding: 8px 12px;
+                -fx-padding: 10px 14px;
                 -fx-background-radius: 6px;
                 -fx-border-color: #9e687e;
                 -fx-border-radius: 6px;
@@ -240,7 +240,7 @@
 
             .error-text {
                 -fx-font-family: "Segoe UI", sans-serif;
-                -fx-font-size: 13px;
+                -fx-font-size: 14px;
                 -fx-font-weight: bold;
                 -fx-text-fill: #f28b82;
             }
@@ -249,13 +249,13 @@
             .stat-name {
                 -fx-font-family: "Segoe UI", sans-serif;
                 -fx-text-fill: #c9b1bd;
-                -fx-font-size: 14px;
+                -fx-font-size: 17px;
             }
 
             .stat-value {
                 -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
                 -fx-text-fill: #fde09b;
-                -fx-font-size: 15px;
+                -fx-font-size: 18px;
                 -fx-font-weight: bold;
             }
 
@@ -270,9 +270,9 @@
                 -fx-border-width: 2px, 1px;
                 -fx-border-radius: 8px, 5px;
                 -fx-text-fill: #f5d5b8;
-                -fx-font-size: 14px;
+                -fx-font-size: 16px;
                 -fx-font-weight: bold;
-                -fx-padding: 10px 24px;
+                -fx-padding: 12px 28px;
                 -fx-cursor: hand;
                 -fx-alignment: CENTER;
             }
@@ -287,8 +287,8 @@
                 -fx-font-family: "Segoe UI", "Trebuchet MS", sans-serif;
                 -fx-background-color: #261829;
                 -fx-text-fill: #f5d5b8;
-                -fx-font-size: 14px;
-                -fx-padding: 10px 18px;
+                -fx-font-size: 16px;
+                -fx-padding: 12px 22px;
                 -fx-background-radius: 8px;
                 -fx-border-color: #9e687e;
                 -fx-border-radius: 8px;
@@ -319,8 +319,8 @@
                 -fx-font-family: "Segoe UI", sans-serif;
                 -fx-background-color: transparent;
                 -fx-text-fill: rgba(245, 213, 184, 0.55);
-                -fx-font-size: 11px;
-                -fx-padding: 2px 8px;
+                -fx-font-size: 13px;
+                -fx-padding: 3px 10px;
                 -fx-cursor: hand;
             }
 
@@ -340,7 +340,7 @@
 
             .continue-hint {
                 -fx-font-family: "Segoe UI", sans-serif;
-                -fx-font-size: 11px;
+                -fx-font-size: 12px;
                 -fx-font-style: italic;
                 -fx-text-fill: rgba(247, 178, 139, 0.85);
             }
@@ -349,9 +349,9 @@
                 -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
                 -fx-background-color: #1b1d2b;
                 -fx-text-fill: #f5d5b8;
-                -fx-font-size: 13px;
+                -fx-font-size: 15px;
                 -fx-font-weight: bold;
-                -fx-padding: 6px 14px;
+                -fx-padding: 8px 18px;
                 -fx-background-radius: 6px;
                 -fx-border-color: #c87d76;
                 -fx-border-radius: 6px;
@@ -414,11 +414,11 @@
                 -fx-font-family: "Segoe UI", sans-serif;
                 -fx-background-color: rgba(27, 29, 43, 0.88);
                 -fx-text-fill: #f5d5b8;
-                -fx-font-size: 13px;
+                -fx-font-size: 15px;
                 -fx-font-weight: bold;
-                -fx-min-width: 34px;
-                -fx-min-height: 28px;
-                -fx-padding: 3px 10px;
+                -fx-min-width: 40px;
+                -fx-min-height: 32px;
+                -fx-padding: 4px 12px;
                 -fx-background-radius: 6px;
                 -fx-border-color: #7a5462;
                 -fx-border-radius: 6px;

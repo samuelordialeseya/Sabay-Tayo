@@ -138,7 +138,7 @@ public class EncounterView extends StackPane {
         // Chain MotionBlur on top of ColorAdjust so speaker dimming and motion blur work together
         maleBlur.setInput(maleTone);
         maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 435);
-        maleSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.60));
+        maleSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.68));
         maleSpriteView.setEffect(maleBlur);
 
         femNeutralImage = loadSpriteImage("/assets/FEM-C/fem_neutral.png");
@@ -151,7 +151,7 @@ public class EncounterView extends StackPane {
 
         femBlur.setInput(femTone);
         femSpriteView = createSpriteView("/assets/FEM-C/fem_neutral.png", 460);
-        femSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.64));
+        femSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.72));
         femSpriteView.setEffect(femBlur);
 
         StackPane femaleSpriteContainer = new StackPane(femSpriteView);
@@ -160,14 +160,14 @@ public class EncounterView extends StackPane {
         StackPane.setAlignment(femSpriteView, Pos.BOTTOM_CENTER);
 
         // 4. Choices Container (centered between the two character sprites)
-        choicesContainer = new VBox(6);
+        choicesContainer = new VBox(8);
         choicesContainer.setAlignment(Pos.CENTER);
-        choicesContainer.setMaxWidth(420);
+        choicesContainer.maxWidthProperty().bind(widthProperty().multiply(0.50));
         choicesContainer.setMaxHeight(Region.USE_PREF_SIZE);
 
         // 5. Dialogue Box (bottom)
         VBox dialogueCard = new VBox(0);
-        dialogueCard.maxWidthProperty().bind(widthProperty().multiply(0.86));
+        dialogueCard.maxWidthProperty().bind(widthProperty().multiply(0.88));
         dialogueCard.setMaxHeight(Region.USE_PREF_SIZE);
 
         speakerLabel = new Label("Stranger");
@@ -179,8 +179,8 @@ public class EncounterView extends StackPane {
 
         VBox textCard = new VBox(8);
         textCard.getStyleClass().add("dialogue-box");
-        textCard.setPadding(new Insets(16, 26, 12, 26));
-        textCard.setMinHeight(125);
+        textCard.setPadding(new Insets(20, 32, 16, 32));
+        textCard.setMinHeight(165);
 
         dialogueLabel = new Label("Loading...");
         dialogueLabel.getStyleClass().add("dialogue-text");
@@ -217,13 +217,13 @@ public class EncounterView extends StackPane {
 
         StackPane.setAlignment(topBar, Pos.TOP_CENTER);
         StackPane.setAlignment(choicesContainer, Pos.TOP_CENTER);
-        StackPane.setMargin(choicesContainer, new Insets(24, 0, 0, 0));
+        StackPane.setMargin(choicesContainer, new Insets(32, 0, 0, 0));
         StackPane.setAlignment(maleSpriteView, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 138, 150));
+        StackPane.setMargin(maleSpriteView, new Insets(0, 0, 160, 130));
         StackPane.setAlignment(femaleSpriteContainer, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 135, 138, 0));
+        StackPane.setMargin(femaleSpriteContainer, new Insets(0, 115, 160, 0));
         StackPane.setAlignment(dialogueCard, Pos.BOTTOM_CENTER);
-        StackPane.setMargin(dialogueCard, new Insets(0, 90, 16, 90));
+        StackPane.setMargin(dialogueCard, new Insets(0, 80, 24, 80));
 
         // Load the first scene
         loadScene();
@@ -318,7 +318,7 @@ public class EncounterView extends StackPane {
 
             Button btn = new Button(buttonText);
             btn.getStyleClass().add("choice-button");
-            btn.setMaxWidth(420);
+            btn.setMaxWidth(650);
             btn.setWrapText(true);
             btn.setDisable(!unlocked);
 

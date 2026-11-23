@@ -54,16 +54,18 @@ public class StartView extends StackPane {
         // Initialize reusable input components
         nameField = new TextField();
         nameField.setPromptText("Enter your name (e.g. Sam)...");
-        nameField.setMaxWidth(340);
+        nameField.setMaxWidth(400);
         nameField.getStyleClass().add("input-field");
 
         playerPronounsBox = new ComboBox<>();
         playerPronounsBox.getItems().addAll(Pronouns.THEY_THEM, Pronouns.HE_HIM, Pronouns.SHE_HER);
         playerPronounsBox.setValue(Pronouns.THEY_THEM);
+        playerPronounsBox.setPrefWidth(400);
 
         strangerPronounsBox = new ComboBox<>();
         strangerPronounsBox.getItems().addAll(Pronouns.SHE_HER, Pronouns.HE_HIM, Pronouns.THEY_THEM);
         strangerPronounsBox.setValue(Pronouns.SHE_HER);
+        strangerPronounsBox.setPrefWidth(400);
 
         errorLabel = new Label("");
         errorLabel.getStyleClass().add("error-text");
@@ -74,14 +76,14 @@ public class StartView extends StackPane {
         HBox musicBar = app.createMusicControlBar();
         musicBar.getStyleClass().add("music-pill");
 
-        HBox topControls = new HBox(10, musicBar, app.createWindowControlBar());
+        HBox topControls = new HBox(12, musicBar, app.createWindowControlBar());
         topControls.setAlignment(Pos.CENTER_RIGHT);
         topControls.setMaxWidth(Region.USE_PREF_SIZE);
         topControls.setMaxHeight(Region.USE_PREF_SIZE);
 
         getChildren().addAll(bgView, contentLayer, topControls);
         StackPane.setAlignment(topControls, Pos.TOP_RIGHT);
-        StackPane.setMargin(topControls, new Insets(16, 20, 0, 0));
+        StackPane.setMargin(topControls, new Insets(20, 28, 0, 0));
     }
 
     // 1. Recreated Start Menu: Signboard Plaque up top, Commute Buttons in center
