@@ -2,7 +2,9 @@ package com.sabaytayo;
 
 import java.net.URL;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
@@ -10,7 +12,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 // Main JavaFX Application class managing the window stage and transitions across views.
 public class GameApplication extends Application {
@@ -43,7 +47,14 @@ public class GameApplication extends Application {
     public void start(Stage stage) {
         this.primaryStage = stage;
         stage.setTitle("Sabay Tayo? — a branching bus-ride dialogue game");
-        stage.setResizable(false);
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setResizable(true);
+
+        Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+        stage.setX(bounds.getMinX());
+        stage.setY(bounds.getMinY());
+        stage.setWidth(bounds.getWidth());
+        stage.setHeight(bounds.getHeight());
 
         startBackgroundMusic();
         showStart();
@@ -142,6 +153,32 @@ public class GameApplication extends Application {
         return bar;
     }
 
+    // Creates a compact window control bar (Minimize — and Close ✕) for the top right
+    public HBox createWindowControlBar() {
+        Button minBtn = new Button("—");
+        minBtn.getStyleClass().add("window-control-btn");
+        minBtn.setFocusTraversable(false);
+        minBtn.setOnAction(e -> {
+            if (primaryStage != null) {
+                primaryStage.setIconified(true);
+            }
+        });
+
+        Button closeBtn = new Button("✕");
+        closeBtn.getStyleClass().addAll("window-control-btn", "window-close-btn");
+        closeBtn.setFocusTraversable(false);
+        closeBtn.setOnAction(e -> {
+            stop();
+            Platform.exit();
+        });
+
+        HBox bar = new HBox(6, minBtn, closeBtn);
+        bar.setAlignment(Pos.CENTER_RIGHT);
+        bar.setMaxWidth(Region.USE_PREF_SIZE);
+        bar.setMaxHeight(Region.USE_PREF_SIZE);
+        return bar;
+    }
+
     @Override
     public void stop() {
         if (bgmPlayer != null) {
@@ -159,7 +196,8 @@ public class GameApplication extends Application {
         StartView startView = new StartView(this);
 
         if (activeScene == null) {
-            activeScene = new Scene(startView, 1280, 720);
+            Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+            activeScene = new Scene(startView, bounds.getWidth(), bounds.getHeight());
             try {
                 String css = getClass().getResource("/com/sabaytayo/style.css").toExternalForm();
                 activeScene.getStylesheets().add(css);

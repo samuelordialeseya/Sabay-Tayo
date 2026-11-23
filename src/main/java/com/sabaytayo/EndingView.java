@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -21,8 +22,8 @@ public class EndingView extends StackPane {
         try {
             Image bg = new Image(getClass().getResourceAsStream("/com/sabaytayo/images/bg.jpg"));
             bgView.setImage(bg);
-            bgView.setFitWidth(1280);
-            bgView.setFitHeight(720);
+            bgView.fitWidthProperty().bind(widthProperty());
+            bgView.fitHeightProperty().bind(heightProperty());
             bgView.setPreserveRatio(false);
         } catch (Exception e) {
             System.err.println("Notice: Could not load bg.jpg, using default styling.");
@@ -76,7 +77,11 @@ public class EndingView extends StackPane {
 
         card.getChildren().addAll(title, desc, ruleLabel, statsGrid, playAgainButton);
 
-        getChildren().addAll(bgView, card);
+        HBox windowControls = app.createWindowControlBar();
+
+        getChildren().addAll(bgView, card, windowControls);
+        StackPane.setAlignment(windowControls, Pos.TOP_RIGHT);
+        StackPane.setMargin(windowControls, new Insets(16, 20, 0, 0));
     }
 
     private void addStatRow(GridPane grid, int row, String name, String value) {

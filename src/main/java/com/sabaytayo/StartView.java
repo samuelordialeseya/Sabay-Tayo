@@ -41,8 +41,8 @@ public class StartView extends StackPane {
         try {
             Image bg = new Image(getClass().getResourceAsStream("/com/sabaytayo/images/bg.jpg"));
             bgView.setImage(bg);
-            bgView.setFitWidth(1280);
-            bgView.setFitHeight(720);
+            bgView.fitWidthProperty().bind(widthProperty());
+            bgView.fitHeightProperty().bind(heightProperty());
             bgView.setPreserveRatio(false);
         } catch (Exception e) {
             System.err.println("Notice: Could not load bg.jpg, using default styling.");
@@ -74,9 +74,14 @@ public class StartView extends StackPane {
         HBox musicBar = app.createMusicControlBar();
         musicBar.getStyleClass().add("music-pill");
 
-        getChildren().addAll(bgView, contentLayer, musicBar);
-        StackPane.setAlignment(musicBar, Pos.TOP_RIGHT);
-        StackPane.setMargin(musicBar, new Insets(16, 20, 0, 0));
+        HBox topControls = new HBox(10, musicBar, app.createWindowControlBar());
+        topControls.setAlignment(Pos.CENTER_RIGHT);
+        topControls.setMaxWidth(Region.USE_PREF_SIZE);
+        topControls.setMaxHeight(Region.USE_PREF_SIZE);
+
+        getChildren().addAll(bgView, contentLayer, topControls);
+        StackPane.setAlignment(topControls, Pos.TOP_RIGHT);
+        StackPane.setMargin(topControls, new Insets(16, 20, 0, 0));
     }
 
     // 1. Recreated Start Menu: Signboard Plaque up top, Commute Buttons in center

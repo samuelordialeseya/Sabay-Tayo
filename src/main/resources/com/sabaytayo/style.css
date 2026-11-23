@@ -408,3 +408,34 @@
             .volume-slider .thumb:hover {
                 -fx-background-color: #fde09b;
             }
+
+            /* 11. TOP-RIGHT WINDOW CONTROLS */
+            .window-control-btn {
+                -fx-font-family: "Segoe UI", sans-serif;
+                -fx-background-color: rgba(27, 29, 43, 0.88);
+                -fx-text-fill: #f5d5b8;
+                -fx-font-size: 13px;
+                -fx-font-weight: bold;
+                -fx-min-width: 34px;
+                -fx-min-height: 28px;
+                -fx-padding: 3px 10px;
+                -fx-background-radius: 6px;
+                -fx-border-color: #7a5462;
+                -fx-border-radius: 6px;
+                -fx-border-width: 1px;
+                -fx-cursor: hand;
+                -fx-alignment: CENTER;
+                -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 6, 0, 0, 2);
+            }
+
+            .window-control-btn:hover {
+                -fx-background-color: #3b253b;
+                -fx-border-color: #f7b28b;
+                -fx-text-fill: #fff0dc;
+            }
+
+            .window-close-btn:hover {
+                -fx-background-color: #c44754;
+                -fx-border-color: #f28b82;
+                -fx-text-fill: #ffffff;
+            }
