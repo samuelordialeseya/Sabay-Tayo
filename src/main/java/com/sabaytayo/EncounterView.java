@@ -72,25 +72,22 @@ public class EncounterView extends StackPane {
     private final MotionBlur femBlur = new MotionBlur(0, 0);
     private final Label speakerLabel;
     private final Label dialogueLabel;
-    private final Label reactionLabel;
-    private final Label continueHintLabel;
     private final Label momentumBadge;
-    private final Label expressionBadge;
     private final VBox choicesContainer;
 
-    private Button autoButton;
     private Timeline typingTimeline;
     private Timeline femAnimTimeline;
     private Timeline maleAnimTimeline;
     private Timeline bgAnimTimeline;
-    private PauseTransition autoAdvanceTimer;
     private Label activeTypingLabel;
     private String activeFullText;
     private Runnable onTypingFinished;
-    private boolean autoMode = false;
     private String pendingNextSceneId = null;
-    private String pendingDisplayedText = "";
     private final EventHandler<KeyEvent> keyAdvanceHandler = this::handleKeyAdvance;
+
+    private final List<DialogueBeat> currentBeats = new java.util.ArrayList<>();
+    private int currentBeatIndex = 0;
+    private boolean showingChoices = false;
 
     public EncounterView(GameApplication app, RelationshipStats stats, Momentum momentum, Encounter encounter) {
         this.app = app;
@@ -102,8 +99,8 @@ public class EncounterView extends StackPane {
         bgWideShotImage = loadSpriteImage("/assets/BACKGROUNDS/bg_bus_wide-shot.png");
         bgCloseUpImage = loadSpriteImage("/assets/BACKGROUNDS/bg_bus_close-up.png");
         bgView = new ImageView();
-        bgView.setFitWidth(1280);
-        bgView.setFitHeight(720);
+        bgView.fitWidthProperty().bind(widthProperty());
+        bgView.fitHeightProperty().bind(heightProperty());
         bgView.setPreserveRatio(false);
         setBackground(bgWideShotImage != null ? bgWideShotImage : loadSpriteImage("/assets/BACKGROUNDS/bg_bus_night_empty.png"));
 
@@ -125,11 +122,11 @@ public class EncounterView extends StackPane {
         skipButton.setFocusTraversable(false);
         skipButton.setOnAction(e -> {
             stopTypingAnimation();
-            stopAutoAdvance();
             app.showEnding();
         });
 
-        topBar.getChildren().addAll(momentumBadge, spacer, skipButton);
+        HBox windowControls = app.createWindowControlBar();
+        topBar.getChildren().addAll(momentumBadge, spacer, skipButton, windowControls);
 
         // 3. Character Sprites (Left: MC, Right: FEM-C)
         maleNeutralImage = loadSpriteImage("/assets/MC/male_neutral.png");
@@ -141,6 +138,7 @@ public class EncounterView extends StackPane {
         // Chain MotionBlur on top of ColorAdjust so speaker dimming and motion blur work together
         maleBlur.setInput(maleTone);
         maleSpriteView = createSpriteView("/assets/MC/male_neutral.png", 435);
+        maleSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.60));
         maleSpriteView.setEffect(maleBlur);
 
         femNeutralImage = loadSpriteImage("/assets/FEM-C/fem_neutral.png");
@@ -153,16 +151,13 @@ public class EncounterView extends StackPane {
 
         femBlur.setInput(femTone);
         femSpriteView = createSpriteView("/assets/FEM-C/fem_neutral.png", 460);
+        femSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.64));
         femSpriteView.setEffect(femBlur);
-        expressionBadge = new Label("Stranger • Listening");
-        expressionBadge.getStyleClass().add("sprite-frame");
 
-        StackPane femaleSpriteContainer = new StackPane(femSpriteView, expressionBadge);
+        StackPane femaleSpriteContainer = new StackPane(femSpriteView);
         femaleSpriteContainer.setMaxWidth(Region.USE_PREF_SIZE);
         femaleSpriteContainer.setMaxHeight(Region.USE_PREF_SIZE);
         StackPane.setAlignment(femSpriteView, Pos.BOTTOM_CENTER);
-        StackPane.setAlignment(expressionBadge, Pos.BOTTOM_CENTER);
-        StackPane.setMargin(expressionBadge, new Insets(0, 0, 42, 0));
 
         // 4. Choices Container (centered between the two character sprites)
         choicesContainer = new VBox(6);
@@ -172,7 +167,7 @@ public class EncounterView extends StackPane {
 
         // 5. Dialogue Box (bottom)
         VBox dialogueCard = new VBox(0);
-        dialogueCard.setMaxWidth(1100);
+        dialogueCard.maxWidthProperty().bind(widthProperty().multiply(0.86));
         dialogueCard.setMaxHeight(Region.USE_PREF_SIZE);
 
         speakerLabel = new Label("Stranger");
@@ -191,40 +186,16 @@ public class EncounterView extends StackPane {
         dialogueLabel.getStyleClass().add("dialogue-text");
         dialogueLabel.setWrapText(true);
 
-        reactionLabel = new Label("");
-        reactionLabel.getStyleClass().add("reaction-text");
-        reactionLabel.setWrapText(true);
-
-        // VN sub-bar (continue hint on the left, VN controls on the right)
-        continueHintLabel = new Label("");
-        continueHintLabel.getStyleClass().add("continue-hint");
-        continueHintLabel.setVisible(false);
-
+        // VN sub-bar: only Music control bar on the right
         Region subBarSpacer = new Region();
         HBox.setHgrow(subBarSpacer, Priority.ALWAYS);
 
         HBox vnSubBar = new HBox(12);
-        vnSubBar.setAlignment(Pos.CENTER_LEFT);
+        vnSubBar.setAlignment(Pos.CENTER_RIGHT);
         vnSubBar.setPadding(new Insets(4, 0, 0, 0));
-        vnSubBar.getChildren().addAll(continueHintLabel, subBarSpacer);
+        vnSubBar.getChildren().addAll(subBarSpacer, app.createMusicControlBar());
 
-        String[] subActions = { "History", "Skip", "Auto", "Music", "Save", "Load", "Settings" };
-        for (String action : subActions) {
-            if ("Music".equals(action)) {
-                vnSubBar.getChildren().add(app.createMusicControlBar());
-                continue;
-            }
-            Button subBtn = new Button(action);
-            subBtn.getStyleClass().add("vn-sub-button");
-            subBtn.setFocusTraversable(false);
-            if ("Auto".equals(action)) {
-                autoButton = subBtn;
-                subBtn.setOnAction(e -> toggleAutoMode());
-            }
-            vnSubBar.getChildren().add(subBtn);
-        }
-
-        textCard.getChildren().addAll(dialogueLabel, reactionLabel, vnSubBar);
+        textCard.getChildren().addAll(dialogueLabel, vnSubBar);
         dialogueCard.getChildren().addAll(nameplate, textCard);
 
         // Left-clicking anywhere on the screen finishes typing or advances when ready
@@ -235,7 +206,6 @@ public class EncounterView extends StackPane {
             if (oldScene != null) {
                 oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, keyAdvanceHandler);
                 stopTypingAnimation();
-                stopAutoAdvance();
             }
             if (newScene != null) {
                 newScene.addEventFilter(KeyEvent.KEY_PRESSED, keyAdvanceHandler);
@@ -287,31 +257,20 @@ public class EncounterView extends StackPane {
         return view;
     }
 
-    // Reads the current scene from Encounter and displays its dialogue + choices.
+    // Reads the current scene from Encounter and displays its sequential dialogue beats.
     private void loadScene() {
         Scene current = encounter.getCurrentScene();
         if (current == null) return;
 
-        stopAutoAdvance();
+        stopTypingAnimation();
         pendingNextSceneId = null;
-        pendingDisplayedText = "";
-        updateContinueHint();
-
-        List<String> lines = current.getDialogueLines();
-        String rawDialogue = !lines.isEmpty() ? String.join("\n\n", lines) : "...";
-        String fullDialogue = ScriptFormatter.format(rawDialogue, app.getPlayer(), app.getStranger());
-        boolean strangerSpeaks = fullDialogue.contains("Stranger:");
-
-        // Clear reaction and choices while the new scene line types in
-        reactionLabel.setText("");
         choicesContainer.getChildren().clear();
-        speakerLabel.setText(strangerSpeaks ? "Stranger" : "Narrator");
+        showingChoices = false;
 
-        // Highlight Stranger if speaking, or keep both balanced during narration
-        if (strangerSpeaks) {
-            setSpeakerFocus(false, true);
-        } else {
-            setBothBalanced();
+        currentBeats.clear();
+        currentBeatIndex = 0;
+        for (String line : current.getDialogueLines()) {
+            currentBeats.add(DialogueBeat.fromLine(line, app.getPlayer(), app.getStranger()));
         }
 
         // Play scene-specific visual novel sprite effects based on the current beat
@@ -320,18 +279,29 @@ public class EncounterView extends StackPane {
         // Update HUD
         updateHUD();
 
-        // Type out the scene text, then either reveal player choices or arm click/Auto advance
-        playTypewriter(dialogueLabel, fullDialogue, () -> {
-            if (hasPlayerReplyChoices(current)) {
-                renderChoices(current);
-                setSpeakerFocus(true, false);
-            } else {
-                String nextId = resolveContinueNextSceneId(current);
-                if (nextId != null) {
-                    prepareNextSceneAdvance(nextId, fullDialogue);
-                }
-            }
-        });
+        // Display the first beat of the scene
+        displayCurrentBeat();
+    }
+
+    // Displays the current dialogue beat with matching speaker nameplate and character lighting.
+    private void displayCurrentBeat() {
+        if (currentBeatIndex < 0 || currentBeatIndex >= currentBeats.size()) {
+            return;
+        }
+
+        DialogueBeat beat = currentBeats.get(currentBeatIndex);
+        speakerLabel.setText(beat.getSpeaker());
+
+        // Highlight speaker
+        if ("Narrator".equals(beat.getSpeaker())) {
+            setBothBalanced();
+        } else if (beat.getSpeaker().equals(app.getPlayerName()) || "You".equals(beat.getSpeaker())) {
+            setSpeakerFocus(true, false);
+        } else {
+            setSpeakerFocus(false, true);
+        }
+
+        playTypewriter(dialogueLabel, beat.getText(), null);
     }
 
     // Renders the choice buttons for the current scene.
@@ -352,7 +322,6 @@ public class EncounterView extends StackPane {
             btn.setWrapText(true);
             btn.setDisable(!unlocked);
 
-            // Capture the choice for the lambda
             DialogueChoice captured = choice;
             btn.setOnAction(e -> handleChoiceSelected(captured));
 
@@ -363,51 +332,50 @@ public class EncounterView extends StackPane {
     // Called when the player clicks a choice.
     private void handleChoiceSelected(DialogueChoice choice) {
         stopTypingAnimation();
-        stopAutoAdvance();
-        pendingNextSceneId = null;
-        pendingDisplayedText = "";
-        updateContinueHint();
+        choicesContainer.getChildren().clear();
+        showingChoices = false;
 
         // Apply the choice's effect on stats and momentum
         choice.applyEffect(stats, momentum);
 
-        // Show the stranger's reaction in the dialogue box
-        String rawReaction = choice.getReaction(momentum);
-        String reaction = ScriptFormatter.format(rawReaction, app.getPlayer(), app.getStranger());
-
-        // Update the expression badge based on choice type
-        updateExpressionBadge(choice);
-
         // Update HUD
         updateHUD();
 
-        // If it's a pure Continue transition with no reaction, advance immediately
-        if (reaction.isEmpty()) {
-            proceedToNextScene(choice.getNextSceneId());
-            return;
-        }
+        String rawReaction = choice.getReaction(momentum);
+        String reaction = ScriptFormatter.format(rawReaction, app.getPlayer(), app.getStranger());
 
-        choicesContainer.getChildren().clear();
-        String nextId = choice.getNextSceneId();
-        String reactionText;
+        pendingNextSceneId = choice.getNextSceneId();
+        currentBeats.clear();
+        currentBeatIndex = 0;
 
-        if ("Continue".equals(choice.getTone())) {
-            // Stay Quiet choice: narrator describes the quiet moment with balanced focus
-            speakerLabel.setText("Narrator");
-            setBothBalanced();
-            playChoiceReactionEffect(choice, reaction);
-            reactionText = "✦ " + reaction;
+        playChoiceReactionEffect(choice, reaction);
+
+        if (choice instanceof ContinueChoice) {
+            // Stay quiet / continue transition: narrator describes the quiet moment
+            currentBeats.add(new DialogueBeat("Narrator", reaction));
         } else {
-            // Spoken choice: shift focus to Stranger while she reacts
-            speakerLabel.setText("Stranger");
-            setSpeakerFocus(false, true);
-            playChoiceReactionEffect(choice, reaction);
-            reactionText = "✦ Stranger: " + reaction;
+            // Spoken choice: Beat 1 is Player speaking, Beat 2 is Stranger reacting
+            String playerSpoken = extractPlayerDialogue(choice.getText());
+            String formattedPlayerSpoken = ScriptFormatter.format(playerSpoken, app.getPlayer(), app.getStranger());
+
+            currentBeats.add(new DialogueBeat(app.getPlayerName(), formattedPlayerSpoken));
+
+            if (reaction != null && !reaction.isBlank()) {
+                currentBeats.add(new DialogueBeat("Stranger", reaction));
+            }
         }
 
-        playTypewriter(reactionLabel, reactionText, () -> {
-            prepareNextSceneAdvance(nextId, reactionText);
-        });
+        displayCurrentBeat();
+    }
+
+    // Strips [Tone] bracket prefix for spoken player dialogue line.
+    private String extractPlayerDialogue(String choiceText) {
+        if (choiceText == null) return "...";
+        int closingBracket = choiceText.indexOf(']');
+        if (closingBracket != -1 && closingBracket + 1 < choiceText.length()) {
+            return choiceText.substring(closingBracket + 1).trim();
+        }
+        return choiceText.trim();
     }
 
     // Handles left-clicking anywhere on the encounter screen.
@@ -421,24 +389,52 @@ public class EncounterView extends StackPane {
         triggerAdvanceAction();
     }
 
-    // Handles Space or Enter key presses to finish typing or advance to the next scene.
+    // Handles Space or Enter key presses to finish typing or advance to the next beat.
     private void handleKeyAdvance(KeyEvent e) {
         if (e.getCode() != KeyCode.SPACE && e.getCode() != KeyCode.ENTER) {
             return;
         }
-        if (typingTimeline != null || pendingNextSceneId != null) {
-            e.consume();
-            triggerAdvanceAction();
-        }
+        e.consume();
+        triggerAdvanceAction();
     }
 
-    // Finishes typing if active, otherwise advances to the pending next scene.
+    // Finishes typing if active, otherwise advances to the next beat or scene.
     private void triggerAdvanceAction() {
         if (typingTimeline != null) {
             finishTypingImmediately();
-        } else if (pendingNextSceneId != null) {
+            return;
+        }
+
+        if (showingChoices) {
+            return;
+        }
+
+        if (currentBeatIndex + 1 < currentBeats.size()) {
+            currentBeatIndex++;
+            displayCurrentBeat();
+            return;
+        }
+
+        // All current beats are finished
+        if (pendingNextSceneId != null) {
             String nextId = pendingNextSceneId;
+            pendingNextSceneId = null;
             proceedToNextScene(nextId);
+            return;
+        }
+
+        Scene current = encounter.getCurrentScene();
+        if (current != null) {
+            if (hasPlayerReplyChoices(current)) {
+                showingChoices = true;
+                renderChoices(current);
+                setSpeakerFocus(true, false);
+            } else {
+                String nextId = resolveContinueNextSceneId(current);
+                if (nextId != null) {
+                    proceedToNextScene(nextId);
+                }
+            }
         }
     }
 
@@ -468,95 +464,6 @@ public class EncounterView extends StackPane {
             }
         }
         return null;
-    }
-
-    // Arms click/key advancement and starts the Auto timer if Auto mode is enabled.
-    private void prepareNextSceneAdvance(String nextId, String displayedText) {
-        pendingNextSceneId = nextId;
-        pendingDisplayedText = displayedText != null ? displayedText : "";
-        updateContinueHint();
-
-        if (autoMode) {
-            scheduleAutoAdvance(pendingDisplayedText);
-        }
-    }
-
-    // Toggles Auto mode ON/OFF from the VN sub-bar.
-    private void toggleAutoMode() {
-        autoMode = !autoMode;
-
-        if (autoButton != null) {
-            autoButton.setText(autoMode ? "Auto: ON" : "Auto");
-            if (autoMode) {
-                if (!autoButton.getStyleClass().contains("vn-sub-button-active")) {
-                    autoButton.getStyleClass().add("vn-sub-button-active");
-                }
-            } else {
-                autoButton.getStyleClass().remove("vn-sub-button-active");
-            }
-        }
-
-        updateContinueHint();
-
-        if (autoMode && typingTimeline == null && pendingNextSceneId != null) {
-            scheduleAutoAdvance(pendingDisplayedText);
-        } else if (!autoMode) {
-            stopAutoAdvance();
-        }
-    }
-
-    // Schedules automatic advancement with a reading pause scaled to the dialogue length.
-    private void scheduleAutoAdvance(String text) {
-        stopAutoAdvance();
-        if (pendingNextSceneId == null) {
-            return;
-        }
-
-        int textLength = text != null ? text.length() : 0;
-        int delayMs = AUTO_BASE_DELAY_MS + (textLength * AUTO_MS_PER_CHAR);
-        if (delayMs < AUTO_MIN_DELAY_MS) {
-            delayMs = AUTO_MIN_DELAY_MS;
-        } else if (delayMs > AUTO_MAX_DELAY_MS) {
-            delayMs = AUTO_MAX_DELAY_MS;
-        }
-
-        String targetNextId = pendingNextSceneId;
-        autoAdvanceTimer = new PauseTransition(Duration.millis(delayMs));
-        autoAdvanceTimer.setOnFinished(e -> {
-            autoAdvanceTimer = null;
-            if (autoMode && targetNextId.equals(pendingNextSceneId)) {
-                proceedToNextScene(targetNextId);
-            }
-        });
-        autoAdvanceTimer.play();
-    }
-
-    // Cancels any pending Auto-advance timer.
-    private void stopAutoAdvance() {
-        if (autoAdvanceTimer != null) {
-            autoAdvanceTimer.stop();
-            autoAdvanceTimer = null;
-        }
-    }
-
-    // Updates the subtle continue/auto hint label inside the dialogue box.
-    private void updateContinueHint() {
-        if (pendingNextSceneId == null) {
-            continueHintLabel.setVisible(false);
-            continueHintLabel.setText("");
-            return;
-        }
-
-        if ("ENDING".equals(pendingNextSceneId)) {
-            continueHintLabel.setText(autoMode
-                    ? "Auto → Ending..."
-                    : "Click or press Space / Enter for ending ▾");
-        } else {
-            continueHintLabel.setText(autoMode
-                    ? "Auto → Next scene..."
-                    : "Click or press Space / Enter to continue ▾");
-        }
-        continueHintLabel.setVisible(true);
     }
 
     // Checks if a scene has actual dialogue choices (not just Continue).
@@ -649,10 +556,7 @@ public class EncounterView extends StackPane {
     // Advances the dialogue graph to the next scene or ending.
     private void proceedToNextScene(String nextId) {
         stopTypingAnimation();
-        stopAutoAdvance();
         pendingNextSceneId = null;
-        pendingDisplayedText = "";
-        updateContinueHint();
 
         if ("ENDING".equals(nextId)) {
             // S08 choice was made — transition to EndingView
@@ -676,27 +580,6 @@ public class EncounterView extends StackPane {
 
         // Reload the view for the new scene
         loadScene();
-    }
-
-    // Updates the expression badge to reflect the stranger's current mood.
-    private void updateExpressionBadge(DialogueChoice choice) {
-        if (choice instanceof FlirtyChoice) {
-            expressionBadge.setText(momentum.getValue() >= 2
-                    ? "Stranger • Flustered (Soft Smile)"
-                    : "Stranger • Caught Off Guard");
-        } else if (choice instanceof SincereChoice) {
-            expressionBadge.setText(momentum.getValue() >= 0
-                    ? "Stranger • Smiling Warmly"
-                    : "Stranger • Politely Nodding");
-        } else if (choice instanceof SarcasticChoice) {
-            expressionBadge.setText(momentum.getValue() >= 2
-                    ? "Stranger • Amused / Chuckling"
-                    : "Stranger • Unamused");
-        } else if (choice instanceof BluntChoice) {
-            expressionBadge.setText("Stranger • Reserved / Quiet");
-        } else if (choice instanceof ContinueChoice) {
-            expressionBadge.setText("Stranger • Looking Outside");
-        }
     }
 
     // Updates the top HUD momentum display.
