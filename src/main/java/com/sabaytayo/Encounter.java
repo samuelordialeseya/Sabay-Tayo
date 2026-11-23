@@ -120,7 +120,8 @@ public class Encounter {
         // S05A: WARM LANE PART 1 (Lianne Sc 6 + Sc 7: Proper Introduction & Common Ground - Turn 3A)
         Scene s05a = new Scene("S05A");
         s05a.addDialogueLine("A few minutes later, traffic started to ease. {S_they} put {s_their} phone down, no longer as occupied as before. You took the chance to introduce yourself.");
-        s05a.addDialogueLine("You: \"By the way, I don't think we've introduced ourselves yet. I'm {player}.\"\nStranger: \"Oh. I'm {seatmate}. Nice to meet you.\"");
+        s05a.addDialogueLine("You: \"By the way, I don't think we've introduced ourselves yet. I'm {player}.\"");
+        s05a.addDialogueLine("Stranger: \"Oh. I'm {seatmate}. Nice to meet you.\"");
         s05a.addDialogueLine("{S_they} gave a small, polite smile before checking the road signs outside. You wondered what to ask next.");
         s05a.addChoice(new SincereChoice(
             "[Sincere] \"Madalas ka bang sumakay sa bus na 'to?\"",
@@ -220,7 +221,8 @@ public class Encounter {
         // S06B: COLD LANE PART 2 (Lianne Sc 8 + Sc 9B: A Still-Awkward Conversation - Turn 4B -> Merges to S07)
         Scene s06b = new Scene("S06B");
         s06b.addDialogueLine("The bus continued moving, but the conversation had become less frequent. {S_they} looked outside, occasionally checking {s_their} phone.");
-        s06b.addDialogueLine("You: \"Okay ka lang? Hindi ba ako nakakaistorbo?\"\nStranger: \"Ah, okay lang naman. Sanay lang talaga akong tahimik kapag nasa biyahe.\"");
+        s06b.addDialogueLine("You: \"Okay ka lang? Hindi ba ako nakakaistorbo?\"");
+        s06b.addDialogueLine("Stranger: \"Ah, okay lang naman. Sanay lang talaga akong tahimik kapag nasa biyahe.\"");
         s06b.addChoice(new SincereChoice(
             "[Sincere] \"Gets ko naman. Okay lang din sa akin kahit tahimik lang.\"",
             "S07",
