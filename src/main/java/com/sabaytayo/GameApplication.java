@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Screen;
@@ -21,12 +22,25 @@ public class GameApplication extends Application {
 
     private static final String BGM_RESOURCE_PATH = "/assets/AUDIO/closer_acoustic.mp3";
     private static final double DEFAULT_BGM_VOLUME = 0.14;
+    private static final double DEFAULT_SFX_VOLUME = 0.45;
 
     private Stage primaryStage;
     private Scene activeScene;
     private MediaPlayer bgmPlayer;
     private boolean musicMuted = false;
     private double musicVolume = DEFAULT_BGM_VOLUME;
+
+    // UI & story sound effects
+    private AudioClip textBlipClip;
+    private AudioClip clickClip;
+    private AudioClip hoverClip;
+    private AudioClip brakeClip;
+    private boolean sfxMuted = false;
+    private double sfxVolume = DEFAULT_SFX_VOLUME;
+
+    // Shared VN presentation settings
+    private int typingDelayMs = 18;
+    private boolean atmosphereEnabled = true;
 
     private RelationshipStats stats;
     private Momentum momentum;
@@ -67,8 +81,91 @@ public class GameApplication extends Application {
         });
 
         startBackgroundMusic();
+        loadSoundEffects();
         showStart();
         stage.show();
+    }
+
+    // Loads lightweight sound effects (prefers .mp3 if team adds custom files, falls back to .wav).
+    private void loadSoundEffects() {
+        textBlipClip = loadAudioClip("/assets/AUDIO/sfx_text_blip.mp3", "/assets/AUDIO/sfx_text_blip.wav");
+        clickClip = loadAudioClip("/assets/AUDIO/sfx_choice_click.mp3", "/assets/AUDIO/sfx_choice_click.wav");
+        hoverClip = loadAudioClip("/assets/AUDIO/sfx_hover.mp3", "/assets/AUDIO/sfx_hover.wav");
+        brakeClip = loadAudioClip("/assets/AUDIO/sfx_bus_brake.mp3", "/assets/AUDIO/sfx_bus_brake.wav");
+    }
+
+    private AudioClip loadAudioClip(String primaryPath, String fallbackPath) {
+        try {
+            URL url = getClass().getResource(primaryPath);
+            if (url == null) {
+                url = getClass().getResource(fallbackPath);
+            }
+            if (url != null) {
+                return new AudioClip(url.toExternalForm());
+            }
+        } catch (Exception e) {
+            System.err.println("Notice: Could not load SFX " + primaryPath + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    public void playTextBlip() {
+        if (!sfxMuted && textBlipClip != null) {
+            textBlipClip.play(sfxVolume * 0.35);
+        }
+    }
+
+    public void playClickSfx() {
+        if (!sfxMuted && clickClip != null) {
+            clickClip.play(sfxVolume * 0.75);
+        }
+    }
+
+    public void playHoverSfx() {
+        if (!sfxMuted && hoverClip != null) {
+            hoverClip.play(sfxVolume * 0.40);
+        }
+    }
+
+    public void playBrakeSfx() {
+        if (!sfxMuted && brakeClip != null) {
+            brakeClip.play(sfxVolume);
+        }
+    }
+
+    public boolean isSfxMuted() {
+        return sfxMuted;
+    }
+
+    public void setSfxMuted(boolean muted) {
+        this.sfxMuted = muted;
+    }
+
+    public double getSfxVolume() {
+        return sfxVolume;
+    }
+
+    public void setSfxVolume(double volume) {
+        this.sfxVolume = Math.max(0.0, Math.min(1.0, volume));
+        if (this.sfxVolume > 0.0 && sfxMuted) {
+            sfxMuted = false;
+        }
+    }
+
+    public int getTypingDelayMs() {
+        return typingDelayMs;
+    }
+
+    public void setTypingDelayMs(int delayMs) {
+        this.typingDelayMs = Math.max(6, Math.min(45, delayMs));
+    }
+
+    public boolean isAtmosphereEnabled() {
+        return atmosphereEnabled;
+    }
+
+    public void setAtmosphereEnabled(boolean enabled) {
+        this.atmosphereEnabled = enabled;
     }
 
     // Loads and loops the background instrumental track throughout the game.
