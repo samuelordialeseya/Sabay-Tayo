@@ -29,7 +29,7 @@ public class Encounter {
         // S01: The Empty Seat (Opening Scene - Non-verbal commuter realism)
         Scene s01 = new Scene("S01");
         s01.addDialogueLine("It was a rainy afternoon. The bus was almost full, and most passengers were looking at their phones or quietly resting. You noticed an empty seat beside a stranger by the window wearing earphones.");
-        s01.addDialogueLine("You: \"Excuse me, may nakaupo ba rito?\"");
+        s01.addDialogueLine("You: Excuse me, may nakaupo ba rito?");
         s01.addDialogueLine("{S_they} glanced briefly at the empty space beside {s_them}, gently shifted {s_their} bag onto {s_their} lap, and gave a small nod. You settled in as the bus rolled into the afternoon traffic.");
         s01.addChoice(new ContinueChoice("Continue...", "S02"));
         s01.setDefaultNextSceneId("S02");
@@ -67,7 +67,7 @@ public class Encounter {
         // S03: The Sudden Brake - Turn 2 (Branches to post-brake beats S04A, S04B, S04C)
         Scene s03 = new Scene("S03");
         s03.addDialogueLine("A vehicle suddenly stopped in front of the bus. The driver slammed on the brakes! {S_they} lurched forward and lightly hit {s_their} head on the seat in front.");
-        s03.addDialogueLine("Stranger: \"Aray! Grabe naman 'yon!\"");
+        s03.addDialogueLine("Stranger: Aray! Grabe naman 'yon!");
         s03.addDialogueLine("{S_they} immediately held {s_their} head and frowned. You noticed what happened and wondered how you should react.");
         s03.addChoice(new SincereChoice(
             "[Sincere] \"Okay ka lang ba? Nasaktan ka ba? Baka nahihilo ka?\"",
@@ -97,7 +97,7 @@ public class Encounter {
         // S04A: After the Incident (Warm Sincere Beat -> triggers Momentum split S04_DONE)
         Scene s04a = new Scene("S04A");
         s04a.addDialogueLine("The bus continued moving. {S_they} now held onto the seat in front whenever the bus slowed down. A few moments later, {s_they} glanced briefly in your direction.");
-        s04a.addDialogueLine("Stranger: \"Buti na lang hindi naman malakas. Thank you ulit.\"");
+        s04a.addDialogueLine("Stranger: Buti na lang hindi naman malakas. Thank you ulit.");
         s04a.addChoice(new ContinueChoice("Continue...", "S04_DONE"));
         s04a.setDefaultNextSceneId("S04_DONE");
         scenes.put("S04A", s04a);
@@ -105,7 +105,7 @@ public class Encounter {
         // S04B: After the Incident (Sarcastic Beat -> triggers Momentum split S04_DONE)
         Scene s04b = new Scene("S04B");
         s04b.addDialogueLine("The bus continued moving. After the sudden incident, the atmosphere settled again as {s_they} held onto the seat in front.");
-        s04b.addDialogueLine("Stranger: \"Sana next time hindi na gano'n kalakas 'yung preno.\"");
+        s04b.addDialogueLine("Stranger: Sana next time hindi na gano'n kalakas 'yung preno.");
         s04b.addChoice(new ContinueChoice("Continue...", "S04_DONE"));
         s04b.setDefaultNextSceneId("S04_DONE");
         scenes.put("S04B", s04b);
@@ -120,26 +120,26 @@ public class Encounter {
         // S05A: WARM LANE PART 1 (Lianne Sc 6 + Sc 7: Proper Introduction & Common Ground - Turn 3A)
         Scene s05a = new Scene("S05A");
         s05a.addDialogueLine("A few minutes later, traffic started to ease. {S_they} put {s_their} phone down, no longer as occupied as before. You took the chance to introduce yourself.");
-        s05a.addDialogueLine("You: \"By the way, I don't think we've introduced ourselves yet. I'm {player}.\"");
-        s05a.addDialogueLine("Stranger: \"Oh. I'm {seatmate}. Nice to meet you.\"");
+        s05a.addDialogueLine("You: By the way, I don't think we've introduced ourselves yet. I'm {player}.");
+        s05a.addDialogueLine("Stranger: Oh. I'm {seatmate}. Nice to meet you.");
         s05a.addDialogueLine("{S_they} gave a small, polite smile before checking the road signs outside. You wondered what to ask next.");
         s05a.addChoice(new SincereChoice(
             "[Sincere] \"Madalas ka bang sumakay sa bus na 'to?\"",
             "S06A",
-            "\"Oo, minsan. Usually kapag may kailangan akong puntahan. Medyo familiar na rin ako sa route.\"",
-            "\"Oo, minsan kapag may kailangan akong puntahan.\""
+            "Oo, minsan. Usually kapag may kailangan akong puntahan. Medyo familiar na rin ako sa route.",
+            "Oo, minsan kapag may kailangan akong puntahan."
         ));
         s05a.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Mukhang kabisado mo na yata lahat ng lubak dito.\"",
             "S06A",
             "(Bahagyang napangiti.) \"Hindi naman lahat. Pero may mga part talaga na ramdam mo—lalo na kapag biglang preno.\"",
-            "\"Hindi naman. Sanay lang sa daan.\""
+            "Hindi naman. Sanay lang sa daan."
         ));
         s05a.addChoice(new BluntChoice(
             "[Blunt] \"Malayo pa ba destination mo?\"",
             "S06A",
-            "\"Medyo malayo pa. Ikaw, ilang stops ka pa?\"",
-            "\"Medyo malayo pa.\""
+            "Medyo malayo pa. Ikaw, ilang stops ka pa?",
+            "Medyo malayo pa."
         ));
         s05a.addChoice(new ContinueChoice(
             "[Quiet] Let the conversation rest and watch the streets pass.",
@@ -161,8 +161,8 @@ public class Encounter {
         s05b.addChoice(new SincereChoice(
             "[Sincere] \"Madalas ka bang sumakay sa bus na 'to? Pasensya na pala kanina kung medyo awkward.\"",
             "S06B",
-            "\"Okay lang. Oo, minsan kapag may kailangan akong puntahan.\"",
-            "\"Ah, okay lang. Minsan lang kapag kailangan.\""
+            "Okay lang. Oo, minsan kapag may kailangan akong puntahan.",
+            "Ah, okay lang. Minsan lang kapag kailangan."
         ));
         s05b.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Mukhang kabisado mo na yata lahat ng lubak dito.\"",
@@ -173,7 +173,7 @@ public class Encounter {
         s05b.addChoice(new BluntChoice(
             "[Blunt] \"Malayo pa ba destination mo?\"",
             "S06B",
-            "\"Medyo malayo pa. Ikaw?\"",
+            "Medyo malayo pa. Ikaw?",
             "\"Medyo malayo pa.\" {S_they} turned right back toward the window."
         ));
         s05b.addChoice(new ContinueChoice(
@@ -186,24 +186,24 @@ public class Encounter {
         // S06A: WARM LANE PART 2 (Lianne Sc 8 + Sc 9A: A Warmer Conversation - Turn 4A -> Merges to S07)
         Scene s06a = new Scene("S06A");
         s06a.addDialogueLine("The bus moved along as a few passengers got off. {S_they} seemed more familiar with your presence now and removed one earphone before glancing at you.");
-        s06a.addDialogueLine("Stranger: \"Ikaw ba, madalas ka rin sumakay dito?\"");
+        s06a.addDialogueLine("Stranger: Ikaw ba, madalas ka rin sumakay dito?");
         s06a.addChoice(new SincereChoice(
             "[Sincere] \"Oo, minsan. Mas convenient din kasi kaysa maghanap pa ng ibang masasakyan.\"",
             "S07",
-            "\"Ah, oo nga. Mas madali rin kapag familiar ka na sa route.\"",
-            "\"Ah, totoo naman.\""
+            "Ah, oo nga. Mas madali rin kapag familiar ka na sa route.",
+            "Ah, totoo naman."
         ));
         s06a.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Oo, parang regular customer na nga ako rito. Kulang na lang may loyalty card.\"",
             "S07",
             "(Bahagyang natawa.) \"Baka next time may free ride ka na.\"",
-            "\"Haha, siguro nga.\""
+            "Haha, siguro nga."
         ));
         s06a.addChoice(new BluntChoice(
             "[Blunt] \"Oo. Mas convenient kasi.\"",
             "S07",
-            "\"Ah, okay. Fair enough.\"",
-            "\"Ah, okay.\""
+            "Ah, okay. Fair enough.",
+            "Ah, okay."
         ));
         s06a.addChoice(new ContinueChoice(
             "[Quiet] Simply nod and look outside.",
@@ -221,18 +221,18 @@ public class Encounter {
         // S06B: COLD LANE PART 2 (Lianne Sc 8 + Sc 9B: A Still-Awkward Conversation - Turn 4B -> Merges to S07)
         Scene s06b = new Scene("S06B");
         s06b.addDialogueLine("The bus continued moving, but the conversation had become less frequent. {S_they} looked outside, occasionally checking {s_their} phone.");
-        s06b.addDialogueLine("You: \"Okay ka lang? Hindi ba ako nakakaistorbo?\"");
-        s06b.addDialogueLine("Stranger: \"Ah, okay lang naman. Sanay lang talaga akong tahimik kapag nasa biyahe.\"");
+        s06b.addDialogueLine("You: Okay ka lang? Hindi ba ako nakakaistorbo?");
+        s06b.addDialogueLine("Stranger: Ah, okay lang naman. Sanay lang talaga akong tahimik kapag nasa biyahe.");
         s06b.addChoice(new SincereChoice(
             "[Sincere] \"Gets ko naman. Okay lang din sa akin kahit tahimik lang.\"",
             "S07",
-            "\"Thank you. Mas gusto ko rin minsan 'yung tahimik lang.\"",
-            "\"Thank you. Mas gusto ko rin minsan 'yung tahimik lang.\""
+            "Thank you. Mas gusto ko rin minsan 'yung tahimik lang.",
+            "Thank you. Mas gusto ko rin minsan 'yung tahimik lang."
         ));
         s06b.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Akala ko naman bawal na akong magsalita.\"",
             "S07",
-            "\"Hindi naman. Hindi lang talaga ako palasalita.\"",
+            "Hindi naman. Hindi lang talaga ako palasalita.",
             "\"Hindi naman. Hindi lang talaga ako palasalita.\" {S_they} answered without much expression and looked outside again."
         ));
         s06b.addChoice(new BluntChoice(
@@ -255,20 +255,20 @@ public class Encounter {
         s07.addChoice(new SincereChoice(
             "[Sincere] \"Mukhang malapit ka na rin sa bababaan mo. Ingat ka pauwi.\"",
             "S08",
-            "\"Ikaw rin. Ingat.\"",
-            "\"Ikaw rin. Ingat.\""
+            "Ikaw rin. Ingat.",
+            "Ikaw rin. Ingat."
         ));
         s07.addChoice(new SarcasticChoice(
             "[Sarcastic] \"Mukhang dito na matatapos ang bus adventure natin.\"",
             "S08",
             "(Bahagyang napangiti.) \"Oo nga. Buti naman nakarating din.\"",
-            "\"Oo nga. Buti nakarating din.\""
+            "Oo nga. Buti nakarating din."
         ));
         s07.addChoice(new BluntChoice(
             "[Blunt] \"Dito na yata ako bababa. Mauna na ako.\"",
             "S08",
-            "\"Ah, sige. Ingat.\"",
-            "\"Ah, sige. Ingat.\""
+            "Ah, sige. Ingat.",
+            "Ah, sige. Ingat."
         ));
         s07.addChoice(new ContinueChoice(
             "[Quiet] Say nothing and prepare your things.",

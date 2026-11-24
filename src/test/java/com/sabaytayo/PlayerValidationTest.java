@@ -37,7 +37,7 @@ public class PlayerValidationTest {
         expectInvalidName("Rejects name with curly braces", "{player}");
 
         Stranger stranger = new Stranger(Pronouns.SHE_HER);
-        check("Stranger default name", stranger.getName().equals("Stranger"));
+        check("Stranger default name", stranger.getName().equals("Fatima"));
         check("Stranger pronouns", stranger.getPronouns() == Pronouns.SHE_HER);
 
         boolean threwNullPronouns = false;

@@ -4,10 +4,10 @@ package com.sabaytayo;
 public class Stranger extends Character {
 
     public Stranger(Pronouns pronouns) {
-        super("Stranger", pronouns);
+        super("Fatima", pronouns);
     }
 
     public Stranger(String name, Pronouns pronouns) {
-        super((name == null || name.trim().isEmpty()) ? "Stranger" : name.trim(), pronouns);
+        super((name == null || name.trim().isEmpty()) ? "Fatima" : name.trim(), pronouns);
     }
 }

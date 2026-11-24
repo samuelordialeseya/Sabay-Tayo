@@ -16,6 +16,11 @@ public class ContinueChoice extends DialogueChoice {
     }
 
     @Override
+    public boolean isSpokenChoice() {
+        return false;
+    }
+
+    @Override
     public void applyEffect(RelationshipStats stats, Momentum momentum) {
         // Narration transition or staying quiet: does not modify relationship stats or momentum
     }

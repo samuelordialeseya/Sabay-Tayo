@@ -52,6 +52,11 @@ public abstract class DialogueChoice {
         return coldReaction;
     }
 
+    // Overridden by ContinueChoice so EncounterView handles spoken vs quiet/continue beats polymorphically
+    public boolean isSpokenChoice() {
+        return true;
+    }
+
     // Abstract methods implemented polymorphically by each choice subclass
     public abstract void applyEffect(RelationshipStats stats, Momentum momentum);
 
