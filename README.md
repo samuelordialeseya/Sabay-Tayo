@@ -12,3 +12,34 @@
 - `src/main/java/com/sabaytayo/` — Core OOP models, scene graph, JavaFX views, and custom exceptions
 - `src/main/resources/assets/` — Character sprites (`MC/`, `FEM-C/`, `CONDUCTOR/`), backgrounds (`BACKGROUNDS/`), Event CGs (`CG/`), and audio (`AUDIO/`)
 - `src/test/java/com/sabaytayo/` — Unit tests for dialogue beats, scene graph reachability, stats, pronouns, outcome classification, and stage cues
+
+## How to Run (Temporary Guide)
+
+### Requirements
+- **Java 21 (JDK 21)**
+- **Maven** (or **VS Code** / **IntelliJ IDEA** with Java & Maven extensions)
+
+### Windows (PowerShell / CMD)
+1. Clone and open the project folder:
+   ```powershell
+   git clone https://github.com/samuelordialeseya/Sabay-Tayo.git
+   cd Sabay-Tayo
+   ```
+2. Run with Maven:
+   ```powershell
+   mvn javafx:run
+   ```
+   *(If you don't have `mvn` in PATH, open the folder in VS Code or IntelliJ, go to the **Maven** panel -> `SabayTayoFX` -> `Plugins` -> `javafx` -> `javafx:run`, or run `src/main/java/com/sabaytayo/Main.java`.)*
+
+### macOS (Terminal)
+1. Make sure Java 21 and Maven are installed (e.g. via Homebrew):
+   ```bash
+   brew install openjdk@21 maven
+   ```
+2. Clone and run the project:
+   ```bash
+   git clone https://github.com/samuelordialeseya/Sabay-Tayo.git
+   cd Sabay-Tayo
+   mvn javafx:run
+   ```
+   *(Or open the project in VS Code / IntelliJ and run `javafx:run` from the Maven panel or `Main.java`.)*
