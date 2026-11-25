@@ -20,30 +20,44 @@ import javafx.stage.StageStyle;
 // Main JavaFX Application class managing the window stage and transitions across views.
 public class GameApplication extends Application {
 
-    private static final String BGM_RESOURCE_PATH = "/assets/AUDIO/closer_acoustic.mp3";
+    public static final String BGM_WARM_PATH = "/assets/AUDIO/closer_acoustic.mp3";
+    public static final String BGM_COLD_PATH = "/assets/AUDIO/bgm_cold_melancholy.mp3";
+    private static final String AMBIENT_RAIN_BUS_PATH = "/assets/AUDIO/sfx_rain_bus_loop.mp3";
     private static final double DEFAULT_BGM_VOLUME = 0.14;
     private static final double DEFAULT_SFX_VOLUME = 0.45;
+    private static final double AMBIENT_RAIN_SCALE = 0.25;
 
     private Stage primaryStage;
     private Scene activeScene;
     private MediaPlayer bgmPlayer;
+    private String currentBgmPath = BGM_WARM_PATH;
     private boolean musicMuted = false;
     private double musicVolume = DEFAULT_BGM_VOLUME;
+
+    // Continuous bus/rain ambient loop (active during S01-S08)
+    private MediaPlayer ambientPlayer;
+    private boolean ambientActive = false;
 
     // UI & story sound effects
     private AudioClip textBlipClip;
     private AudioClip clickClip;
     private AudioClip hoverClip;
+    private AudioClip busHornClip;
     private AudioClip brakeClip;
+    private AudioClip headThudClip;
+    private AudioClip headThudSecondaryClip;
+    private AudioClip phoneNotificationClip;
     private boolean sfxMuted = false;
     private double sfxVolume = DEFAULT_SFX_VOLUME;
 
     // Shared VN presentation settings
     private int typingDelayMs = 18;
     private boolean atmosphereEnabled = true;
+    private boolean cgPlaceholderEnabled = true;
 
     private RelationshipStats stats;
     private Momentum momentum;
+    private EncounterView activeEncounterView;
 
     private Player player;
     private Stranger stranger;
@@ -91,13 +105,17 @@ public class GameApplication extends Application {
         textBlipClip = loadAudioClip("/assets/AUDIO/sfx_text_blip.mp3", "/assets/AUDIO/sfx_text_blip.wav");
         clickClip = loadAudioClip("/assets/AUDIO/sfx_choice_click.mp3", "/assets/AUDIO/sfx_choice_click.wav");
         hoverClip = loadAudioClip("/assets/AUDIO/sfx_hover.mp3", "/assets/AUDIO/sfx_hover.wav");
+        busHornClip = loadAudioClip("/assets/AUDIO/sfx_bus_horn.mp3", null);
         brakeClip = loadAudioClip("/assets/AUDIO/sfx_bus_brake.mp3", "/assets/AUDIO/sfx_bus_brake.wav");
+        headThudClip = loadAudioClip("/assets/AUDIO/sfx_head_thud.mp3", null);
+        headThudSecondaryClip = loadAudioClip("/assets/AUDIO/sfx_head_thud2.mp3", null);
+        phoneNotificationClip = loadAudioClip("/assets/AUDIO/sfx_phone_notification.mp3", null);
     }
 
     private AudioClip loadAudioClip(String primaryPath, String fallbackPath) {
         try {
             URL url = getClass().getResource(primaryPath);
-            if (url == null) {
+            if (url == null && fallbackPath != null) {
                 url = getClass().getResource(fallbackPath);
             }
             if (url != null) {
@@ -127,9 +145,33 @@ public class GameApplication extends Application {
         }
     }
 
+    public void playBusHornSfx() {
+        if (!sfxMuted && busHornClip != null) {
+            busHornClip.play(Math.min(1.0, sfxVolume * 1.45));
+        }
+    }
+
     public void playBrakeSfx() {
         if (!sfxMuted && brakeClip != null) {
-            brakeClip.play(sfxVolume);
+            brakeClip.play(Math.min(1.0, sfxVolume * 2.0));
+        }
+    }
+
+    public void playHeadThudSfx() {
+        if (!sfxMuted && headThudClip != null) {
+            headThudClip.play(Math.min(1.0, sfxVolume * 1.65));
+        }
+    }
+
+    public void playHeadThudSecondarySfx() {
+        if (!sfxMuted && headThudSecondaryClip != null) {
+            headThudSecondaryClip.play(Math.min(1.0, sfxVolume * 1.45));
+        }
+    }
+
+    public void playPhoneNotificationSfx() {
+        if (!sfxMuted && phoneNotificationClip != null) {
+            phoneNotificationClip.play(sfxVolume * 0.70);
         }
     }
 
@@ -139,6 +181,7 @@ public class GameApplication extends Application {
 
     public void setSfxMuted(boolean muted) {
         this.sfxMuted = muted;
+        syncAmbientAudioState();
     }
 
     public double getSfxVolume() {
@@ -150,6 +193,7 @@ public class GameApplication extends Application {
         if (this.sfxVolume > 0.0 && sfxMuted) {
             sfxMuted = false;
         }
+        syncAmbientAudioState();
     }
 
     public int getTypingDelayMs() {
@@ -166,14 +210,40 @@ public class GameApplication extends Application {
 
     public void setAtmosphereEnabled(boolean enabled) {
         this.atmosphereEnabled = enabled;
+        syncAmbientAudioState();
+    }
+
+    public boolean isCgPlaceholderEnabled() {
+        return cgPlaceholderEnabled;
+    }
+
+    public void setCgPlaceholderEnabled(boolean enabled) {
+        this.cgPlaceholderEnabled = enabled;
     }
 
     // Loads and loops the background instrumental track throughout the game.
     private void startBackgroundMusic() {
+        switchBackgroundMusic(BGM_WARM_PATH);
+    }
+
+    // Switches the looping background music track when entering warm/cold story lanes or endings.
+    public void switchBackgroundMusic(String resourcePath) {
+        if (resourcePath == null) {
+            return;
+        }
+        if (bgmPlayer != null && resourcePath.equals(currentBgmPath)) {
+            return;
+        }
+        if (bgmPlayer != null) {
+            bgmPlayer.stop();
+            bgmPlayer.dispose();
+            bgmPlayer = null;
+        }
+        currentBgmPath = resourcePath;
         try {
-            URL audioUrl = getClass().getResource(BGM_RESOURCE_PATH);
+            URL audioUrl = getClass().getResource(resourcePath);
             if (audioUrl == null) {
-                System.err.println("Notice: Could not find background music at " + BGM_RESOURCE_PATH);
+                System.err.println("Notice: Could not find background music at " + resourcePath);
                 return;
             }
             Media media = new Media(audioUrl.toExternalForm());
@@ -184,6 +254,42 @@ public class GameApplication extends Application {
             bgmPlayer.play();
         } catch (Exception e) {
             System.err.println("Notice: Could not play background music: " + e.getMessage());
+        }
+    }
+
+    // Starts the continuous rain + bus engine ambient loop for scenes S01-S08.
+    public void startBusAmbience() {
+        ambientActive = true;
+        try {
+            if (ambientPlayer == null) {
+                URL audioUrl = getClass().getResource(AMBIENT_RAIN_BUS_PATH);
+                if (audioUrl == null) {
+                    System.err.println("Notice: Could not find ambient loop at " + AMBIENT_RAIN_BUS_PATH);
+                    return;
+                }
+                Media media = new Media(audioUrl.toExternalForm());
+                ambientPlayer = new MediaPlayer(media);
+                ambientPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            }
+            syncAmbientAudioState();
+            ambientPlayer.play();
+        } catch (Exception e) {
+            System.err.println("Notice: Could not play bus ambience: " + e.getMessage());
+        }
+    }
+
+    // Pauses the bus/rain ambient loop outside of the encounter scenes.
+    public void stopBusAmbience() {
+        ambientActive = false;
+        if (ambientPlayer != null) {
+            ambientPlayer.pause();
+        }
+    }
+
+    private void syncAmbientAudioState() {
+        if (ambientPlayer != null) {
+            ambientPlayer.setVolume(sfxVolume * AMBIENT_RAIN_SCALE);
+            ambientPlayer.setMute(!ambientActive || sfxMuted || !atmosphereEnabled);
         }
     }
 
@@ -293,12 +399,20 @@ public class GameApplication extends Application {
             bgmPlayer.dispose();
             bgmPlayer = null;
         }
+        if (ambientPlayer != null) {
+            ambientPlayer.stop();
+            ambientPlayer.dispose();
+            ambientPlayer = null;
+        }
     }
 
     // Switches the screen to the character setup / start view
     public void showStart() {
+        stopBusAmbience();
+        switchBackgroundMusic(BGM_WARM_PATH);
         this.stats = new RelationshipStats();
         this.momentum = new Momentum();
+        this.activeEncounterView = null;
 
         StartView startView = new StartView(this);
 
@@ -320,8 +434,23 @@ public class GameApplication extends Application {
     // Switches the screen to the bus encounter dialogue view
     public void showEncounter() {
         Encounter encounter = new Encounter();
-        EncounterView encounterView = new EncounterView(this, stats, momentum, encounter);
-        activeScene.setRoot(encounterView);
+        activeEncounterView = new EncounterView(this, stats, momentum, encounter);
+        activeScene.setRoot(activeEncounterView);
+    }
+
+    // Returns whether the active encounter has saved steps to rewind to from EndingView
+    public boolean canReturnToEncounter() {
+        return activeEncounterView != null && activeEncounterView.canStepBack();
+    }
+
+    // Rewinds from EndingView back to the last encounter beat/choice for debug testing
+    public void returnToEncounter() {
+        if (activeEncounterView == null || activeScene == null) {
+            showStart();
+            return;
+        }
+        activeEncounterView.restoreFromEnding();
+        activeScene.setRoot(activeEncounterView);
     }
 
     // Switches the screen to the final stats & outcome breakdown view

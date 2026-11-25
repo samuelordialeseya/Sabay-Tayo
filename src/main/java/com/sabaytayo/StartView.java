@@ -114,9 +114,17 @@ public class StartView extends StackPane {
         buttonsBox.setAlignment(Pos.CENTER);
 
         HBox startRow = createMenuButtonRow("START COMMUTE", 0, this::showCharacterSetup);
-        HBox exitRow = createMenuButtonRow("EXIT", 1, () -> Platform.exit());
+        HBox testRow = createMenuButtonRow("QUICK START (SAM)", 1, () -> {
+            try {
+                app.setPlayer(new Player("Sam", Pronouns.THEY_THEM));
+            } catch (InvalidNameException ignored) {
+            }
+            app.setStranger(new Stranger(Pronouns.SHE_HER));
+            app.showEncounter();
+        });
+        HBox exitRow = createMenuButtonRow("EXIT", 2, () -> Platform.exit());
 
-        buttonsBox.getChildren().addAll(startRow, exitRow);
+        buttonsBox.getChildren().addAll(startRow, testRow, exitRow);
         setActiveMenuButton(0);
 
         VBox centerColumn = new VBox(28, logoView, buttonsBox);

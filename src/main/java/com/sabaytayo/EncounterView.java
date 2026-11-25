@@ -48,6 +48,9 @@ public class EncounterView extends StackPane {
     private static final double CLOSEUP_BG_SCALE = 1.22;
     private static final double CLOSEUP_BG_OFFSET_X_RATIO = 0.012;
     private static final double SPRITE_SEAT_OFFSET_RATIO = 0.155;
+    private static final double CONDUCTOR_AISLE_OFFSET_RATIO = -0.32;
+    private static final double THREE_SPRITE_MALE_OFFSET_RATIO = -0.02;
+    private static final double THREE_SPRITE_FEM_OFFSET_RATIO = 0.25;
     private static final int AUTO_BASE_DELAY_MS = 1100;
     private static final int AUTO_MS_PER_CHAR = 20;
     private static final int AUTO_MIN_DELAY_MS = 1400;
@@ -62,10 +65,19 @@ public class EncounterView extends StackPane {
     private final StackPane stageLayer;
     private final StackPane cameraRig;
     private final ImageView bgView;
+    private final ImageView cgCrossfadeView;
     private final ImageView cgView;
+    private final Region headlightBeamOverlay;
+    private final Region headlightWashOverlay;
+    private final StackPane cgPlaceholderOverlay;
+    private final Label cgPlaceholderTagLabel;
+    private final Label cgPlaceholderFileLabel;
+    private final Label cgPlaceholderDescLabel;
     private final StackPane spriteLayer;
+    private final StackPane conductorSlot;
     private final StackPane maleSlot;
     private final StackPane femSlot;
+    private final ImageView conductorSpriteView;
     private final ImageView maleSpriteView;
     private final ImageView femSpriteView;
     private final BusAtmosphereLayer atmosphereLayer;
@@ -76,6 +88,7 @@ public class EncounterView extends StackPane {
     // Cached background, CG, and sprite images
     private final Image bgWideShotImage;
     private final Image bgCloseUpImage;
+    private Image conductorImage;
     private final Map<String, Image> maleSprites = new HashMap<>();
     private final Map<String, Image> femSprites = new HashMap<>();
     private final Map<String, Image> cgCache = new HashMap<>();
@@ -83,10 +96,13 @@ public class EncounterView extends StackPane {
 
     // Background & sprite lighting effects
     private final ColorAdjust bgCloseUpTone = new ColorAdjust();
+    private final ColorAdjust cgTone = new ColorAdjust();
+    private final ColorAdjust conductorTone = new ColorAdjust();
     private final ColorAdjust maleTone = new ColorAdjust();
     private final ColorAdjust femTone = new ColorAdjust();
 
     // Dialogue & HUD controls
+    private final HBox topBar;
     private final StackPane dialogueWrapper;
     private final VBox textCard;
     private final HBox nameplate;
@@ -98,6 +114,7 @@ public class EncounterView extends StackPane {
     private final VBox choicesContainer;
 
     // Inline DDLC-style bottom toolbar buttons
+    private final Button backBtn;
     private final Button autoBtn;
     private final Button musicBtn;
 
@@ -107,16 +124,24 @@ public class EncounterView extends StackPane {
 
     // Timelines & VN playback states
     private Timeline typingTimeline;
+    private Timeline conductorAnimTimeline;
+    private Timeline stageShiftTimeline;
     private Timeline femAnimTimeline;
     private Timeline maleAnimTimeline;
     private Timeline focusFadeTimeline;
     private Timeline maleIdleTimeline;
     private Timeline femIdleTimeline;
     private Timeline bgFadeTimeline;
+    private Timeline busHeadlightTimeline;
+    private Timeline suddenBrakeTimeline;
+    private Timeline endingFadeTimeline;
     private Timeline nextPulseTimeline;
     private PauseTransition autoAdvanceTimer;
     private Runnable pendingFadeMidpoint;
+    private Runnable pendingBrakeReveal;
     private boolean initialFadePlayed = false;
+    private boolean conductorOnStage = false;
+    private boolean transitioningToEnding = false;
 
     private Label activeTypingLabel;
     private String activeFullText;
@@ -125,9 +150,35 @@ public class EncounterView extends StackPane {
 
     private final List<DialogueBeat> currentBeats = new ArrayList<>();
     private final List<StageCue> currentBeatCues = new ArrayList<>();
+    private final List<StepSnapshot> historyStack = new ArrayList<>();
     private int currentBeatIndex = 0;
     private boolean showingChoices = false;
     private boolean autoMode = false;
+
+    // Captures a full beat/choice state so debug Back/Rewind can undo choices and scene jumps cleanly.
+    private static class StepSnapshot {
+        final String sceneId;
+        final int[] statsSnapshot;
+        final int momentumValue;
+        final List<DialogueBeat> beats;
+        final List<StageCue> cues;
+        final int beatIndex;
+        final String pendingNextSceneId;
+        final boolean showingChoices;
+
+        StepSnapshot(String sceneId, int[] statsSnapshot, int momentumValue,
+                     List<DialogueBeat> beats, List<StageCue> cues,
+                     int beatIndex, String pendingNextSceneId, boolean showingChoices) {
+            this.sceneId = sceneId;
+            this.statsSnapshot = statsSnapshot;
+            this.momentumValue = momentumValue;
+            this.beats = new ArrayList<>(beats);
+            this.cues = new ArrayList<>(cues);
+            this.beatIndex = beatIndex;
+            this.pendingNextSceneId = pendingNextSceneId;
+            this.showingChoices = showingChoices;
+        }
+    }
 
     private final EventHandler<KeyEvent> keyAdvanceHandler = this::handleKeyAdvance;
 
@@ -171,20 +222,97 @@ public class EncounterView extends StackPane {
                         + "rgba(12, 8, 20, 0.0) 35%, rgba(10, 6, 18, 0.42) 100%);");
         bgVignetteOverlay.setMouseTransparent(true);
 
+        cgCrossfadeView = new ImageView();
+        cgCrossfadeView.setPreserveRatio(true);
+        cgCrossfadeView.setSmooth(false);
+        cgCrossfadeView.setVisible(false);
+        cgCrossfadeView.setOpacity(0.0);
+
         cgView = new ImageView();
         cgView.setPreserveRatio(true);
         cgView.setSmooth(false);
         cgView.setVisible(false);
         cgView.setOpacity(0.0);
 
+        headlightBeamOverlay = new Region();
+        headlightBeamOverlay.setStyle(
+                "-fx-background-color: radial-gradient(center 62% 56%, radius 46%, "
+                        + "rgba(255, 242, 198, 0.70) 0%, "
+                        + "rgba(255, 214, 132, 0.38) 36%, "
+                        + "rgba(255, 188, 96, 0.12) 64%, "
+                        + "rgba(255, 180, 90, 0.0) 88%);");
+        headlightBeamOverlay.setScaleX(1.65);
+        headlightBeamOverlay.setScaleY(1.35);
+        headlightBeamOverlay.setOpacity(0.0);
+        headlightBeamOverlay.setVisible(false);
+        headlightBeamOverlay.setMouseTransparent(true);
+
+        headlightWashOverlay = new Region();
+        headlightWashOverlay.setStyle(
+                "-fx-background-color: radial-gradient(center 34% 48%, radius 68%, "
+                        + "rgba(255, 232, 174, 0.42) 0%, "
+                        + "rgba(255, 206, 128, 0.16) 52%, "
+                        + "rgba(255, 186, 98, 0.0) 85%);");
+        headlightWashOverlay.setOpacity(0.0);
+        headlightWashOverlay.setVisible(false);
+        headlightWashOverlay.setMouseTransparent(true);
+
+        // Missing-CG Placeholder overlay (Dev / Testing mode: hides floating sprites and shows expected CG filename)
+        cgPlaceholderTagLabel = new Label("MISSING EVENT CG");
+        cgPlaceholderTagLabel.getStyleClass().add("cg-placeholder-tag");
+
+        cgPlaceholderFileLabel = new Label("");
+        cgPlaceholderFileLabel.getStyleClass().add("cg-placeholder-file");
+        cgPlaceholderFileLabel.setWrapText(true);
+
+        cgPlaceholderDescLabel = new Label("");
+        cgPlaceholderDescLabel.getStyleClass().add("cg-placeholder-desc");
+        cgPlaceholderDescLabel.setWrapText(true);
+        cgPlaceholderDescLabel.setAlignment(Pos.CENTER);
+
+        Label cgPlaceholderHint = new Label("Floating sprites hidden to match Event CG framing  •  Toggle in Settings");
+        cgPlaceholderHint.getStyleClass().add("cg-placeholder-hint");
+        cgPlaceholderHint.setWrapText(true);
+
+        VBox cgPlaceholderCard = new VBox(10,
+                cgPlaceholderTagLabel,
+                cgPlaceholderFileLabel,
+                cgPlaceholderDescLabel,
+                cgPlaceholderHint
+        );
+        cgPlaceholderCard.getStyleClass().add("cg-placeholder-card");
+        cgPlaceholderCard.setAlignment(Pos.CENTER);
+        cgPlaceholderCard.maxWidthProperty().bind(Bindings.min(widthProperty().multiply(0.56), 680));
+        cgPlaceholderCard.setMaxHeight(Region.USE_PREF_SIZE);
+
+        cgPlaceholderOverlay = new StackPane(cgPlaceholderCard);
+        cgPlaceholderOverlay.getStyleClass().add("cg-placeholder-backdrop");
+        cgPlaceholderOverlay.setAlignment(Pos.CENTER);
+        cgPlaceholderOverlay.setMouseTransparent(true);
+        cgPlaceholderOverlay.setVisible(false);
+
         // Aspect-fill binding so 16:9 backgrounds & CGs fill any screen without stretching
-        widthProperty().addListener((obs, oldW, newW) -> updateCoverFit());
+        widthProperty().addListener((obs, oldW, newW) -> {
+            updateCoverFit();
+            updateSpriteSlotPositions();
+        });
         heightProperty().addListener((obs, oldH, newH) -> {
             updateCoverFit();
             updateResponsiveMetrics(newH.doubleValue());
         });
 
         // 3. Character sprites anchored near bottom behind the semi-transparent dialogue box
+        conductorSpriteView = createSpriteView(conductorImage);
+        conductorSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.82));
+        conductorSpriteView.setEffect(conductorTone);
+
+        conductorSlot = new StackPane(conductorSpriteView);
+        conductorSlot.setMaxWidth(Region.USE_PREF_SIZE);
+        conductorSlot.setMaxHeight(Region.USE_PREF_SIZE);
+        conductorSlot.setPickOnBounds(false);
+        conductorSlot.setVisible(false);
+        StackPane.setAlignment(conductorSpriteView, Pos.BOTTOM_CENTER);
+
         maleSpriteView = createSpriteView(maleSprites.get("neutral"));
         maleSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.86));
         maleSpriteView.setEffect(maleTone);
@@ -194,7 +322,6 @@ public class EncounterView extends StackPane {
         maleSlot.setMaxHeight(Region.USE_PREF_SIZE);
         maleSlot.setPickOnBounds(false);
         StackPane.setAlignment(maleSpriteView, Pos.BOTTOM_CENTER);
-        maleSlot.translateXProperty().bind(widthProperty().multiply(-SPRITE_SEAT_OFFSET_RATIO));
 
         femSpriteView = createSpriteView(femSprites.get("neutral"));
         femSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.76));
@@ -205,10 +332,10 @@ public class EncounterView extends StackPane {
         femSlot.setMaxHeight(Region.USE_PREF_SIZE);
         femSlot.setPickOnBounds(false);
         StackPane.setAlignment(femSpriteView, Pos.BOTTOM_CENTER);
-        femSlot.translateXProperty().bind(widthProperty().multiply(SPRITE_SEAT_OFFSET_RATIO));
 
-        spriteLayer = new StackPane(maleSlot, femSlot);
+        spriteLayer = new StackPane(conductorSlot, maleSlot, femSlot);
         spriteLayer.setPickOnBounds(false);
+        StackPane.setAlignment(conductorSlot, Pos.BOTTOM_CENTER);
         StackPane.setAlignment(maleSlot, Pos.BOTTOM_CENTER);
         StackPane.setAlignment(femSlot, Pos.BOTTOM_CENTER);
 
@@ -233,11 +360,11 @@ public class EncounterView extends StackPane {
         bgFadeOverlay.setMouseTransparent(true);
 
         stageLayer.getChildren().addAll(
-                cameraRig, cgView,
-                atmosphereLayer, flashOverlay, bgFadeOverlay);
+                cameraRig, cgCrossfadeView, cgView, headlightBeamOverlay, headlightWashOverlay,
+                cgPlaceholderOverlay, atmosphereLayer, flashOverlay, bgFadeOverlay);
 
         // 4. Minimal Top HUD Bar (compact Momentum badge left, subtle window controls right)
-        HBox topBar = new HBox(12);
+        topBar = new HBox(12);
         topBar.setPadding(new Insets(16, 24, 0, 24));
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setMaxHeight(Region.USE_PREF_SIZE);
@@ -285,11 +412,13 @@ public class EncounterView extends StackPane {
         VBox.setVgrow(dialogueLabel, Priority.ALWAYS);
 
         // Inline DDLC-style bottom-right control row inside the dialogue box
+        backBtn = createInlineControl("Back", this::stepBack);
+        backBtn.setDisable(true);
         autoBtn = createInlineControl("Auto", this::toggleAutoMode);
         musicBtn = createInlineControl(app.isMusicMuted() ? "Music: OFF" : "Music", this::handleMusicToggle);
         Button settingsBtn = createInlineControl("Settings", this::openSettingsModal);
 
-        HBox bottomControls = new HBox(18, autoBtn, musicBtn, settingsBtn);
+        HBox bottomControls = new HBox(18, backBtn, autoBtn, musicBtn, settingsBtn);
         bottomControls.setAlignment(Pos.CENTER_RIGHT);
 
         nextIndicator = new Label("▶");
@@ -351,12 +480,15 @@ public class EncounterView extends StackPane {
             if (oldScene != null) {
                 oldScene.removeEventFilter(KeyEvent.KEY_PRESSED, keyAdvanceHandler);
                 cleanupTimers();
+                app.stopBusAmbience();
             }
             if (newScene != null) {
                 newScene.addEventFilter(KeyEvent.KEY_PRESSED, keyAdvanceHandler);
                 atmosphereLayer.start();
+                app.startBusAmbience();
                 startIdleSeatMotion();
                 updateCoverFit();
+                updateSpriteSlotPositions();
                 updateResponsiveMetrics(getHeight() > 0 ? getHeight() : newScene.getHeight());
                 if (!initialFadePlayed) {
                     initialFadePlayed = true;
@@ -375,8 +507,10 @@ public class EncounterView extends StackPane {
         loadScene();
     }
 
-    // Loads all MC and FEM-C expression sprites into lookup maps.
+    // Loads all MC, FEM-C, and Conductor cameo sprites into lookup maps.
     private void loadCharacterSprites() {
+        conductorImage = loadSpriteImage("/assets/CONDUCTOR/cameo_conductor.png");
+
         maleSprites.put("neutral", loadSpriteImage("/assets/MC/male_neutral.png"));
         maleSprites.put("sincere", loadSpriteImage("/assets/MC/male_sincere.png"));
         maleSprites.put("smirk", loadSpriteImage("/assets/MC/male_smirk.png"));
@@ -418,6 +552,7 @@ public class EncounterView extends StackPane {
             return;
         }
         applyCoverSize(bgView, w, h);
+        applyCoverSize(cgCrossfadeView, w, h);
         applyCoverSize(cgView, w, h);
         syncBackgroundBaseTransform();
     }
@@ -463,6 +598,7 @@ public class EncounterView extends StackPane {
         speakerLabel.setStyle("-fx-font-size: " + String.format("%.1f", speakerFont) + "px;");
         StackPane.setMargin(dialogueWrapper, new Insets(0, 0, bottomMargin, 0));
         choicesOverlay.setPadding(new Insets(56, 0, choiceBottomPad, 0));
+        cgPlaceholderOverlay.setPadding(new Insets(64, 24, choiceBottomPad, 24));
     }
 
     private Image loadSpriteImage(String resourcePath) {
@@ -513,6 +649,9 @@ public class EncounterView extends StackPane {
             return;
         }
 
+        // Switch BGM between warm acoustic theme and cold melancholy lo-fi piano based on story lane
+        syncSceneMusic(current.getSceneId());
+
         stopTypingAnimation();
         stopAutoTimer();
         pendingNextSceneId = null;
@@ -525,14 +664,27 @@ public class EncounterView extends StackPane {
         List<String> lines = current.getDialogueLines();
         for (int i = 0; i < lines.size(); i++) {
             currentBeats.add(DialogueBeat.fromLine(lines.get(i), app.getPlayer(), app.getStranger()));
-            currentBeatCues.add(StageCue.forSceneBeat(current.getSceneId(), i, momentum));
+            currentBeatCues.add(StageCue.forSceneBeat(current.getSceneId(), i, momentum, encounter.getS08Variant()));
         }
 
         updateHUD();
         displayCurrentBeat();
     }
 
+    private void syncSceneMusic(String sceneId) {
+        if ("S05B".equals(sceneId) || "S06B".equals(sceneId)
+                || (("S07".equals(sceneId) || "S08".equals(sceneId)) && momentum.getValue() < 0)) {
+            app.switchBackgroundMusic(GameApplication.BGM_COLD_PATH);
+        } else {
+            app.switchBackgroundMusic(GameApplication.BGM_WARM_PATH);
+        }
+    }
+
     private void displayCurrentBeat() {
+        displayCurrentBeat(false);
+    }
+
+    private void displayCurrentBeat(boolean instantRestore) {
         if (currentBeatIndex < 0 || currentBeatIndex >= currentBeats.size()) {
             return;
         }
@@ -546,28 +698,44 @@ public class EncounterView extends StackPane {
         // Update overlapping speaker nameplate (hidden on Narrator beats like DDLC Screenshot 2)
         updateNameplate(beat.getSpeaker());
 
-        // Apply per-beat CG switch, camera framing, sprite expressions, speaker focus, and animations
+        // Apply per-beat CG switch (or Missing-CG placeholder), camera framing, sprite expressions, speaker focus, and animations
         if (cue != null) {
-            applyStageCue(cue, beat.getSpeaker());
+            applyStageCue(cue, beat.getSpeaker(), instantRestore);
         } else {
             applySpeakerFocusFor(beat.getSpeaker());
         }
 
-        playTypewriter(dialogueLabel, beat.getText(), this::onBeatTypingComplete);
+        if (instantRestore) {
+            stopTypingAnimation();
+            dialogueLabel.setText(beat.getText() != null ? beat.getText() : "");
+            onBeatTypingComplete();
+        } else {
+            playTypewriter(dialogueLabel, beat.getText(), this::onBeatTypingComplete);
+        }
     }
 
     private void applySpeakerFocusFor(String speaker) {
         if ("Narrator".equals(speaker)) {
             setBothBalanced();
+        } else if ("Conductor".equals(speaker)) {
+            setSpeakerFocus(false, false, true);
         } else if (speaker != null && (speaker.equals(app.getPlayerName()) || "You".equals(speaker))) {
-            setSpeakerFocus(true, false);
+            setSpeakerFocus(true, false, false);
         } else {
-            setSpeakerFocus(false, true);
+            setSpeakerFocus(false, true, false);
+        }
+    }
+
+    // Re-applies the active beat's visual state immediately (used when toggling Dev CG Placeholders in Settings).
+    private void refreshCurrentBeatVisuals() {
+        if (currentBeatIndex >= 0 && currentBeatIndex < currentBeats.size()
+                && currentBeatIndex < currentBeatCues.size()) {
+            applyStageCue(currentBeatCues.get(currentBeatIndex), currentBeats.get(currentBeatIndex).getSpeaker());
         }
     }
 
     private void updateNameplate(String speaker) {
-        nameplate.getStyleClass().removeAll("vn-nameplate-player", "vn-nameplate-stranger");
+        nameplate.getStyleClass().removeAll("vn-nameplate-player", "vn-nameplate-stranger", "vn-nameplate-conductor");
 
         if (speaker == null || "Narrator".equals(speaker) || speaker.isBlank()) {
             nameplate.setVisible(false);
@@ -579,7 +747,9 @@ public class EncounterView extends StackPane {
         nameplate.setVisible(true);
         nameplate.setManaged(true);
 
-        if (speaker.equals(app.getPlayerName()) || "You".equals(speaker)) {
+        if ("Conductor".equals(speaker)) {
+            nameplate.getStyleClass().add("vn-nameplate-conductor");
+        } else if (speaker.equals(app.getPlayerName()) || "You".equals(speaker)) {
             nameplate.getStyleClass().add("vn-nameplate-player");
         } else {
             nameplate.getStyleClass().add("vn-nameplate-stranger");
@@ -688,6 +858,7 @@ public class EncounterView extends StackPane {
     }
 
     private void handleChoiceSelected(DialogueChoice choice) {
+        pushSnapshot();
         stopTypingAnimation();
         stopAutoTimer();
         hideChoices();
@@ -763,7 +934,7 @@ public class EncounterView extends StackPane {
     // -------------------------------------------------------------------------
 
     private void handleScreenClick(MouseEvent e) {
-        if (modalOpen || e.getButton() != MouseButton.PRIMARY) {
+        if (modalOpen || transitioningToEnding || e.getButton() != MouseButton.PRIMARY) {
             return;
         }
         if (isClickOnInteractive(e.getTarget())) {
@@ -775,6 +946,9 @@ public class EncounterView extends StackPane {
     private void handleKeyAdvance(KeyEvent e) {
         if (e.getCode() == KeyCode.ESCAPE) {
             e.consume();
+            if (transitioningToEnding) {
+                return;
+            }
             if (modalOpen) {
                 closeModal();
             } else {
@@ -782,7 +956,12 @@ public class EncounterView extends StackPane {
             }
             return;
         }
-        if (modalOpen) {
+        if (modalOpen || transitioningToEnding) {
+            return;
+        }
+        if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.LEFT) {
+            e.consume();
+            stepBack();
             return;
         }
         if (e.getCode() != KeyCode.SPACE && e.getCode() != KeyCode.ENTER) {
@@ -793,6 +972,9 @@ public class EncounterView extends StackPane {
     }
 
     private void triggerAdvanceAction() {
+        if (transitioningToEnding) {
+            return;
+        }
         if (typingTimeline != null) {
             finishTypingImmediately();
             return;
@@ -803,12 +985,14 @@ public class EncounterView extends StackPane {
         }
 
         if (currentBeatIndex + 1 < currentBeats.size()) {
+            pushSnapshot();
             currentBeatIndex++;
             displayCurrentBeat();
             return;
         }
 
         if (pendingNextSceneId != null) {
+            pushSnapshot();
             String nextId = pendingNextSceneId;
             pendingNextSceneId = null;
             proceedToNextScene(nextId);
@@ -818,18 +1002,106 @@ public class EncounterView extends StackPane {
         Scene current = encounter.getCurrentScene();
         if (current != null) {
             if (hasPlayerReplyChoices(current)) {
+                pushSnapshot();
                 stopAutoTimer();
                 hideNextIndicator();
                 showingChoices = true;
                 renderChoices(current);
-                setSpeakerFocus(true, false);
+                setSpeakerFocus(true, false, false);
             } else {
                 String nextId = resolveContinueNextSceneId(current);
                 if (nextId != null) {
+                    pushSnapshot();
                     proceedToNextScene(nextId);
                 }
             }
         }
+    }
+
+    public boolean canStepBack() {
+        return !historyStack.isEmpty();
+    }
+
+    // Debug rewind: pops the last snapshot and restores stats, momentum, scene, beat, or choice menu.
+    public void stepBack() {
+        if (historyStack.isEmpty() || modalOpen || transitioningToEnding) {
+            return;
+        }
+        StepSnapshot snap = historyStack.remove(historyStack.size() - 1);
+        backBtn.setDisable(historyStack.isEmpty());
+
+        stopTypingAnimation();
+        stopAutoTimer();
+        stopBgFadeAnimation(false);
+        stopBusHeadlightArrival();
+        stopSuddenBrakeSequence(false);
+        hideChoices();
+        hideNextIndicator();
+
+        stats.restore(snap.statsSnapshot);
+        momentum.setValue(snap.momentumValue);
+
+        try {
+            if ("S08".equals(snap.sceneId)) {
+                encounter.prepareFinalScene(stats);
+            }
+            encounter.advanceTo(snap.sceneId);
+        } catch (SceneNotFoundException e) {
+            System.err.println("Error rewinding scene: " + e.getMessage());
+            return;
+        }
+
+        currentBeats.clear();
+        currentBeats.addAll(snap.beats);
+        currentBeatCues.clear();
+        currentBeatCues.addAll(snap.cues);
+        currentBeatIndex = snap.beatIndex;
+        pendingNextSceneId = snap.pendingNextSceneId;
+
+        syncSceneMusic(snap.sceneId);
+        updateHUD();
+
+        if (snap.showingChoices) {
+            displayCurrentBeat(true);
+            Scene current = encounter.getCurrentScene();
+            if (current != null) {
+                stopAutoTimer();
+                hideNextIndicator();
+                showingChoices = true;
+                renderChoices(current);
+                setSpeakerFocus(true, false, false);
+            }
+        } else {
+            displayCurrentBeat(true);
+        }
+    }
+
+    // Restores EncounterView cleanly when navigating back from EndingView.
+    public void restoreFromEnding() {
+        if (endingFadeTimeline != null) {
+            endingFadeTimeline.stop();
+            endingFadeTimeline = null;
+        }
+        transitioningToEnding = false;
+        dialogueWrapper.setOpacity(1.0);
+        dialogueWrapper.setTranslateY(0.0);
+        topBar.setOpacity(1.0);
+        bgFadeOverlay.setOpacity(0.0);
+        stepBack();
+    }
+
+    private void pushSnapshot() {
+        historyStack.add(new StepSnapshot(
+                encounter.getCurrentSceneId(),
+                stats.snapshot(),
+                momentum.getValue(),
+                currentBeats,
+                currentBeatCues,
+                currentBeatIndex,
+                pendingNextSceneId,
+                showingChoices
+        ));
+        backBtn.setDisable(false);
     }
 
     private void toggleAutoMode() {
@@ -922,8 +1194,7 @@ public class EncounterView extends StackPane {
         pendingNextSceneId = null;
 
         if ("ENDING".equals(nextId)) {
-            cleanupTimers();
-            app.showEnding();
+            transitionToEndingCinematic();
             return;
         }
 
@@ -931,6 +1202,9 @@ public class EncounterView extends StackPane {
             if ("S04_DONE".equals(nextId) || "S05_DONE".equals(nextId)) {
                 encounter.advanceTo(encounter.getMomentumBranch(momentum));
             } else {
+                if ("S08".equals(nextId)) {
+                    encounter.prepareFinalScene(stats);
+                }
                 encounter.advanceTo(nextId);
             }
         } catch (SceneNotFoundException e) {
@@ -1003,6 +1277,15 @@ public class EncounterView extends StackPane {
             atmosphereLayer.setAtmosphereEnabled(n);
         });
 
+        // Missing-CG Placeholder Overlay (Dev / Testing Mode)
+        CheckBox cgPlaceholderToggle = new CheckBox("Show Missing CG Placeholders (Dev)");
+        cgPlaceholderToggle.setSelected(app.isCgPlaceholderEnabled());
+        cgPlaceholderToggle.getStyleClass().add("vn-checkbox");
+        cgPlaceholderToggle.selectedProperty().addListener((obs, o, n) -> {
+            app.setCgPlaceholderEnabled(n);
+            refreshCurrentBeatVisuals();
+        });
+
         // Quick navigation actions
         Button restartBtn = new Button("Restart Ride");
         restartBtn.getStyleClass().add("menu-button");
@@ -1013,6 +1296,16 @@ public class EncounterView extends StackPane {
             app.showStart();
         });
 
+        Button skipEndingBtn = new Button("Skip to Ending");
+        skipEndingBtn.getStyleClass().add("menu-button");
+        skipEndingBtn.setOnAction(e -> {
+            app.playClickSfx();
+            pushSnapshot();
+            closeModal();
+            cleanupTimers();
+            app.showEnding();
+        });
+
         Button resumeBtn = new Button("Resume");
         resumeBtn.getStyleClass().addAll("menu-button", "commute-menu-btn-active");
         resumeBtn.setOnAction(e -> {
@@ -1020,7 +1313,7 @@ public class EncounterView extends StackPane {
             closeModal();
         });
 
-        HBox actions = new HBox(12, restartBtn, resumeBtn);
+        HBox actions = new HBox(12, restartBtn, skipEndingBtn, resumeBtn);
         actions.setAlignment(Pos.CENTER_RIGHT);
         actions.setPadding(new Insets(8, 0, 0, 0));
 
@@ -1030,6 +1323,7 @@ public class EncounterView extends StackPane {
                 sfxToggle,
                 new VBox(6, speedLbl, speedSlider),
                 atmToggle,
+                cgPlaceholderToggle,
                 actions
         );
         showModal(modalCard);
@@ -1125,17 +1419,71 @@ public class EncounterView extends StackPane {
         onTypingFinished = null;
     }
 
+    private void transitionToEndingCinematic() {
+        if (transitioningToEnding) {
+            return;
+        }
+        transitioningToEnding = true;
+        stopTypingAnimation();
+        stopAutoTimer();
+        stopBgFadeAnimation(false);
+        stopBusHeadlightArrival();
+        stopSuddenBrakeSequence(true);
+        hideChoices();
+        hideNextIndicator();
+
+        if (getScene() == null) {
+            cleanupTimers();
+            app.showEnding();
+            return;
+        }
+
+        endingFadeTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(dialogueWrapper.opacityProperty(), dialogueWrapper.getOpacity()),
+                        new KeyValue(dialogueWrapper.translateYProperty(), dialogueWrapper.getTranslateY()),
+                        new KeyValue(topBar.opacityProperty(), topBar.getOpacity()),
+                        new KeyValue(bgFadeOverlay.opacityProperty(), bgFadeOverlay.getOpacity())),
+                new KeyFrame(Duration.millis(420),
+                        new KeyValue(dialogueWrapper.opacityProperty(), 0.0, Interpolator.EASE_OUT),
+                        new KeyValue(dialogueWrapper.translateYProperty(), 14.0, Interpolator.EASE_OUT),
+                        new KeyValue(topBar.opacityProperty(), 0.0, Interpolator.EASE_OUT)),
+                new KeyFrame(Duration.millis(760),
+                        new KeyValue(bgFadeOverlay.opacityProperty(), 1.0, Interpolator.EASE_BOTH)),
+                new KeyFrame(Duration.millis(920),
+                        new KeyValue(bgFadeOverlay.opacityProperty(), 1.0))
+        );
+        endingFadeTimeline.setOnFinished(e -> {
+            endingFadeTimeline = null;
+            cleanupTimers();
+            app.showEnding();
+        });
+        endingFadeTimeline.play();
+    }
+
     private void cleanupTimers() {
         stopTypingAnimation();
         stopAutoTimer();
         stopBgFadeAnimation(false);
+        stopBusHeadlightArrival();
+        stopSuddenBrakeSequence(false);
+        if (endingFadeTimeline != null) {
+            endingFadeTimeline.stop();
+            endingFadeTimeline = null;
+        }
         stopIdleSeatMotion();
         if (focusFadeTimeline != null) {
             focusFadeTimeline.stop();
             focusFadeTimeline = null;
         }
+        if (stageShiftTimeline != null) {
+            stageShiftTimeline.stop();
+            stageShiftTimeline = null;
+        }
         hideNextIndicator();
         resetSpriteTransforms();
+        conductorSpriteView.setTranslateX(0);
+        conductorSpriteView.setTranslateY(0);
         maleSpriteView.setTranslateX(0);
         maleSpriteView.setTranslateY(0);
         femSpriteView.setTranslateX(0);
@@ -1153,39 +1501,96 @@ public class EncounterView extends StackPane {
     private static final int FADE_FROM_BLACK_MS = 820;
 
     private void applyStageCue(StageCue cue, String speaker) {
+        applyStageCue(cue, speaker, false);
+    }
+
+    private void applyStageCue(StageCue cue, String speaker, boolean instantRestore) {
         resetSpriteTransforms();
 
-        // Commit any interrupted fade before evaluating the next beat
-        stopBgFadeAnimation(true);
+        // Commit any interrupted fade, headlight sweep, or pending brake reveal before evaluating the next beat
+        stopBgFadeAnimation(!instantRestore);
+        stopBusHeadlightArrival();
+        stopSuddenBrakeSequence(!instantRestore);
 
-        // 1. Play brake SFX & flash on dramatic impact beats
-        if (cue.isPlayBrakeSfx()) {
-            app.playBrakeSfx();
-            playImpactFlash();
+        // 1. Check Event CG first so dramatic brake beats can lead with horn + brake SFX before revealing the CG
+        Image cgImage = loadEventCg(cue.getCgPath());
+
+        if (!instantRestore && cue.isPlayBrakeSfx() && getScene() != null) {
+            playSuddenBrakeSequence(cue, speaker, cgImage);
+            return;
+        }
+
+        if (!instantRestore) {
+            if (cue.isPlayBrakeSfx()) {
+                app.playBusHornSfx();
+                app.playBrakeSfx();
+                playImpactFlash();
+            }
+            if (cue.isPlayHeadThudSfx()) {
+                app.playHeadThudSfx();
+                app.playHeadThudSecondarySfx();
+            }
+            if (cue.isPlayPhoneNotificationSfx()) {
+                app.playPhoneNotificationSfx();
+            }
         }
 
         // 2. Check if this beat has a full-screen Event CG image available in assets/CG/
-        Image cgImage = loadEventCg(cue.getCgPath());
         if (cgImage != null) {
+            String previousCgPath = activeCgPath;
+            Image previousCgImage = cgView.isVisible() ? cgView.getImage() : null;
             boolean cgChanged = !cue.getCgPath().equals(activeCgPath);
-            if (cgChanged && getScene() != null && !cue.isPlayBrakeSfx()) {
+            if (!instantRestore && cgChanged && getScene() != null && !cue.isPlayBrakeSfx()
+                    && !isSameShotCgVariant(activeCgPath, cue.getCgPath())) {
                 fadeThroughBlack(() -> {
                     showEventCgImmediate(cue.getCgPath(), cgImage);
                     applyBeatStageVisuals(cue, speaker, true);
+                    if (cue.getEffectType() == StageCue.EffectType.BUS_HEADLIGHT_ARRIVAL) {
+                        playBusHeadlightArrival(null);
+                    }
                 });
             } else {
                 showEventCgImmediate(cue.getCgPath(), cgImage);
                 applyBeatStageVisuals(cue, speaker, true);
+                if (!instantRestore && cue.getEffectType() == StageCue.EffectType.BUS_HEADLIGHT_ARRIVAL) {
+                    Image crossfadeFrom = isSameShotCgVariant(previousCgPath, cue.getCgPath()) ? previousCgImage : null;
+                    playBusHeadlightArrival(crossfadeFrom);
+                }
             }
             return;
         }
 
-        // 3. Normal Sprite Stage (or fallback when CG artwork is not present)
+        // 3. Missing Event CG with Dev Placeholder toggle ON: hide floating sprites and show filename/shot card
+        boolean showPlaceholder = cue.getCgPath() != null && app.isCgPlaceholderEnabled();
         Image targetBg = cue.isUseWideBackground() ? bgWideShotImage : bgCloseUpImage;
         boolean wasInCg = (activeCgPath != null);
+        boolean wasPlaceholder = cgPlaceholderOverlay.isVisible();
         boolean bgChanged = targetBg != null && bgView.getImage() != targetBg;
 
-        if ((wasInCg || bgChanged) && getScene() != null) {
+        if (showPlaceholder) {
+            boolean placeholderChanged = !wasPlaceholder || !cue.getCgPath().equals(activeCgPath);
+            if (!instantRestore && (wasInCg || bgChanged || placeholderChanged) && getScene() != null && !cue.isPlayBrakeSfx()) {
+                fadeThroughBlack(() -> {
+                    if (targetBg != null && bgView.getImage() != targetBg) {
+                        bgView.setImage(targetBg);
+                        updateCoverFit();
+                    }
+                    showMissingCgPlaceholderImmediate(cue);
+                    applyBeatStageVisuals(cue, speaker, false);
+                });
+            } else {
+                if (bgChanged) {
+                    bgView.setImage(targetBg);
+                    updateCoverFit();
+                }
+                showMissingCgPlaceholderImmediate(cue);
+                applyBeatStageVisuals(cue, speaker, false);
+            }
+            return;
+        }
+
+        // 4. Normal Sprite Stage (or Missing CG with Dev Placeholder OFF)
+        if (!instantRestore && (wasInCg || wasPlaceholder || bgChanged) && getScene() != null) {
             fadeThroughBlack(() -> {
                 hideEventCgImmediate();
                 if (targetBg != null && bgView.getImage() != targetBg) {
@@ -1205,9 +1610,10 @@ public class EncounterView extends StackPane {
     }
 
     private void applyBeatStageVisuals(StageCue cue, String speaker, boolean inCgMode) {
-        // 3. Sprite visibility & mood swaps (null mood preserves current sprite expression)
+        // 3. Sprite visibility, conductor cameo enter/exit, & mood swaps (null mood preserves current expression)
         maleSlot.setVisible(cue.isShowMale());
         femSlot.setVisible(cue.isShowFem());
+        applyConductorPresence(cue.isShowConductor(), getScene() != null && !inCgMode);
 
         if (cue.getMaleMood() != null) {
             Image mImg = maleSprites.get(cue.getMaleMood());
@@ -1230,6 +1636,93 @@ public class EncounterView extends StackPane {
 
         // 5. Beat-specific motion effect
         playEffect(cue.getEffectType());
+    }
+
+    private void updateSpriteSlotPositions() {
+        double w = getWidth();
+        if (w <= 0) {
+            return;
+        }
+        conductorSlot.setTranslateX(w * CONDUCTOR_AISLE_OFFSET_RATIO);
+        if (stageShiftTimeline == null) {
+            maleSlot.setTranslateX(w * (conductorOnStage ? THREE_SPRITE_MALE_OFFSET_RATIO : -SPRITE_SEAT_OFFSET_RATIO));
+            femSlot.setTranslateX(w * (conductorOnStage ? THREE_SPRITE_FEM_OFFSET_RATIO : SPRITE_SEAT_OFFSET_RATIO));
+        }
+    }
+
+    // Slides the conductor sprite in/out of the left aisle and gently shifts seated sprites to make room.
+    private void applyConductorPresence(boolean showConductor, boolean animate) {
+        if (showConductor == conductorOnStage) {
+            if (showConductor) {
+                conductorSlot.setVisible(true);
+            }
+            return;
+        }
+
+        conductorOnStage = showConductor;
+        if (conductorAnimTimeline != null) {
+            conductorAnimTimeline.stop();
+            conductorAnimTimeline = null;
+        }
+        if (stageShiftTimeline != null) {
+            stageShiftTimeline.stop();
+            stageShiftTimeline = null;
+        }
+
+        double w = getWidth();
+        double targetMaleX = w * (showConductor ? THREE_SPRITE_MALE_OFFSET_RATIO : -SPRITE_SEAT_OFFSET_RATIO);
+        double targetFemX = w * (showConductor ? THREE_SPRITE_FEM_OFFSET_RATIO : SPRITE_SEAT_OFFSET_RATIO);
+        conductorSlot.setTranslateX(w * CONDUCTOR_AISLE_OFFSET_RATIO);
+
+        if (showConductor) {
+            conductorSlot.setVisible(true);
+            if (animate && w > 0) {
+                conductorSpriteView.setTranslateX(-w * 0.25);
+                conductorSpriteView.setOpacity(0.0);
+                conductorAnimTimeline = new Timeline(
+                        new KeyFrame(Duration.millis(380),
+                                new KeyValue(conductorSpriteView.translateXProperty(), 0.0, Interpolator.EASE_OUT),
+                                new KeyValue(conductorSpriteView.opacityProperty(), 1.0, Interpolator.EASE_OUT))
+                );
+                conductorAnimTimeline.setOnFinished(e -> conductorAnimTimeline = null);
+                conductorAnimTimeline.play();
+            } else {
+                conductorSpriteView.setTranslateX(0.0);
+                conductorSpriteView.setOpacity(1.0);
+            }
+        } else {
+            if (animate && w > 0 && conductorSlot.isVisible()) {
+                conductorAnimTimeline = new Timeline(
+                        new KeyFrame(Duration.millis(320),
+                                new KeyValue(conductorSpriteView.translateXProperty(), -w * 0.25, Interpolator.EASE_IN),
+                                new KeyValue(conductorSpriteView.opacityProperty(), 0.0, Interpolator.EASE_IN))
+                );
+                conductorAnimTimeline.setOnFinished(e -> {
+                    conductorAnimTimeline = null;
+                    conductorSlot.setVisible(false);
+                    conductorSpriteView.setTranslateX(0.0);
+                    conductorSpriteView.setOpacity(1.0);
+                });
+                conductorAnimTimeline.play();
+            } else {
+                conductorSlot.setVisible(false);
+                conductorSpriteView.setTranslateX(0.0);
+                conductorSpriteView.setOpacity(1.0);
+            }
+        }
+
+        if (animate && w > 0) {
+            stageShiftTimeline = new Timeline(
+                    new KeyFrame(Duration.millis(340),
+                            new KeyValue(maleSlot.translateXProperty(), targetMaleX, Interpolator.EASE_BOTH),
+                            new KeyValue(femSlot.translateXProperty(), targetFemX, Interpolator.EASE_BOTH))
+            );
+            stageShiftTimeline.setOnFinished(e -> stageShiftTimeline = null);
+            stageShiftTimeline.play();
+        } else {
+            maleSlot.setTranslateX(targetMaleX);
+            femSlot.setTranslateX(targetFemX);
+        }
     }
 
     private void playOpeningFadeIn() {
@@ -1283,8 +1776,14 @@ public class EncounterView extends StackPane {
         bgFadeOverlay.setOpacity(0.0);
     }
 
+    private boolean isSameShotCgVariant(String prevCgPath, String nextCgPath) {
+        return (StageCue.CG_BUS_STOP_WAIT.equals(prevCgPath) && StageCue.CG_BUS_STOP_WAIT1.equals(nextCgPath))
+                || (StageCue.CG_BUS_STOP_WAIT1.equals(prevCgPath) && StageCue.CG_BUS_STOP_WAIT.equals(nextCgPath));
+    }
+
     private void showEventCgImmediate(String cgPath, Image cgImage) {
         activeCgPath = cgPath;
+        cgPlaceholderOverlay.setVisible(false);
         cgView.setImage(cgImage);
         updateCoverFit();
         cgView.setOpacity(1.0);
@@ -1292,11 +1791,207 @@ public class EncounterView extends StackPane {
         spriteLayer.setVisible(false);
     }
 
+    private void showMissingCgPlaceholderImmediate(StageCue cue) {
+        activeCgPath = cue.getCgPath();
+        cgView.setOpacity(0.0);
+        cgView.setVisible(false);
+        spriteLayer.setVisible(false);
+
+        String sceneId = encounter.getCurrentSceneId();
+        String beatLabel = (pendingNextSceneId != null) ? "CHOICE REACTION" : ("BEAT " + (currentBeatIndex + 1));
+        cgPlaceholderTagLabel.setText("MISSING EVENT CG  •  " + sceneId + "  •  " + beatLabel);
+        cgPlaceholderFileLabel.setText("src/main/resources" + cue.getCgPath());
+        cgPlaceholderDescLabel.setText(StageCue.getCgDescription(cue.getCgPath()));
+        cgPlaceholderOverlay.setVisible(true);
+    }
+
     private void hideEventCgImmediate() {
+        stopBusHeadlightArrival();
         activeCgPath = null;
         cgView.setOpacity(0.0);
         cgView.setVisible(false);
+        cgPlaceholderOverlay.setVisible(false);
         spriteLayer.setVisible(true);
+    }
+
+    // Sweeps warm arriving bus headlights from the street onto MC while crossfading wait0 -> wait1.
+    private void playBusHeadlightArrival(Image previousCgImage) {
+        stopBusHeadlightArrival();
+
+        double w = getWidth() > 0 ? getWidth() : 1280.0;
+        boolean hasCrossfade = (previousCgImage != null);
+        if (hasCrossfade) {
+            cgCrossfadeView.setImage(previousCgImage);
+            updateCoverFit();
+            cgCrossfadeView.setScaleX(1.0);
+            cgCrossfadeView.setScaleY(1.0);
+            cgCrossfadeView.setOpacity(1.0);
+            cgCrossfadeView.setVisible(true);
+            cgView.setOpacity(0.0);
+        } else {
+            cgView.setOpacity(1.0);
+        }
+
+        cgTone.setBrightness(0.0);
+        cgView.setEffect(cgTone);
+        cgView.setScaleX(1.0);
+        cgView.setScaleY(1.0);
+
+        headlightBeamOverlay.setTranslateX(w * 0.36);
+        headlightBeamOverlay.setOpacity(0.0);
+        headlightBeamOverlay.setVisible(true);
+
+        headlightWashOverlay.setOpacity(0.0);
+        headlightWashOverlay.setVisible(true);
+
+        busHeadlightTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(headlightBeamOverlay.translateXProperty(), w * 0.36),
+                        new KeyValue(headlightBeamOverlay.opacityProperty(), 0.0),
+                        new KeyValue(headlightWashOverlay.opacityProperty(), 0.0),
+                        new KeyValue(cgView.opacityProperty(), hasCrossfade ? 0.0 : 1.0),
+                        new KeyValue(cgView.scaleXProperty(), 1.0),
+                        new KeyValue(cgView.scaleYProperty(), 1.0),
+                        new KeyValue(cgCrossfadeView.scaleXProperty(), 1.0),
+                        new KeyValue(cgCrossfadeView.scaleYProperty(), 1.0),
+                        new KeyValue(cgTone.brightnessProperty(), 0.0)),
+                new KeyFrame(Duration.millis(220),
+                        new KeyValue(headlightBeamOverlay.translateXProperty(), w * 0.06, Interpolator.EASE_OUT),
+                        new KeyValue(headlightBeamOverlay.opacityProperty(), 0.92, Interpolator.EASE_OUT),
+                        new KeyValue(headlightWashOverlay.opacityProperty(), 0.42, Interpolator.EASE_OUT),
+                        new KeyValue(cgView.opacityProperty(), hasCrossfade ? 0.45 : 1.0, Interpolator.EASE_BOTH),
+                        new KeyValue(cgTone.brightnessProperty(), 0.14, Interpolator.EASE_OUT)),
+                new KeyFrame(Duration.millis(430),
+                        new KeyValue(headlightBeamOverlay.translateXProperty(), -w * 0.10, Interpolator.EASE_BOTH),
+                        new KeyValue(headlightBeamOverlay.opacityProperty(), 0.84, Interpolator.EASE_BOTH),
+                        new KeyValue(headlightWashOverlay.opacityProperty(), 0.56, Interpolator.EASE_BOTH),
+                        new KeyValue(cgView.opacityProperty(), 1.0, Interpolator.EASE_OUT),
+                        new KeyValue(cgView.scaleXProperty(), 1.016, Interpolator.EASE_OUT),
+                        new KeyValue(cgView.scaleYProperty(), 1.016, Interpolator.EASE_OUT),
+                        new KeyValue(cgCrossfadeView.scaleXProperty(), 1.016, Interpolator.EASE_OUT),
+                        new KeyValue(cgCrossfadeView.scaleYProperty(), 1.016, Interpolator.EASE_OUT),
+                        new KeyValue(cgTone.brightnessProperty(), 0.18, Interpolator.EASE_BOTH)),
+                new KeyFrame(Duration.millis(940),
+                        new KeyValue(headlightBeamOverlay.translateXProperty(), -w * 0.24, Interpolator.EASE_OUT),
+                        new KeyValue(headlightBeamOverlay.opacityProperty(), 0.0, Interpolator.EASE_OUT),
+                        new KeyValue(headlightWashOverlay.opacityProperty(), 0.0, Interpolator.EASE_OUT),
+                        new KeyValue(cgView.opacityProperty(), 1.0),
+                        new KeyValue(cgView.scaleXProperty(), 1.022, Interpolator.EASE_OUT),
+                        new KeyValue(cgView.scaleYProperty(), 1.022, Interpolator.EASE_OUT),
+                        new KeyValue(cgCrossfadeView.scaleXProperty(), 1.022, Interpolator.EASE_OUT),
+                        new KeyValue(cgCrossfadeView.scaleYProperty(), 1.022, Interpolator.EASE_OUT),
+                        new KeyValue(cgTone.brightnessProperty(), 0.0, Interpolator.EASE_OUT))
+        );
+        busHeadlightTimeline.setOnFinished(e -> {
+            busHeadlightTimeline = null;
+            cgCrossfadeView.setVisible(false);
+            cgCrossfadeView.setOpacity(0.0);
+            cgCrossfadeView.setImage(null);
+            headlightBeamOverlay.setVisible(false);
+            headlightWashOverlay.setVisible(false);
+            cgView.setEffect(null);
+        });
+        busHeadlightTimeline.play();
+    }
+
+    private void stopBusHeadlightArrival() {
+        if (busHeadlightTimeline != null) {
+            busHeadlightTimeline.stop();
+            busHeadlightTimeline = null;
+        }
+        cgCrossfadeView.setVisible(false);
+        cgCrossfadeView.setOpacity(0.0);
+        cgCrossfadeView.setImage(null);
+        cgCrossfadeView.setScaleX(1.0);
+        cgCrossfadeView.setScaleY(1.0);
+
+        headlightBeamOverlay.setVisible(false);
+        headlightBeamOverlay.setOpacity(0.0);
+        headlightBeamOverlay.setTranslateX(0.0);
+
+        headlightWashOverlay.setVisible(false);
+        headlightWashOverlay.setOpacity(0.0);
+
+        cgTone.setBrightness(0.0);
+        cgView.setEffect(null);
+        if (cgView.isVisible()) {
+            cgView.setOpacity(1.0);
+        }
+    }
+
+    // Plays "BEEP BEEP!" bus horn -> loud brake screech -> impact flash + CG reveal -> double head-bump thuds.
+    private void playSuddenBrakeSequence(StageCue cue, String speaker, Image cgImage) {
+        stopSuddenBrakeSequence(false);
+
+        // Keep the seated two-shot stage visible during the initial horn + brake build-up
+        hideEventCgImmediate();
+        Image targetBg = cue.isUseWideBackground() ? bgWideShotImage : bgCloseUpImage;
+        if (targetBg != null && bgView.getImage() != targetBg) {
+            bgView.setImage(targetBg);
+            updateCoverFit();
+        }
+        maleSlot.setVisible(true);
+        femSlot.setVisible(true);
+        Image mSurprised = maleSprites.get("surprised");
+        if (mSurprised != null) {
+            maleSpriteView.setImage(mSurprised);
+        }
+        Image fSurprised = femSprites.get("surprised");
+        if (fSurprised != null) {
+            femSpriteView.setImage(fSurprised);
+        }
+        setBothBalanced();
+        applyCameraAngle(StageCue.CameraAngle.TWO_SEAT, false);
+
+        pendingBrakeReveal = () -> {
+            if (cgImage != null) {
+                showEventCgImmediate(cue.getCgPath(), cgImage);
+                applyBeatStageVisuals(cue, speaker, true);
+            } else {
+                if (app.isCgPlaceholderEnabled()) {
+                    showMissingCgPlaceholderImmediate(cue);
+                }
+                applyBeatStageVisuals(cue, speaker, false);
+            }
+        };
+
+        // 0ms: Big double bus horn ("BEEP BEEP!")
+        app.playBusHornSfx();
+
+        suddenBrakeTimeline = new Timeline(
+                new KeyFrame(Duration.millis(520), e -> {
+                    // Loud brake slam + initial bus lurch before cutting to the CG
+                    app.playBrakeSfx();
+                    playBusSlowdownSway();
+                }),
+                new KeyFrame(Duration.millis(820), e -> {
+                    // Impact peak: flash + reveal cg_sudden_brake + camera jolt
+                    playImpactFlash();
+                    if (pendingBrakeReveal != null) {
+                        Runnable reveal = pendingBrakeReveal;
+                        pendingBrakeReveal = null;
+                        reveal.run();
+                    }
+                }),
+                new KeyFrame(Duration.millis(930), e -> app.playHeadThudSfx()),
+                new KeyFrame(Duration.millis(1120), e -> app.playHeadThudSecondarySfx())
+        );
+        suddenBrakeTimeline.setOnFinished(e -> suddenBrakeTimeline = null);
+        suddenBrakeTimeline.play();
+    }
+
+    private void stopSuddenBrakeSequence(boolean commitCg) {
+        if (suddenBrakeTimeline != null) {
+            suddenBrakeTimeline.stop();
+            suddenBrakeTimeline = null;
+        }
+        if (commitCg && pendingBrakeReveal != null) {
+            Runnable reveal = pendingBrakeReveal;
+            pendingBrakeReveal = null;
+            reveal.run();
+        } else {
+            pendingBrakeReveal = null;
+        }
     }
 
     private void applyCameraAngle(StageCue.CameraAngle angle, boolean inCgMode) {
@@ -1329,19 +2024,20 @@ public class EncounterView extends StackPane {
         flash.play();
     }
 
-    private void setSpeakerFocus(boolean maleActive, boolean femActive) {
+    private void setSpeakerFocus(boolean maleActive, boolean femActive, boolean conductorActive) {
         animateSpeakerLighting(
                 maleActive ? ACTIVE_BRIGHTNESS : LISTENING_BRIGHTNESS,
-                femActive ? ACTIVE_BRIGHTNESS : LISTENING_BRIGHTNESS
+                femActive ? ACTIVE_BRIGHTNESS : LISTENING_BRIGHTNESS,
+                conductorActive ? ACTIVE_BRIGHTNESS : LISTENING_BRIGHTNESS
         );
     }
 
     private void setBothBalanced() {
-        animateSpeakerLighting(NARRATION_BRIGHTNESS, NARRATION_BRIGHTNESS);
+        animateSpeakerLighting(NARRATION_BRIGHTNESS, NARRATION_BRIGHTNESS, NARRATION_BRIGHTNESS);
     }
 
     // Smoothly shifts lighting toward the active speaker instead of abruptly snapping or zooming the camera.
-    private void animateSpeakerLighting(double targetMale, double targetFem) {
+    private void animateSpeakerLighting(double targetMale, double targetFem, double targetConductor) {
         if (focusFadeTimeline != null) {
             focusFadeTimeline.stop();
             focusFadeTimeline = null;
@@ -1349,7 +2045,8 @@ public class EncounterView extends StackPane {
         focusFadeTimeline = new Timeline(
                 new KeyFrame(Duration.millis(220),
                         new KeyValue(maleTone.brightnessProperty(), targetMale, Interpolator.EASE_OUT),
-                        new KeyValue(femTone.brightnessProperty(), targetFem, Interpolator.EASE_OUT))
+                        new KeyValue(femTone.brightnessProperty(), targetFem, Interpolator.EASE_OUT),
+                        new KeyValue(conductorTone.brightnessProperty(), targetConductor, Interpolator.EASE_OUT))
         );
         focusFadeTimeline.setOnFinished(e -> focusFadeTimeline = null);
         focusFadeTimeline.play();
@@ -1435,6 +2132,10 @@ public class EncounterView extends StackPane {
     }
 
     private void resetSpriteTransforms() {
+        if (conductorAnimTimeline != null) {
+            conductorAnimTimeline.stop();
+            conductorAnimTimeline = null;
+        }
         if (femAnimTimeline != null) {
             femAnimTimeline.stop();
             femAnimTimeline = null;
@@ -1443,6 +2144,12 @@ public class EncounterView extends StackPane {
             maleAnimTimeline.stop();
             maleAnimTimeline = null;
         }
+
+        conductorSpriteView.setScaleX(1.0);
+        conductorSpriteView.setScaleY(1.0);
+        conductorSpriteView.setOpacity(1.0);
+        conductorSpriteView.setTranslateX(0.0);
+        conductorSlot.setVisible(conductorOnStage);
 
         femSpriteView.setScaleX(1.0);
         femSpriteView.setScaleY(1.0);

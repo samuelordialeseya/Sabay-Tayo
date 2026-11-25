@@ -86,6 +86,11 @@
     -fx-border-color: #f7b296;
 }
 
+.vn-nameplate-conductor {
+    -fx-background-color: linear-gradient(to bottom, #2f4668 0%, #1f304a 100%);
+    -fx-border-color: #9ec8f5;
+}
+
 .vn-speaker-label {
     -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     -fx-text-fill: #fff6ec;
@@ -518,4 +523,64 @@
     -fx-background-color: #c44754;
     -fx-border-color: #f28b82;
     -fx-text-fill: #ffffff;
+}
+
+/* 10. MISSING EVENT CG PLACEHOLDER OVERLAY (DEV / TESTING MODE) */
+.cg-placeholder-backdrop {
+    -fx-background-color: rgba(12, 9, 20, 0.58);
+}
+
+.cg-placeholder-card {
+    -fx-background-color: rgba(24, 17, 34, 0.90);
+    -fx-background-radius: 14px;
+    -fx-border-color: #f5b878;
+    -fx-border-width: 2px;
+    -fx-border-radius: 14px;
+    -fx-border-style: segments(10, 6) line-cap round;
+    -fx-padding: 22px 28px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.72), 20, 0.2, 0, 6);
+}
+
+.cg-placeholder-tag {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fde09b;
+}
+
+.cg-placeholder-file {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffcf99;
+    -fx-background-color: rgba(245, 184, 120, 0.14);
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 12px;
+}
+
+.cg-placeholder-desc {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 15px;
+    -fx-text-fill: #f0dde6;
+    -fx-text-alignment: CENTER;
+}
+
+.cg-placeholder-hint {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: #bfa7b5;
+}
+
+.cg-continue-pill {
+    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fde09b;
+    -fx-background-color: rgba(24, 17, 34, 0.86);
+    -fx-background-radius: 20px;
+    -fx-border-color: #c87d76;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 20px;
+    -fx-padding: 9px 22px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 12, 0, 0, 3);
 }
