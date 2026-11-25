@@ -40,6 +40,12 @@ public class DialogueBeatTest {
         check("Stranger beat speaker is Fatima", "Fatima".equals(b3.getSpeaker()));
         check("Stranger beat text strips Stranger: prefix", "Aray! Grabe naman 'yon!".equals(b3.getText()));
 
+        // 3b. Conductor beat
+        String conductorLine = "Conductor: Grand Terminal Batangas!";
+        DialogueBeat b3c = DialogueBeat.fromLine(conductorLine, player, stranger);
+        check("Conductor beat speaker is Conductor", "Conductor".equals(b3c.getSpeaker()));
+        check("Conductor beat text strips Conductor: prefix", "Grand Terminal Batangas!".equals(b3c.getText()));
+
         // 4. Token formatting inside beat
         String tokenLine = "{S_they} glanced briefly at the empty space beside {s_them}.";
         DialogueBeat b4 = DialogueBeat.fromLine(tokenLine, player, stranger);

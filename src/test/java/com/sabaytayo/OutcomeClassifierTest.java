@@ -57,7 +57,21 @@ public class OutcomeClassifierTest {
         check("Respect 50 + Annoyance 22 + Trust 40 -> RivalOutcome",
                 classifier.classify(rivalStats) instanceof RivalOutcome);
 
-        // 7. Null guard
+        // 7. Polymorphic Ending CG & badge paths on all 5 Outcome classes
+        Outcome[] allOutcomes = {
+            new BlockedOutcome(), new LoverOutcome(), new BestFriendOutcome(),
+            new RivalOutcome(), new AcquaintanceOutcome()
+        };
+        for (Outcome o : allOutcomes) {
+            check(o.getTitle() + " provides Ending CG path",
+                    o.getEndingCgPath() != null && o.getEndingCgPath().startsWith("/assets/CG/cg_ending_"));
+            check(o.getTitle() + " provides Badge path",
+                    o.getBadgePath() != null && o.getBadgePath().startsWith("/assets/ui/endings/badge_ending_"));
+        }
+        check("BlockedOutcome uses cold BGM tone", new BlockedOutcome().isColdTone());
+        check("LoverOutcome plays reveal chime", new LoverOutcome().playsChimeOnReveal());
+
+        // 8. Null guard
         boolean threwNull = false;
         try {
             classifier.classify(null);

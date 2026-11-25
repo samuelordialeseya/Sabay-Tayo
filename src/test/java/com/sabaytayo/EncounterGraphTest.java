@@ -80,6 +80,28 @@ public class EncounterGraphTest {
         }
         check("All 12 scenes & choices have zero unresolved tokens across all 9 pronoun pairs", true);
 
+        // Verify S08 branch preparation (Lovers -> "Sabay tayo?" only; Blocked -> Option B exit; Standard -> 4 choices)
+        RelationshipStats loverStats = new RelationshipStats();
+        loverStats.adjustTrust(20);
+        loverStats.adjustAttraction(15);
+        encounter.prepareFinalScene(loverStats);
+        Scene loversS08 = encounter.getScene("S08");
+        check("Lovers S08 configures LOVERS variant", "LOVERS".equals(encounter.getS08Variant()));
+        check("Lovers S08 has only Sabay tayo? choice",
+                loversS08.getChoices().size() == 1 && loversS08.getChoices().get(0).getText().contains("Sabay tayo?"));
+
+        RelationshipStats blockedStats = new RelationshipStats();
+        blockedStats.adjustAnnoyance(25);
+        encounter.prepareFinalScene(blockedStats);
+        Scene blockedS08 = encounter.getScene("S08");
+        check("Blocked S08 configures BLOCKED variant", "BLOCKED".equals(encounter.getS08Variant()));
+        check("Blocked S08 uses Option B line Excuse me. Dito na ako.",
+                blockedS08.getDialogueLines().stream().anyMatch(l -> l.contains("Excuse me. Dito na ako.")));
+
+        encounter.prepareFinalScene(new RelationshipStats());
+        check("Default stats restore STANDARD S08 with 4 choices",
+                "STANDARD".equals(encounter.getS08Variant()) && encounter.getScene("S08").getChoices().size() == 4);
+
         System.out.println("\n===== ENCOUNTER GRAPH TEST SUMMARY =====");
         System.out.println("Passed: " + passed + " | Failed: " + failed);
         if (failed > 0) {

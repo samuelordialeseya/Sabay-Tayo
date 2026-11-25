@@ -46,6 +46,19 @@ public class RelationshipStatsTest {
         }
         check("Invalid stat index throws IllegalArgumentException", threwInvalidIndex);
 
+        int[] snap = stats.snapshot();
+        stats.adjustTrust(55);
+        stats.restore(snap);
+        check("restore() rolls back RelationshipStats to snapshot",
+                stats.getTrust() == snap[0] && stats.getAttraction() == snap[1]
+                        && stats.getRespect() == snap[2] && stats.getAnnoyance() == snap[3]);
+
+        Momentum m = new Momentum();
+        m.setValue(99);
+        check("Momentum.setValue clamps upper bound to +5", m.getValue() == 5);
+        m.setValue(-99);
+        check("Momentum.setValue clamps lower bound to -5", m.getValue() == -5);
+
         System.out.println("\n===== RELATIONSHIP STATS TEST SUMMARY =====");
         System.out.println("Passed: " + passed + " | Failed: " + failed);
         if (failed > 0) {
