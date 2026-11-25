@@ -19,6 +19,11 @@ public class Momentum {
         return this.value;
     }
 
+    // Sets momentum directly within [-5, +5] (used by debug Back/Rewind)
+    public void setValue(int value) {
+        this.value = Math.max(-5, Math.min(5, value));
+    }
+
     // Returns 1.5 if momentum >= 3, 0.5 if momentum <= -3, else 1.0
     public double getMultiplier() {
         if (this.value >= 3) {
