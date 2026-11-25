@@ -15,6 +15,9 @@ public class Encounter {
     // Tracks whether the game has ended (after the final choice in S08)
     private boolean gameOver;
 
+    // Active S08 branch ("STANDARD", "LOVERS", or "BLOCKED")
+    private String s08Variant = "STANDARD";
+
     // Builds the full scene graph and starts at Scene 1.
     public Encounter() {
         scenes = new HashMap<>();
@@ -26,9 +29,11 @@ public class Encounter {
     // Constructs all 12 scenes and adds them to the HashMap.
     private void buildSceneGraph() {
 
-        // S01: The Empty Seat (Opening Scene - Non-verbal commuter realism)
+        // S01: The Empty Seat (Opening Scene - Bus stop wait -> boarding aisle -> asking to sit)
         Scene s01 = new Scene("S01");
-        s01.addDialogueLine("It was a rainy afternoon. The bus was almost full, and most passengers were looking at their phones or quietly resting. You noticed an empty seat beside a stranger by the window wearing earphones.");
+        s01.addDialogueLine("It was a rainy afternoon. You stood under the bus stop shelter, watching the wet street as rain pattered onto the asphalt.");
+        s01.addDialogueLine("You: Oh, here's the bus!");
+        s01.addDialogueLine("You stepped inside and looked down the crowded aisle. Almost every seat was taken—until you spotted one last empty seat beside a stranger by the window wearing earphones.");
         s01.addDialogueLine("You: Excuse me, may nakaupo ba rito?");
         s01.addDialogueLine("{S_they} glanced briefly at the empty space beside {s_them}, gently shifted {s_their} bag onto {s_their} lap, and gave a small nod. You settled in as the bus rolled into the afternoon traffic.");
         s01.addChoice(new ContinueChoice("Continue...", "S02"));
@@ -66,6 +71,7 @@ public class Encounter {
 
         // S03: The Sudden Brake - Turn 2 (Branches to post-brake beats S04A, S04B, S04C)
         Scene s03 = new Scene("S03");
+        s03.addDialogueLine("....");
         s03.addDialogueLine("A vehicle suddenly stopped in front of the bus. The driver slammed on the brakes! {S_they} lurched forward and lightly hit {s_their} head on the seat in front.");
         s03.addDialogueLine("Stranger: Aray! Grabe naman 'yon!");
         s03.addDialogueLine("{S_they} immediately held {s_their} head and frowned. You noticed what happened and wondered how you should react.");
@@ -248,12 +254,13 @@ public class Encounter {
         ));
         scenes.put("S06B", s06b);
 
-        // S07: MERGE - Almost There (Lianne Sc 10 - Turn 5)
+        // S07: MERGE - Almost There (Conductor calls out Grand Terminal Batangas, then leaves before choices)
         Scene s07 = new Scene("S07");
-        s07.addDialogueLine("Time passed, and the bus was getting closer to your destination. Several passengers began standing up to prepare for their stops. {S_they} checked {s_their} phone and looked outside.");
-        s07.addDialogueLine("You realized you might not have another opportunity to speak before going your separate ways.");
+        s07.addDialogueLine("Time passed as the bus neared the terminal. The conductor stepped up the aisle, tapping his ticket puncher against the rail.");
+        s07.addDialogueLine("Conductor: Grand Terminal Batangas! Grand Terminal na tayo—mga bababa sa terminal, maghanda na!");
+        s07.addDialogueLine("The conductor moved further down the aisle. {S_they} glanced out the window as you realized you might not have another opportunity to speak before getting off.");
         s07.addChoice(new SincereChoice(
-            "[Sincere] \"Mukhang malapit ka na rin sa bababaan mo. Ingat ka pauwi.\"",
+            "[Sincere] \"Mukhang malapit na tayo sa Grand Terminal. Ingat ka pauwi.\"",
             "S08",
             "Ikaw rin. Ingat.",
             "Ikaw rin. Ingat."
@@ -265,7 +272,7 @@ public class Encounter {
             "Oo nga. Buti nakarating din."
         ));
         s07.addChoice(new BluntChoice(
-            "[Blunt] \"Dito na yata ako bababa. Mauna na ako.\"",
+            "[Blunt] \"Grand Terminal na pala. Malapit na akong bumaba.\"",
             "S08",
             "Ah, sige. Ingat.",
             "Ah, sige. Ingat."
@@ -283,21 +290,26 @@ public class Encounter {
         ));
         scenes.put("S07", s07);
 
-        // S08: Before the Ride Ends (Lianne Sc 11 + Sc 12 transition - Final Interaction -> ENDING)
+        // S08: Before the Ride Ends (Default STANDARD branch; reconfigured dynamically by prepareFinalScene)
+        scenes.put("S08", buildStandardS08());
+    }
+
+    // Builds the standard S08 exit lookback scene (Best Friends / Rivals / Just Strangers).
+    private Scene buildStandardS08() {
         Scene s08 = new Scene("S08");
-        s08.addDialogueLine("The bus finally approached your stop. You stood up and prepared to leave. Before stepping away, you looked at {s_them} one last time.");
-        s08.addDialogueLine("You wondered what to say before stepping off into the cool air after the rain.");
+        s08.addDialogueLine("Conductor: Wala na ba? Wala nang bababa?");
+        s08.addDialogueLine("The bus finally approached your stop. You stood up and prepared to leave, looking back at {s_them} one last time.");
         s08.addChoice(new SincereChoice(
-            "[Sincere] \"It was nice meeting you. Ingat ka lagi.\"",
+            "[Sincere] \"Dito na pala ako! Wait—ano nga ulit IG mo? Para makapag-usap pa tayo kahit paano.\"",
             "ENDING",
-            "\"Nice meeting you, too. Ingat!\" You gave {s_them} a small nod before stepping off the bus.",
-            "\"Ingat din.\" You gave {s_them} a small nod before stepping off the bus."
+            "(Natawa nang mahina at kinuha ang phone.) \"Sure! Follow mo na lang ako—ingat ka pauwi!\" {S_they} waved warmly as you stepped off the bus.",
+            "\"Ah... sige, ingat ka.\" You gave {s_them} a polite nod before stepping off the bus."
         ));
         s08.addChoice(new SarcasticChoice(
-            "[Sarcastic] \"Baka next time magkita ulit tayo rito. Sana hindi na traffic.\"",
+            "[Sarcastic] \"Dito na 'ko. Huwag ka sanang ma-late bukas!\"",
             "ENDING",
-            "(Bahagyang natawa.) \"Sana nga. Ingat!\" You smiled and headed toward the bus exit.",
-            "\"Sana nga. Ingat.\" You made your way toward the bus exit."
+            "(Napairap nang nakangiti.) \"Mas nauna pa akong sumakay sa'yo. Ingat na lang!\" You smirked and headed toward the exit.",
+            "\"Sige. Ingat.\" {S_they} answered briefly as you made your way toward the exit."
         ));
         s08.addChoice(new BluntChoice(
             "[Blunt] \"Sige, mauna na ako. Ingat.\"",
@@ -310,13 +322,54 @@ public class Encounter {
             "ENDING",
             "You stepped off the bus without another word and felt the cool air after the rain as the bus slowly moved away."
         ));
-        s08.addChoice(new FlirtyChoice(
-            "[Flirty] \"I was hoping we could talk again sometime. Would it be okay if I asked for your number?\"",
-            "ENDING",
-            "(Briefly surprised, then smiled softly.) \"Ah... sure. Okay lang naman. Maybe we can see.\"",
-            "(Briefly surprised.) \"Ah... maybe next time na lang. Ingat.\""
-        ));
-        scenes.put("S08", s08);
+        return s08;
+    }
+
+    // Configures S08 right before entering it so Lovers and Blocked (Option B) play their dedicated sequences.
+    public void prepareFinalScene(RelationshipStats stats) {
+        Outcome projected = (stats != null) ? new OutcomeClassifier().classify(stats) : new AcquaintanceOutcome();
+
+        if (projected instanceof BlockedOutcome) {
+            s08Variant = "BLOCKED";
+            Scene s08 = new Scene("S08");
+            s08.addDialogueLine("Conductor: Wala na ba? Wala nang bababa?");
+            s08.addDialogueLine("{S_they} didn't wait for you to stand up. {S_they} abruptly grabbed {s_their} bag and stood up first.");
+            s08.addDialogueLine("Stranger: Excuse me. Dito na ako.");
+            s08.addDialogueLine("{S_they} walked straight past you toward the exit without looking back.");
+            s08.addChoice(new ContinueChoice("Continue...", "ENDING"));
+            s08.setDefaultNextSceneId("ENDING");
+            scenes.put("S08", s08);
+            return;
+        }
+
+        if (projected instanceof LoverOutcome) {
+            s08Variant = "LOVERS";
+            Scene s08 = new Scene("S08");
+            s08.addDialogueLine("Conductor: Wala na ba? Wala nang bababa?");
+            s08.addDialogueLine("You: Wait—saan ka nga ulit bababa?");
+            s08.addDialogueLine("Stranger: Sa Ayala pa ako. Bakit?");
+            s08.addDialogueLine("You: Hmm... may oras pa naman ako.");
+            s08.addChoice(new FlirtyChoice(
+                "[Flirty] \"Sabay tayo?\"",
+                "ENDING",
+                "(Nagulat saglit, then smiled softly.) \"Sige... sabay tayo.\" You stayed right there in your seat beside {s_them} as the bus continued toward Ayala.",
+                "(Nagulat saglit, then smiled softly.) \"Sige... sabay tayo.\" You stayed right there in your seat beside {s_them} as the bus continued toward Ayala."
+            ) {
+                @Override
+                public boolean isUnlocked(Momentum momentum) {
+                    return true;
+                }
+            });
+            scenes.put("S08", s08);
+            return;
+        }
+
+        s08Variant = "STANDARD";
+        scenes.put("S08", buildStandardS08());
+    }
+
+    public String getS08Variant() {
+        return s08Variant;
     }
 
     // Returns the scene currently being displayed.
