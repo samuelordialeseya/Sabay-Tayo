@@ -15,4 +15,19 @@ public class AcquaintanceOutcome extends Outcome {
     public boolean matches(RelationshipStats stats) {
         return true;
     }
+
+    @Override
+    public String getEndingCgPath() {
+        return "/assets/CG/cg_ending_strangers.png";
+    }
+
+    @Override
+    public String getBadgePath() {
+        return "/assets/ui/endings/badge_ending_strangers.png";
+    }
+
+    @Override
+    public String getEndingCgDescription() {
+        return "MC standing alone under the rainy bus stop shelter watching the red taillights disappear down the wet street.";
+    }
 }

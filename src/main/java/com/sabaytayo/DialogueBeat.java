@@ -48,6 +48,12 @@ public class DialogueBeat {
             return new DialogueBeat(strangerName, quote);
         }
 
+        // Check if the line is spoken by the bus conductor
+        if (formatted.startsWith("Conductor: ")) {
+            String quote = formatted.substring(11).trim();
+            return new DialogueBeat("Conductor", quote);
+        }
+
         // Otherwise it is narration / ambient description
         return new DialogueBeat("Narrator", formatted);
     }

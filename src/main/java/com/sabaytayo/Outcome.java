@@ -27,4 +27,23 @@ public abstract class Outcome {
 
     // Each concrete outcome defines its own stat threshold rules.
     public abstract boolean matches(RelationshipStats stats);
+
+    // Resource path to the 16:9 Ending CG summarizing this outcome.
+    public abstract String getEndingCgPath();
+
+    // Resource path to the commemorative badge icon for this outcome.
+    public abstract String getBadgePath();
+
+    // Short shot description displayed when Dev CG placeholders are enabled and the PNG is missing.
+    public abstract String getEndingCgDescription();
+
+    // Cold outcomes switch the ending music to the melancholic lo-fi piano track.
+    public boolean isColdTone() {
+        return false;
+    }
+
+    // Romantic outcome triggers a soft chime on reveal.
+    public boolean playsChimeOnReveal() {
+        return false;
+    }
 }

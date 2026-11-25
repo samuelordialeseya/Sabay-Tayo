@@ -75,6 +75,16 @@ public class RelationshipStats {
         return Arrays.copyOf(values, values.length);
     }
 
+    // Restores all 4 relationship stats from a saved snapshot (used by debug Back/Rewind)
+    public void restore(int[] snapshot) {
+        if (snapshot == null || snapshot.length != values.length) {
+            throw new IllegalArgumentException("Invalid stats snapshot.");
+        }
+        for (int i = 0; i < values.length; i++) {
+            values[i] = clamp(snapshot[i]);
+        }
+    }
+
     public static String[] getLabels() {
         return Arrays.copyOf(LABELS, LABELS.length);
     }

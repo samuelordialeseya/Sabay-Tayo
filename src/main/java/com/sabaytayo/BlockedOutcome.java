@@ -15,4 +15,24 @@ public class BlockedOutcome extends Outcome {
     public boolean matches(RelationshipStats stats) {
         return stats.get(RelationshipStats.ANNOYANCE) >= 34;
     }
+
+    @Override
+    public String getEndingCgPath() {
+        return "/assets/CG/cg_ending_blocked.png";
+    }
+
+    @Override
+    public String getBadgePath() {
+        return "/assets/ui/endings/badge_ending_blocked.png";
+    }
+
+    @Override
+    public String getEndingCgDescription() {
+        return "View past the empty pink window seat through rain-streaked glass as the Stranger walks away down the wet street without looking back.";
+    }
+
+    @Override
+    public boolean isColdTone() {
+        return true;
+    }
 }

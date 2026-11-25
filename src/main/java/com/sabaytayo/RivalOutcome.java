@@ -17,4 +17,19 @@ public class RivalOutcome extends Outcome {
             && stats.get(RelationshipStats.ANNOYANCE) >= 22
             && stats.get(RelationshipStats.TRUST) < 50;
     }
+
+    @Override
+    public String getEndingCgPath() {
+        return "/assets/CG/cg_ending_rivals.png";
+    }
+
+    @Override
+    public String getBadgePath() {
+        return "/assets/ui/endings/badge_ending_rivals.png";
+    }
+
+    @Override
+    public String getEndingCgDescription() {
+        return "Eye-level POV from the bus aisle as the Stranger crosses her arms with a playful, unimpressed \"whatever\" side-glance.";
+    }
 }
