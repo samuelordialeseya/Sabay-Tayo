@@ -6,12 +6,15 @@
 - **Character & Pronoun Customization (`StartView`):** Set your name and choose pronouns (`He/Him`, `She/Her`, `They/Them`) for both the player and your seatmate.
 - **12-Scene Two-Lane Dialogue Graph (`Encounter`, `Scene`):** Branches at the sudden brake incident (`S03` -> `S04A`/`S04B`/`S04C`), splits into a Warm Lane (`S05A` -> `S06A`) or Cold Lane (`S05B` -> `S06B`) based on Momentum, merges at `S07`, and resolves into `S08` (`LOVERS`, `BLOCKED`, or `STANDARD`).
 - **5 Relationship Outcomes (`OutcomeClassifier`):** `BlockedOutcome`, `LoverOutcome`, `BestFriendOutcome`, `RivalOutcome`, and `AcquaintanceOutcome`.
-- **Visual Novel Stage & Audio (`EncounterView`, `EndingView`, `StageCue`, `GameApplication`):** Per-beat expressions, Event CG angle cuts, conductor aisle cameo, animated rain/streetlight atmosphere, warm/cold adaptive BGM, rain-bus ambient loop, Foley/UI SFX, and outcome-specific Ending CGs revealed before the final results & badge card.
+- **Visual Novel Stage & Audio (`EncounterView`, `EndingView`, `StageCue`, `GameApplication`):** Per-beat expressions, Event CG angle cuts, conductor aisle cameo, animated rain/streetlight atmosphere, dedicated Main Menu, warm/cold dialogue, Sudden Brake, and per-ending BGM tracks, rain-bus ambient loop, Foley/UI SFX, and outcome-specific Ending CGs revealed before the final results & badge card.
 
 ## Project Structure
 - `src/main/java/com/sabaytayo/` — Core OOP models, scene graph, JavaFX views, and custom exceptions
 - `src/main/resources/assets/` — Character sprites (`MC/`, `FEM-C/`, `CONDUCTOR/`), backgrounds (`BACKGROUNDS/`), Event CGs (`CG/`), and audio (`AUDIO/`)
 - `src/test/java/com/sabaytayo/` — Unit tests for dialogue beats, scene graph reachability, stats, pronouns, outcome classification, and stage cues
+
+## Audio Credits
+Menu, sudden brake, and ending BGM tracks (`bgm_main_menu.mp3`, `bgm_sudden_brake.mp3`, `bgm_ending_*.mp3`) include music by Kevin MacLeod ([incompetech.com](https://incompetech.com)), licensed under Creative Commons: By Attribution 4.0 License (`Late Night Radio`, `I Can Feel it Coming`, `Clear Air`, `Montauk Point`, `Past Sadness`, `Loopster`, `Immersed`).
 
 ## How to Run (Temporary Guide)
 
