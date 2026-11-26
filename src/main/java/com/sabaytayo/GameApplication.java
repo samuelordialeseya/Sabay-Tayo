@@ -7,7 +7,6 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -182,50 +181,16 @@ public class GameApplication extends Application {
         }
     }
 
-    public boolean isSfxMuted() {
-        return sfxMuted;
-    }
-
-    public void setSfxMuted(boolean muted) {
-        this.sfxMuted = muted;
-        syncAmbientAudioState();
-    }
-
-    public double getSfxVolume() {
-        return sfxVolume;
-    }
-
-    public void setSfxVolume(double volume) {
-        this.sfxVolume = Math.max(0.0, Math.min(1.0, volume));
-        if (this.sfxVolume > 0.0 && sfxMuted) {
-            sfxMuted = false;
-        }
-        syncAmbientAudioState();
-    }
-
     public int getTypingDelayMs() {
         return typingDelayMs;
-    }
-
-    public void setTypingDelayMs(int delayMs) {
-        this.typingDelayMs = Math.max(6, Math.min(45, delayMs));
     }
 
     public boolean isAtmosphereEnabled() {
         return atmosphereEnabled;
     }
 
-    public void setAtmosphereEnabled(boolean enabled) {
-        this.atmosphereEnabled = enabled;
-        syncAmbientAudioState();
-    }
-
     public boolean isCgPlaceholderEnabled() {
         return cgPlaceholderEnabled;
-    }
-
-    public void setCgPlaceholderEnabled(boolean enabled) {
-        this.cgPlaceholderEnabled = enabled;
     }
 
     // Loads and loops the main menu background track on startup.
@@ -316,67 +281,6 @@ public class GameApplication extends Application {
 
     public boolean isMusicMuted() {
         return musicMuted;
-    }
-
-    // Updates background music volume (0.0 to 1.0) and unmutes if raised above 0.
-    public void setMusicVolume(double volume) {
-        if (volume < 0.0) {
-            volume = 0.0;
-        } else if (volume > 1.0) {
-            volume = 1.0;
-        }
-        this.musicVolume = volume;
-        if (volume > 0.0 && musicMuted) {
-            musicMuted = false;
-        }
-        if (bgmPlayer != null) {
-            bgmPlayer.setVolume(musicVolume);
-            bgmPlayer.setMute(musicMuted);
-        }
-    }
-
-    public double getMusicVolume() {
-        return musicVolume;
-    }
-
-    // Creates a compact Music mute toggle + volume slider synced to the background music player.
-    public HBox createMusicControlBar() {
-        Button musicBtn = new Button();
-        musicBtn.getStyleClass().add("vn-sub-button");
-        musicBtn.setFocusTraversable(false);
-
-        Slider volumeSlider = new Slider(0.0, 1.0, musicVolume);
-        volumeSlider.getStyleClass().add("volume-slider");
-        volumeSlider.setPrefWidth(88);
-        volumeSlider.setFocusTraversable(false);
-
-        Runnable refreshLabel = () -> {
-            musicBtn.setText(musicMuted ? "Music: OFF" : "Music: ON");
-            if (!musicMuted) {
-                if (!musicBtn.getStyleClass().contains("vn-sub-button-active")) {
-                    musicBtn.getStyleClass().add("vn-sub-button-active");
-                }
-            } else {
-                musicBtn.getStyleClass().remove("vn-sub-button-active");
-            }
-        };
-        refreshLabel.run();
-
-        musicBtn.setOnAction(e -> {
-            toggleMusicMute();
-            refreshLabel.run();
-        });
-
-        volumeSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            setMusicVolume(newVal.doubleValue());
-            refreshLabel.run();
-        });
-
-        HBox bar = new HBox(6, musicBtn, volumeSlider);
-        bar.setAlignment(Pos.CENTER);
-        bar.setMaxWidth(Region.USE_PREF_SIZE);
-        bar.setMaxHeight(Region.USE_PREF_SIZE);
-        return bar;
     }
 
     // Creates a compact window control bar (Minimize — and Close ✕) for the top right

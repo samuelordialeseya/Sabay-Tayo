@@ -87,10 +87,7 @@ public class StartView extends StackPane {
         // Display the opening menu
         showMainMenu();
 
-        HBox musicBar = app.createMusicControlBar();
-        musicBar.getStyleClass().add("music-pill");
-
-        HBox topControls = new HBox(12, musicBar, app.createWindowControlBar());
+        HBox topControls = app.createWindowControlBar();
         topControls.setAlignment(Pos.CENTER_RIGHT);
         topControls.setMaxWidth(Region.USE_PREF_SIZE);
         topControls.setMaxHeight(Region.USE_PREF_SIZE);
