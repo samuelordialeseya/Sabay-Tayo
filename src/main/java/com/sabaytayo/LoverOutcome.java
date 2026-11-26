@@ -34,6 +34,11 @@ public class LoverOutcome extends Outcome {
     }
 
     @Override
+    public String getEndingBgmPath() {
+        return "/assets/AUDIO/bgm_ending_lovers.mp3";
+    }
+
+    @Override
     public boolean playsChimeOnReveal() {
         return true;
     }

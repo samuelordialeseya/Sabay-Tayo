@@ -32,4 +32,9 @@ public class RivalOutcome extends Outcome {
     public String getEndingCgDescription() {
         return "Eye-level POV from the bus aisle as the Stranger crosses her arms with a playful, unimpressed \"whatever\" side-glance.";
     }
+
+    @Override
+    public String getEndingBgmPath() {
+        return "/assets/AUDIO/bgm_ending_rivals.mp3";
+    }
 }

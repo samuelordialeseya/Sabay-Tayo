@@ -30,4 +30,9 @@ public class AcquaintanceOutcome extends Outcome {
     public String getEndingCgDescription() {
         return "MC standing alone under the rainy bus stop shelter watching the red taillights disappear down the wet street.";
     }
+
+    @Override
+    public String getEndingBgmPath() {
+        return "/assets/AUDIO/bgm_ending_strangers.mp3";
+    }
 }

@@ -32,6 +32,11 @@ public class BlockedOutcome extends Outcome {
     }
 
     @Override
+    public String getEndingBgmPath() {
+        return "/assets/AUDIO/bgm_ending_blocked.mp3";
+    }
+
+    @Override
     public boolean isColdTone() {
         return true;
     }

@@ -37,7 +37,10 @@ public abstract class Outcome {
     // Short shot description displayed when Dev CG placeholders are enabled and the PNG is missing.
     public abstract String getEndingCgDescription();
 
-    // Cold outcomes switch the ending music to the melancholic lo-fi piano track.
+    // Resource path to the background music track played on this ending screen.
+    public abstract String getEndingBgmPath();
+
+    // Cold outcomes switch the ending visual tone and curtain pacing.
     public boolean isColdTone() {
         return false;
     }

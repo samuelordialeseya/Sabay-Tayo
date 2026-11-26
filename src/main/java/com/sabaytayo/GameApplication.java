@@ -21,8 +21,10 @@ import javafx.stage.StageStyle;
 // Main JavaFX Application class managing the window stage and transitions across views.
 public class GameApplication extends Application {
 
+    public static final String BGM_MENU_PATH = "/assets/AUDIO/bgm_main_menu.mp3";
     public static final String BGM_WARM_PATH = "/assets/AUDIO/closer_acoustic.mp3";
     public static final String BGM_COLD_PATH = "/assets/AUDIO/bgm_cold_melancholy.mp3";
+    public static final String BGM_SUDDEN_BRAKE_PATH = "/assets/AUDIO/bgm_sudden_brake.mp3";
     private static final String AMBIENT_RAIN_BUS_PATH = "/assets/AUDIO/sfx_rain_bus_loop.mp3";
     private static final double DEFAULT_BGM_VOLUME = 0.14;
     private static final double DEFAULT_SFX_VOLUME = 0.45;
@@ -31,7 +33,7 @@ public class GameApplication extends Application {
     private Stage primaryStage;
     private Scene activeScene;
     private MediaPlayer bgmPlayer;
-    private String currentBgmPath = BGM_WARM_PATH;
+    private String currentBgmPath = null;
     private boolean musicMuted = false;
     private double musicVolume = DEFAULT_BGM_VOLUME;
 
@@ -226,12 +228,22 @@ public class GameApplication extends Application {
         this.cgPlaceholderEnabled = enabled;
     }
 
-    // Loads and loops the background instrumental track throughout the game.
+    // Loads and loops the main menu background track on startup.
     private void startBackgroundMusic() {
-        switchBackgroundMusic(BGM_WARM_PATH);
+        switchBackgroundMusic(BGM_MENU_PATH);
     }
 
-    // Switches the looping background music track when entering warm/cold story lanes or endings.
+    // Stops and disposes the active background music track (e.g. tense silence before the sudden brake).
+    public void stopBackgroundMusic() {
+        if (bgmPlayer != null) {
+            bgmPlayer.stop();
+            bgmPlayer.dispose();
+            bgmPlayer = null;
+        }
+        currentBgmPath = null;
+    }
+
+    // Switches the looping background music track across menus, dialogue lanes, sudden brake, and endings.
     public void switchBackgroundMusic(String resourcePath) {
         if (resourcePath == null) {
             return;
@@ -239,11 +251,7 @@ public class GameApplication extends Application {
         if (bgmPlayer != null && resourcePath.equals(currentBgmPath)) {
             return;
         }
-        if (bgmPlayer != null) {
-            bgmPlayer.stop();
-            bgmPlayer.dispose();
-            bgmPlayer = null;
-        }
+        stopBackgroundMusic();
         currentBgmPath = resourcePath;
         try {
             URL audioUrl = getClass().getResource(resourcePath);
@@ -399,11 +407,7 @@ public class GameApplication extends Application {
 
     @Override
     public void stop() {
-        if (bgmPlayer != null) {
-            bgmPlayer.stop();
-            bgmPlayer.dispose();
-            bgmPlayer = null;
-        }
+        stopBackgroundMusic();
         if (ambientPlayer != null) {
             ambientPlayer.stop();
             ambientPlayer.dispose();
@@ -414,7 +418,7 @@ public class GameApplication extends Application {
     // Switches the screen to the character setup / start view
     public void showStart() {
         stopBusAmbience();
-        switchBackgroundMusic(BGM_WARM_PATH);
+        switchBackgroundMusic(BGM_MENU_PATH);
         this.stats = new RelationshipStats();
         this.momentum = new Momentum();
         this.activeEncounterView = null;

@@ -32,4 +32,9 @@ public class BestFriendOutcome extends Outcome {
     public String getEndingCgDescription() {
         return "MC stepping onto the rainy curb as the Stranger smiles and waves from the bus window holding her phone.";
     }
+
+    @Override
+    public String getEndingBgmPath() {
+        return "/assets/AUDIO/bgm_ending_bestfriend.mp3";
+    }
 }
