@@ -35,7 +35,7 @@ public class Encounter {
         s01.addDialogueLine("You: Oh, here's the bus!");
         s01.addDialogueLine("You stepped inside and looked down the crowded aisle. Almost every seat was taken—until you spotted one last empty seat beside a stranger by the window wearing earphones.");
         s01.addDialogueLine("You: Excuse me, may nakaupo ba rito?");
-        s01.addDialogueLine("{S_they} glanced briefly at the empty space beside {s_them}, gently shifted {s_their} bag onto {s_their} lap, and gave a small nod. You settled in as the bus rolled into the afternoon traffic.");
+        s01.addDialogueLine("{S_they} glanced briefly at the empty space beside {s_them}, gently shifted {s_their} bag onto {s_their} lap, and gave {player} a small nod as {they} settled into {their} seat.");
         s01.addChoice(new ContinueChoice("Continue...", "S02"));
         s01.setDefaultNextSceneId("S02");
         scenes.put("S01", s01);
@@ -128,7 +128,7 @@ public class Encounter {
         s05a.addDialogueLine("A few minutes later, traffic started to ease. {S_they} put {s_their} phone down, no longer as occupied as before. You took the chance to introduce yourself.");
         s05a.addDialogueLine("You: By the way, I don't think we've introduced ourselves yet. I'm {player}.");
         s05a.addDialogueLine("Stranger: Oh. I'm {seatmate}. Nice to meet you.");
-        s05a.addDialogueLine("{S_they} gave a small, polite smile before checking the road signs outside. You wondered what to ask next.");
+        s05a.addDialogueLine("{S_they} gave {player} a small, polite smile before checking the road signs outside, leaving {them} wondering what to ask next.");
         s05a.addChoice(new SincereChoice(
             "[Sincere] \"Madalas ka bang sumakay sa bus na 'to?\"",
             "S06A",
@@ -298,10 +298,11 @@ public class Encounter {
     private Scene buildStandardS08() {
         Scene s08 = new Scene("S08");
         s08.addDialogueLine("Conductor: Wala na ba? Wala nang bababa?");
-        s08.addDialogueLine("The bus finally approached your stop. You stood up and prepared to leave, looking back at {s_them} one last time.");
+        s08.addDialogueLine("The bus finally approached {player}'s stop. {They} stood up and prepared to leave, looking back at {s_them} one last time.");
         s08.addChoice(new SincereChoice(
             "[Sincere] \"Dito na pala ako! Wait—ano nga ulit IG mo? Para makapag-usap pa tayo kahit paano.\"",
             "ENDING",
+            2,
             "(Natawa nang mahina at kinuha ang phone.) \"Sure! Follow mo na lang ako—ingat ka pauwi!\" {S_they} waved warmly as you stepped off the bus.",
             "\"Ah... sige, ingat ka.\" You gave {s_them} a polite nod before stepping off the bus."
         ));

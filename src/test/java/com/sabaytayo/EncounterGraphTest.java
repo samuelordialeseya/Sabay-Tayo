@@ -102,6 +102,16 @@ public class EncounterGraphTest {
         check("Default stats restore STANDARD S08 with 4 choices",
                 "STANDARD".equals(encounter.getS08Variant()) && encounter.getScene("S08").getChoices().size() == 4);
 
+        // Verify IG choice in STANDARD S08 is locked when momentum is cold, while Sarcastic/Blunt/Quiet stay available
+        Momentum allBluntM = new Momentum();
+        allBluntM.setValue(-5);
+        List<DialogueChoice> coldS08Choices = encounter.getScene("S08").getAvailableChoices(allBluntM);
+        check("STANDARD S08 locks IG choice at Momentum -5 (3 choices unlocked)",
+                coldS08Choices.size() == 3
+                        && coldS08Choices.stream().noneMatch(c -> c.getText().contains("IG mo")));
+        check("STANDARD S08 unlocks all 4 choices (including IG) at Momentum +2",
+                encounter.getScene("S08").getAvailableChoices(highM).size() == 4);
+
         System.out.println("\n===== ENCOUNTER GRAPH TEST SUMMARY =====");
         System.out.println("Passed: " + passed + " | Failed: " + failed);
         if (failed > 0) {

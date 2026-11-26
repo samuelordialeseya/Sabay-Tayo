@@ -65,7 +65,7 @@ public class PronounTest {
         );
         check(
             "ScriptFormatter formats player & stranger tokens",
-            formatted.equals("Sam sat beside Fatima. She put her phone away, and he smiled.")
+            formatted.equals("Sam sat beside Amara. She put her phone away, and he smiled.")
         );
         check("No unresolved tokens remain", !ScriptFormatter.hasUnresolvedTokens(formatted));
         check("Detects unresolved typo token", ScriptFormatter.hasUnresolvedTokens("Hi {thye}"));

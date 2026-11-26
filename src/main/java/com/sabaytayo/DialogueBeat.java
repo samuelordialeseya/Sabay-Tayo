@@ -44,7 +44,7 @@ public class DialogueBeat {
             String quote = formatted.substring(10).trim();
             String strangerName = (stranger != null && stranger.getName() != null && !stranger.getName().isBlank())
                     ? stranger.getName()
-                    : "Fatima";
+                    : "Amara";
             return new DialogueBeat(strangerName, quote);
         }
 
@@ -67,7 +67,7 @@ public class DialogueBeat {
 
         String speakerName = (strangerName != null && !strangerName.isBlank())
                 ? strangerName
-                : "Fatima";
+                : "Amara";
         String text = formattedReaction.trim();
 
         // Plain unquoted reaction: either pure description or pure spoken line

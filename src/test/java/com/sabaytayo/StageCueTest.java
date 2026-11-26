@@ -58,9 +58,10 @@ public class StageCueTest {
         StageCue s03b2 = StageCue.forSceneBeat("S03", 2, warmM);
         check("S03 Beat 2 triggers head thud SFX", s03b2.isPlayHeadThudSfx() && !s03b2.isPlayBrakeSfx());
 
-        // S05A Beat 0: Phone notification SFX; S07 Beats 0-2: Conductor enters (3 sprites) -> calls stop -> leaves
+        // S05A Beat 0: Phone notification SFX + black reset fade; S07 Beats 0-2: Conductor enters (3 sprites) -> calls stop -> leaves
         StageCue s05ab0 = StageCue.forSceneBeat("S05A", 0, warmM);
         check("S05A Beat 0 triggers phone notification SFX", s05ab0.isPlayPhoneNotificationSfx());
+        check("S05A Beat 0 uses black fade reset transition", s05ab0.isFadeResetTransition());
         StageCue s07b0 = StageCue.forSceneBeat("S07", 0, warmM);
         StageCue s07b1 = StageCue.forSceneBeat("S07", 1, warmM);
         StageCue s07b2 = StageCue.forSceneBeat("S07", 2, warmM);
@@ -73,7 +74,9 @@ public class StageCueTest {
 
         // S04A Beat 0: Returns to normal sprites
         StageCue s04a = StageCue.forSceneBeat("S04A", 0, warmM);
-        check("S04A returns to sprites after S03 CG", s04a.getCgPath() == null && "warm_smile".equals(s04a.getFemMood()));
+        check("S04A returns to sprites after S03 CG", s04a.getCgPath() == null && "shy".equals(s04a.getFemMood()));
+        StageCue s04a1 = StageCue.forSceneBeat("S04A", 1, warmM);
+        check("S04A beat 1 warms up to warm_smile", s04a1.getCgPath() == null && "warm_smile".equals(s04a1.getFemMood()));
 
         // S04B: Warm sarcastic path vs. Cold unamused path
         Momentum coldM = new Momentum();
@@ -130,7 +133,7 @@ public class StageCueTest {
         check("Flirty narration beat keeps flustered",
                 "flustered".equals(StageCue.adjustReactionBeat(flusteredCue, "Narrator", false).getFemMood()));
         check("Flirty spoken beat switches to flustered_laugh",
-                "flustered_laugh".equals(StageCue.adjustReactionBeat(flusteredCue, "Fatima", false).getFemMood()));
+                "flustered_laugh".equals(StageCue.adjustReactionBeat(flusteredCue, "Amara", false).getFemMood()));
         check("Narration after she spoke stays flustered_laugh",
                 "flustered_laugh".equals(StageCue.adjustReactionBeat(flusteredCue, "Narrator", true).getFemMood()));
 

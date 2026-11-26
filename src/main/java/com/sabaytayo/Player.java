@@ -27,6 +27,10 @@ public class Player extends Character {
             throw new InvalidNameException("Name cannot contain curly braces.");
         }
 
+        if (!trimmed.matches("[a-zA-Z]+")) {
+            throw new InvalidNameException("Name can only contain letters.");
+        }
+
         return trimmed;
     }
 }

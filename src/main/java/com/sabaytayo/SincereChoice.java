@@ -4,7 +4,11 @@ package com.sabaytayo;
 public class SincereChoice extends DialogueChoice {
 
     public SincereChoice(String text, String nextSceneId, String warmReaction, String coldReaction) {
-        super(text, nextSceneId, "Sincere", -5, warmReaction, coldReaction);
+        this(text, nextSceneId, -5, warmReaction, coldReaction);
+    }
+
+    public SincereChoice(String text, String nextSceneId, int minMomentum, String warmReaction, String coldReaction) {
+        super(text, nextSceneId, "Sincere", minMomentum, warmReaction, coldReaction);
     }
 
     public SincereChoice(String text, String nextSceneId) {

@@ -38,7 +38,6 @@ public class StageCue {
     public static final String CG_SUDDEN_BRAKE = "/assets/CG/cg_sudden_brake.png";
     public static final String CG_QUIET_WINDOW = "/assets/CG/cg_rainy_window_quiet.png";
     public static final String CG_WARM_SMILE = "/assets/CG/cg_warm_earphone_smile.png";
-    public static final String CG_EXIT_LOOKBACK = "/assets/CG/cg_bus_exit_lookback.png";
 
     // Returns a short shot description for the in-game Missing-CG placeholder card.
     public static String getCgDescription(String cgPath) {
@@ -62,8 +61,6 @@ public class StageCue {
                 return "Quiet distance — raindrops on glass, blurred streetlights, unspoken silence between seats.";
             case CG_WARM_SMILE:
                 return "Warm Lane highlight — stranger removes one earphone and turns toward MC with a warm smile.";
-            case CG_EXIT_LOOKBACK:
-                return "Bus nearing the stop — MC stands up in the aisle and looks back one last time at the stranger.";
             default:
                 return "Event CG artwork slot (16:9 PNG).";
         }
@@ -81,12 +78,13 @@ public class StageCue {
     private final boolean playBrakeSfx;
     private final boolean playHeadThudSfx;
     private final boolean playPhoneNotificationSfx;
+    private final boolean fadeResetTransition;
 
     public StageCue(String cgPath, boolean useWideBackground, CameraAngle cameraAngle,
                     String maleMood, String femMood, boolean showMale, boolean showFem,
                     EffectType effectType, boolean playBrakeSfx) {
         this(cgPath, useWideBackground, cameraAngle, maleMood, femMood,
-                showMale, showFem, effectType, playBrakeSfx, false, false, false);
+                showMale, showFem, effectType, playBrakeSfx, false, false, false, false);
     }
 
     public StageCue(String cgPath, boolean useWideBackground, CameraAngle cameraAngle,
@@ -94,13 +92,23 @@ public class StageCue {
                     EffectType effectType, boolean playBrakeSfx,
                     boolean playHeadThudSfx, boolean playPhoneNotificationSfx) {
         this(cgPath, useWideBackground, cameraAngle, maleMood, femMood,
-                showMale, showFem, effectType, playBrakeSfx, playHeadThudSfx, playPhoneNotificationSfx, false);
+                showMale, showFem, effectType, playBrakeSfx, playHeadThudSfx, playPhoneNotificationSfx, false, false);
     }
 
     public StageCue(String cgPath, boolean useWideBackground, CameraAngle cameraAngle,
                     String maleMood, String femMood, boolean showMale, boolean showFem,
                     EffectType effectType, boolean playBrakeSfx,
                     boolean playHeadThudSfx, boolean playPhoneNotificationSfx, boolean showConductor) {
+        this(cgPath, useWideBackground, cameraAngle, maleMood, femMood,
+                showMale, showFem, effectType, playBrakeSfx, playHeadThudSfx, playPhoneNotificationSfx,
+                showConductor, false);
+    }
+
+    private StageCue(String cgPath, boolean useWideBackground, CameraAngle cameraAngle,
+                     String maleMood, String femMood, boolean showMale, boolean showFem,
+                     EffectType effectType, boolean playBrakeSfx,
+                     boolean playHeadThudSfx, boolean playPhoneNotificationSfx,
+                     boolean showConductor, boolean fadeResetTransition) {
         this.cgPath = cgPath;
         this.useWideBackground = useWideBackground;
         this.cameraAngle = cameraAngle;
@@ -113,6 +121,7 @@ public class StageCue {
         this.playBrakeSfx = playBrakeSfx;
         this.playHeadThudSfx = playHeadThudSfx;
         this.playPhoneNotificationSfx = playPhoneNotificationSfx;
+        this.fadeResetTransition = fadeResetTransition;
     }
 
     public String getCgPath() {
@@ -163,6 +172,17 @@ public class StageCue {
         return playPhoneNotificationSfx;
     }
 
+    public boolean isFadeResetTransition() {
+        return fadeResetTransition;
+    }
+
+    // Marks this cue to fade to black, show the beat's narrator text, then fade out to reveal the reset stage.
+    public StageCue withFadeResetTransition() {
+        return new StageCue(cgPath, useWideBackground, cameraAngle,
+                maleMood, femMood, showMale, showFem, effectType, playBrakeSfx,
+                playHeadThudSfx, playPhoneNotificationSfx, showConductor, true);
+    }
+
     // Returns a copy of this cue without replaying motion effects or SFX (for split follow-up beats).
     public StageCue withoutEffect() {
         return new StageCue(cgPath, useWideBackground, cameraAngle,
@@ -186,6 +206,9 @@ public class StageCue {
         }
         if ("neutral_talking".equals(mood) && isNarrator) {
             return cue.withFemMood("neutral");
+        }
+        if ("wincing_talking".equals(mood) && isNarrator) {
+            return cue.withFemMood("wince");
         }
         return cue;
     }
@@ -251,7 +274,7 @@ public class StageCue {
 
             case "S04A":
                 return new StageCue(null, false, beatIndex == 1 ? CameraAngle.FOCUS_RIGHT : CameraAngle.TWO_SEAT,
-                        "relieved_smile", "warm_smile", true, true,
+                        "relieved_smile", beatIndex == 0 ? "shy" : "warm_smile", true, true,
                         beatIndex == 0 ? EffectType.WARM_LEAN : EffectType.NONE, false);
 
             case "S04B":
@@ -270,7 +293,8 @@ public class StageCue {
             case "S05A":
                 if (beatIndex == 0) {
                     return new StageCue(null, false, CameraAngle.TWO_SEAT,
-                            "neutral", "neutral", true, true, EffectType.TRAFFIC_SWAY, false, false, true);
+                            "neutral", "neutral", true, true, EffectType.TRAFFIC_SWAY, false, false, true)
+                            .withFadeResetTransition();
                 } else if (beatIndex == 1) {
                     return new StageCue(null, false, CameraAngle.TWO_SEAT,
                             "sincere", "neutral", true, true, EffectType.WARM_LEAN, false);
@@ -420,6 +444,11 @@ public class StageCue {
                 if (choice != null && choice.getText() != null && choice.getText().contains("traffic ngayon")) {
                     return new StageCue(null, false, CameraAngle.TWO_SEAT,
                             "sincere", "neutral_talking", true, true, EffectType.GENTLE_NOD, false);
+                }
+                // S03 post-brake check-in: she talks while still wincing from the head bump
+                if (choice != null && choice.getText() != null && choice.getText().contains("Okay ka lang ba")) {
+                    return new StageCue(null, false, CameraAngle.TWO_SEAT,
+                            "sincere", "wincing_talking", true, true, EffectType.GENTLE_NOD, false);
                 }
                 if (isWarm) {
                     boolean igShared = lower.contains("follow mo") || lower.contains("waved warmly");

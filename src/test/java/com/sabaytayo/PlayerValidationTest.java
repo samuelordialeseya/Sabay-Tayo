@@ -35,9 +35,14 @@ public class PlayerValidationTest {
         expectInvalidName("Rejects name over 20 chars", "Abcdefghijklmnopqrstu");
         expectInvalidName("Rejects name with digits", "Sam123");
         expectInvalidName("Rejects name with curly braces", "{player}");
+        expectInvalidName("Rejects name with special characters (!)", "Sam!");
+        expectInvalidName("Rejects name with symbols (@)", "@Sam");
+        expectInvalidName("Rejects name with punctuation (-)", "Sam-Lee");
+        expectInvalidName("Rejects name with underscore (_)", "Sam_Lee");
+        expectInvalidName("Rejects name with spaces", "Sam Lee");
 
         Stranger stranger = new Stranger(Pronouns.SHE_HER);
-        check("Stranger default name", stranger.getName().equals("Fatima"));
+        check("Stranger default name", stranger.getName().equals("Amara"));
         check("Stranger pronouns", stranger.getPronouns() == Pronouns.SHE_HER);
 
         boolean threwNullPronouns = false;
