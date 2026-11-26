@@ -147,7 +147,7 @@
     -fx-border-width: 2px, 1px;
     -fx-padding: 13px 22px;
     -fx-cursor: hand;
-    -fx-alignment: CENTER_LEFT;
+    -fx-alignment: CENTER;
     -fx-effect: dropshadow(gaussian, rgba(8, 4, 14, 0.72), 14, 0.18, 0, 4);
 }
 
@@ -170,6 +170,7 @@
     -fx-font-family: "Segoe UI Semibold", "Segoe UI", sans-serif;
     -fx-text-fill: #fff4e8;
     -fx-font-size: 17px;
+    -fx-text-alignment: center;
     -fx-effect: dropshadow(one-pass-box, rgba(12, 6, 18, 0.9), 1, 1.0, 1, 1);
 }
 
@@ -239,79 +240,6 @@
 .hud-momentum-cold {
     -fx-border-color: #8ea4c8;
     -fx-text-fill: #cad8f0;
-}
-
-/* 6. MODAL OVERLAYS (HISTORY & SETTINGS) */
-.vn-modal-backdrop {
-    -fx-background-color: rgba(12, 8, 18, 0.72);
-}
-
-.vn-modal-card {
-    -fx-background-color: rgba(28, 20, 38, 0.97);
-    -fx-background-radius: 14px;
-    -fx-border-color: #e89c84, #6d465b;
-    -fx-border-insets: 0, 4;
-    -fx-border-radius: 14px, 10px;
-    -fx-border-width: 2.5px, 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.85), 26, 0.25, 0, 8);
-}
-
-.vn-modal-title {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #fde09b;
-}
-
-.history-scroll {
-    -fx-background: transparent;
-    -fx-background-color: rgba(18, 13, 26, 0.65);
-    -fx-border-color: rgba(214, 133, 124, 0.35);
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-padding: 6px;
-}
-
-.history-scroll .viewport {
-    -fx-background-color: transparent;
-}
-
-.history-entry {
-    -fx-padding: 8px 12px;
-    -fx-background-color: rgba(46, 30, 56, 0.45);
-    -fx-background-radius: 8px;
-}
-
-.history-speaker {
-    -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f7b88f;
-}
-
-.history-text {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 16px;
-    -fx-text-fill: #f6e7da;
-    -fx-line-spacing: 3px;
-}
-
-.vn-checkbox {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 15px;
-    -fx-text-fill: #f5dec8;
-    -fx-cursor: hand;
-}
-
-.vn-checkbox .box {
-    -fx-background-color: #1c1528;
-    -fx-border-color: #d6857c;
-    -fx-border-radius: 4px;
-    -fx-background-radius: 4px;
-}
-
-.vn-checkbox:selected .mark {
-    -fx-background-color: #fde09b;
 }
 
 /* 7. SETUP & ENDING CARDS */
@@ -412,7 +340,7 @@
     -fx-accent: #e06d78;
 }
 
-/* 9. MENU BUTTONS, MUSIC PILL & WINDOW CONTROLS */
+/* 9. MENU BUTTONS & WINDOW CONTROLS */
 .menu-button {
     -fx-font-family: "Trebuchet MS", "Segoe UI", sans-serif;
     -fx-background-color: #1c1022, #3e263e;
@@ -457,43 +385,6 @@
     -fx-border-color: #f9be93;
     -fx-border-radius: 5px;
     -fx-border-width: 1px;
-}
-
-.music-pill {
-    -fx-background-color: rgba(26, 20, 36, 0.85);
-    -fx-background-radius: 8px;
-    -fx-border-color: #c87d76;
-    -fx-border-radius: 8px;
-    -fx-border-width: 1.5px;
-    -fx-padding: 5px 10px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.55), 8, 0, 0, 2);
-}
-
-.volume-slider {
-    -fx-cursor: hand;
-}
-
-.volume-slider .track {
-    -fx-background-color: #3b253b;
-    -fx-background-radius: 4px;
-    -fx-pref-height: 6px;
-    -fx-border-color: #825769;
-    -fx-border-radius: 4px;
-    -fx-border-width: 1px;
-}
-
-.volume-slider .thumb {
-    -fx-background-color: #f7b88f;
-    -fx-background-radius: 7px;
-    -fx-pref-width: 13px;
-    -fx-pref-height: 13px;
-    -fx-border-color: #1b1d2b;
-    -fx-border-radius: 7px;
-    -fx-border-width: 1px;
-}
-
-.volume-slider .thumb:hover {
-    -fx-background-color: #fde09b;
 }
 
 .window-control-btn {

@@ -19,11 +19,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -37,6 +34,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 // Visual Novel Encounter screen: DDLC-inspired proportions adapted to Sabay Tayo's twilight bus aesthetic.
@@ -116,10 +114,6 @@ public class EncounterView extends StackPane {
     private final Button backBtn;
     private final Button autoBtn;
     private final Button musicBtn;
-
-    // Modal overlay (Settings)
-    private final StackPane modalOverlay;
-    private boolean modalOpen = false;
 
     // Timelines & VN playback states
     private final Typewriter typewriter;
@@ -277,7 +271,7 @@ public class EncounterView extends StackPane {
         cgPlaceholderDescLabel.setWrapText(true);
         cgPlaceholderDescLabel.setAlignment(Pos.CENTER);
 
-        Label cgPlaceholderHint = new Label("Floating sprites hidden to match Event CG framing  •  Toggle in Settings");
+        Label cgPlaceholderHint = new Label("Floating sprites hidden to match Event CG framing");
         cgPlaceholderHint.getStyleClass().add("cg-placeholder-hint");
         cgPlaceholderHint.setWrapText(true);
 
@@ -386,11 +380,12 @@ public class EncounterView extends StackPane {
         HBox windowControls = app.createWindowControlBar();
         topBar.getChildren().addAll(momentumBadge, topSpacer, windowControls);
 
-        // 5. Centered Choice Stack (DDLC Screenshot 3 layout: centered in upper-middle stage)
+        // 5. Centered Choice Stack (DDLC-style compact centered choice cards)
         choicesContainer = new VBox(12);
         choicesContainer.setAlignment(Pos.CENTER);
         choicesContainer.prefWidthProperty().bind(
-                Bindings.max(320.0, Bindings.min(widthProperty().multiply(0.48), heightProperty().multiply(0.86))));
+                Bindings.max(300.0, Bindings.min(520.0,
+                        Bindings.min(widthProperty().multiply(0.35), heightProperty().multiply(0.62)))));
         choicesContainer.maxWidthProperty().bind(choicesContainer.prefWidthProperty());
         choicesContainer.setMaxHeight(Region.USE_PREF_SIZE);
 
@@ -423,9 +418,8 @@ public class EncounterView extends StackPane {
         backBtn.setDisable(true);
         autoBtn = createInlineControl("Auto", this::toggleAutoMode);
         musicBtn = createInlineControl(app.isMusicMuted() ? "Music: OFF" : "Music", this::handleMusicToggle);
-        Button settingsBtn = createInlineControl("Settings", this::openSettingsModal);
 
-        HBox bottomControls = new HBox(18, backBtn, autoBtn, musicBtn, settingsBtn);
+        HBox bottomControls = new HBox(18, backBtn, autoBtn, musicBtn);
         bottomControls.setAlignment(Pos.CENTER_RIGHT);
 
         nextIndicator = new Label("▶");
@@ -451,17 +445,6 @@ public class EncounterView extends StackPane {
         StackPane.setAlignment(textCard, Pos.BOTTOM_CENTER);
         StackPane.setAlignment(nameplate, Pos.TOP_LEFT);
         StackPane.setMargin(nameplate, new Insets(-22, 0, 0, 28));
-
-        // 7. Modal overlay for History & Settings
-        modalOverlay = new StackPane();
-        modalOverlay.getStyleClass().add("vn-modal-backdrop");
-        modalOverlay.setVisible(false);
-        modalOverlay.setManaged(false);
-        modalOverlay.setOnMouseClicked(e -> {
-            if (e.getTarget() == modalOverlay) {
-                closeModal();
-            }
-        });
 
         // Subtle pulse animation for the ▶ advance triangle
         nextPulseTimeline = new Timeline(
@@ -505,7 +488,7 @@ public class EncounterView extends StackPane {
         });
 
         // Assemble layers from back to front
-        getChildren().addAll(stageLayer, choicesOverlay, dialogueWrapper, topBar, modalOverlay);
+        getChildren().addAll(stageLayer, choicesOverlay, dialogueWrapper, topBar);
         StackPane.setAlignment(topBar, Pos.TOP_CENTER);
         StackPane.setAlignment(dialogueWrapper, Pos.BOTTOM_CENTER);
         StackPane.setMargin(dialogueWrapper, new Insets(0, 0, 22, 0));
@@ -711,14 +694,6 @@ public class EncounterView extends StackPane {
         }
     }
 
-    // Re-applies the active beat's visual state immediately (used when toggling Dev CG Placeholders in Settings).
-    private void refreshCurrentBeatVisuals() {
-        if (currentBeatIndex >= 0 && currentBeatIndex < currentBeats.size()
-                && currentBeatIndex < currentBeatCues.size()) {
-            applyStageCue(currentBeatCues.get(currentBeatIndex), currentBeats.get(currentBeatIndex).getSpeaker());
-        }
-    }
-
     private void updateNameplate(String speaker) {
         nameplate.getStyleClass().removeAll("vn-nameplate-player", "vn-nameplate-stranger", "vn-nameplate-conductor");
 
@@ -784,7 +759,7 @@ public class EncounterView extends StackPane {
             btn.setDisable(!unlocked);
 
             HBox content = new HBox(12);
-            content.setAlignment(Pos.CENTER_LEFT);
+            content.setAlignment(Pos.CENTER);
             content.prefWidthProperty().bind(choicesContainer.prefWidthProperty().subtract(48));
             content.maxWidthProperty().bind(choicesContainer.prefWidthProperty().subtract(48));
             content.setMinHeight(Region.USE_PREF_SIZE);
@@ -793,7 +768,10 @@ public class EncounterView extends StackPane {
             Label textLbl = new Label(cleanText);
             textLbl.getStyleClass().add("vn-choice-label");
             textLbl.setWrapText(true);
+            textLbl.setAlignment(Pos.CENTER);
+            textLbl.setTextAlignment(TextAlignment.CENTER);
             textLbl.setMinWidth(0);
+            textLbl.setMaxWidth(Double.MAX_VALUE);
             textLbl.setMinHeight(Region.USE_PREF_SIZE);
             HBox.setHgrow(textLbl, Priority.ALWAYS);
             content.getChildren().add(textLbl);
@@ -911,7 +889,7 @@ public class EncounterView extends StackPane {
     // -------------------------------------------------------------------------
 
     private void handleScreenClick(MouseEvent e) {
-        if (modalOpen || transitioningToEnding || e.getButton() != MouseButton.PRIMARY) {
+        if (transitioningToEnding || e.getButton() != MouseButton.PRIMARY) {
             return;
         }
         if (isClickOnInteractive(e.getTarget())) {
@@ -921,19 +899,7 @@ public class EncounterView extends StackPane {
     }
 
     private void handleKeyAdvance(KeyEvent e) {
-        if (e.getCode() == KeyCode.ESCAPE) {
-            e.consume();
-            if (transitioningToEnding) {
-                return;
-            }
-            if (modalOpen) {
-                closeModal();
-            } else {
-                openSettingsModal();
-            }
-            return;
-        }
-        if (modalOpen || transitioningToEnding) {
+        if (transitioningToEnding) {
             return;
         }
         if (e.getCode() == KeyCode.BACK_SPACE || e.getCode() == KeyCode.LEFT) {
@@ -1007,7 +973,7 @@ public class EncounterView extends StackPane {
 
     // Debug rewind: pops the last snapshot and restores stats, momentum, scene, beat, or choice menu.
     public void stepBack() {
-        if (historyStack.isEmpty() || modalOpen || transitioningToEnding) {
+        if (historyStack.isEmpty() || transitioningToEnding) {
             return;
         }
         StepSnapshot snap = historyStack.remove(historyStack.size() - 1);
@@ -1094,7 +1060,7 @@ public class EncounterView extends StackPane {
     private void toggleAutoMode() {
         autoMode = !autoMode;
         updateInlineButtonState(autoBtn, autoMode);
-        if (autoMode && !typewriter.isTyping() && !showingChoices && !modalOpen) {
+        if (autoMode && !typewriter.isTyping() && !showingChoices) {
             scheduleNextAuto();
         } else if (!autoMode) {
             stopAutoTimer();
@@ -1123,7 +1089,7 @@ public class EncounterView extends StackPane {
 
     private void scheduleNextAuto() {
         stopAutoTimer();
-        if (showingChoices || modalOpen || !autoMode) {
+        if (showingChoices || !autoMode) {
             return;
         }
         int len = dialogueLabel.getText() != null ? dialogueLabel.getText().length() : 0;
@@ -1146,7 +1112,7 @@ public class EncounterView extends StackPane {
         }
         Node current = (Node) target;
         while (current != null && current != this) {
-            if (current instanceof ButtonBase || current instanceof Slider || current instanceof CheckBox) {
+            if (current instanceof ButtonBase) {
                 return true;
             }
             current = current.getParent();
@@ -1214,123 +1180,6 @@ public class EncounterView extends StackPane {
             momentumBadge.getStyleClass().add("hud-momentum-warm");
         } else if (m <= -2) {
             momentumBadge.getStyleClass().add("hud-momentum-cold");
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Settings Modal (DDLC Inline Toolbar)
-    // -------------------------------------------------------------------------
-
-    private void openSettingsModal() {
-        stopAutoTimer();
-        VBox modalCard = new VBox(18);
-        modalCard.getStyleClass().add("vn-modal-card");
-        modalCard.maxWidthProperty().bind(widthProperty().multiply(0.44));
-        modalCard.setMaxHeight(Region.USE_PREF_SIZE);
-        modalCard.setPadding(new Insets(28, 34, 26, 34));
-
-        Label title = new Label("Settings & Ride Menu");
-        title.getStyleClass().add("vn-modal-title");
-
-        // Music Volume
-        Label bgmLbl = new Label("Music Volume");
-        bgmLbl.getStyleClass().add("field-label");
-        Slider bgmSlider = new Slider(0.0, 1.0, app.getMusicVolume());
-        bgmSlider.getStyleClass().add("volume-slider");
-        bgmSlider.valueProperty().addListener((obs, o, n) -> {
-            app.setMusicVolume(n.doubleValue());
-            refreshMusicButtonLabel();
-        });
-
-        // SFX Toggle + Volume
-        CheckBox sfxToggle = new CheckBox("Enable UI & Bus Sound Effects");
-        sfxToggle.setSelected(!app.isSfxMuted());
-        sfxToggle.getStyleClass().add("vn-checkbox");
-        sfxToggle.selectedProperty().addListener((obs, o, n) -> app.setSfxMuted(!n));
-
-        // Text Speed
-        Label speedLbl = new Label("Text Speed (Faster  ←  →  Slower)");
-        speedLbl.getStyleClass().add("field-label");
-        Slider speedSlider = new Slider(6, 40, app.getTypingDelayMs());
-        speedSlider.getStyleClass().add("volume-slider");
-        speedSlider.valueProperty().addListener((obs, o, n) -> app.setTypingDelayMs(n.intValue()));
-
-        // Ambient Rain & Streetlights
-        CheckBox atmToggle = new CheckBox("Twilight Rain & Passing Streetlight Effects");
-        atmToggle.setSelected(app.isAtmosphereEnabled());
-        atmToggle.getStyleClass().add("vn-checkbox");
-        atmToggle.selectedProperty().addListener((obs, o, n) -> {
-            app.setAtmosphereEnabled(n);
-            atmosphereLayer.setAtmosphereEnabled(n);
-        });
-
-        // Missing-CG Placeholder Overlay (Dev / Testing Mode)
-        CheckBox cgPlaceholderToggle = new CheckBox("Show Missing CG Placeholders (Dev)");
-        cgPlaceholderToggle.setSelected(app.isCgPlaceholderEnabled());
-        cgPlaceholderToggle.getStyleClass().add("vn-checkbox");
-        cgPlaceholderToggle.selectedProperty().addListener((obs, o, n) -> {
-            app.setCgPlaceholderEnabled(n);
-            refreshCurrentBeatVisuals();
-        });
-
-        // Quick navigation actions
-        Button restartBtn = new Button("Restart Ride");
-        restartBtn.getStyleClass().add("menu-button");
-        restartBtn.setOnAction(e -> {
-            app.playClickSfx();
-            closeModal();
-            cleanupTimers();
-            app.showStart();
-        });
-
-        Button skipEndingBtn = new Button("Skip to Ending");
-        skipEndingBtn.getStyleClass().add("menu-button");
-        skipEndingBtn.setOnAction(e -> {
-            app.playClickSfx();
-            pushSnapshot();
-            closeModal();
-            cleanupTimers();
-            app.showEnding();
-        });
-
-        Button resumeBtn = new Button("Resume");
-        resumeBtn.getStyleClass().addAll("menu-button", "commute-menu-btn-active");
-        resumeBtn.setOnAction(e -> {
-            app.playClickSfx();
-            closeModal();
-        });
-
-        HBox actions = new HBox(12, restartBtn, skipEndingBtn, resumeBtn);
-        actions.setAlignment(Pos.CENTER_RIGHT);
-        actions.setPadding(new Insets(8, 0, 0, 0));
-
-        modalCard.getChildren().addAll(
-                title,
-                new VBox(6, bgmLbl, bgmSlider),
-                sfxToggle,
-                new VBox(6, speedLbl, speedSlider),
-                atmToggle,
-                cgPlaceholderToggle,
-                actions
-        );
-        showModal(modalCard);
-    }
-
-    private void showModal(Node content) {
-        modalOverlay.getChildren().setAll(content);
-        StackPane.setAlignment(content, Pos.CENTER);
-        modalOverlay.setVisible(true);
-        modalOverlay.setManaged(true);
-        modalOpen = true;
-    }
-
-    private void closeModal() {
-        modalOverlay.setVisible(false);
-        modalOverlay.setManaged(false);
-        modalOverlay.getChildren().clear();
-        modalOpen = false;
-        if (autoMode && !typewriter.isTyping() && !showingChoices) {
-            scheduleNextAuto();
         }
     }
 
