@@ -117,6 +117,23 @@ public class StageCueTest {
         check("Flirty speak beat stays in steady two-seat framing with smirk", speakCue.getCameraAngle() == StageCue.CameraAngle.TWO_SEAT && "smirk".equals(speakCue.getMaleMood()));
         check("Flirty warm reaction focuses on stranger with kilig fluster", reactCue.getCameraAngle() == StageCue.CameraAngle.FOCUS_RIGHT && "flustered".equals(reactCue.getFemMood()) && reactCue.getEffectType() == StageCue.EffectType.KILIG_FLUSTER);
 
+        // S02 traffic line uses neutral talking; narration beat drops back to neutral
+        SincereChoice traffic = new SincereChoice("[Sincere] \"Ang traffic ngayon, no? Mukhang matatagalan pa tayo rito.\"",
+                "S03", "\"Oo nga eh.\" She glanced at you.", "\"Oo nga eh.\"");
+        StageCue trafficCue = StageCue.forChoiceReactionBeat(traffic, "\"Oo nga eh.\" She glanced at you.", warmM);
+        check("S02 traffic reply uses neutral_talking", "neutral_talking".equals(trafficCue.getFemMood()));
+        check("Narration beat of traffic reply uses neutral",
+                "neutral".equals(StageCue.adjustReactionBeat(trafficCue, "Narrator", true).getFemMood()));
+
+        // After the flustered reaction, her spoken lines switch to flustered_laugh
+        StageCue flusteredCue = StageCue.forChoiceReactionBeat(flirty, "She smiled softly.", warmM);
+        check("Flirty narration beat keeps flustered",
+                "flustered".equals(StageCue.adjustReactionBeat(flusteredCue, "Narrator", false).getFemMood()));
+        check("Flirty spoken beat switches to flustered_laugh",
+                "flustered_laugh".equals(StageCue.adjustReactionBeat(flusteredCue, "Fatima", false).getFemMood()));
+        check("Narration after she spoke stays flustered_laugh",
+                "flustered_laugh".equals(StageCue.adjustReactionBeat(flusteredCue, "Narrator", true).getFemMood()));
+
         BluntChoice blunt = new BluntChoice("[Blunt] Test", "S07", "Okay.", "Okay.");
         StageCue bluntReact = StageCue.forChoiceReactionBeat(blunt, "Okay.", warmM);
         check("Blunt reaction keeps steady two-seat framing without zoom", bluntReact.getCameraAngle() == StageCue.CameraAngle.TWO_SEAT);

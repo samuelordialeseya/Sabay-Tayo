@@ -169,6 +169,27 @@ public class StageCue {
                 maleMood, femMood, showMale, showFem, EffectType.NONE, false, false, false, showConductor);
     }
 
+    // Returns a copy of this cue with a different stranger expression (no effect or SFX replay).
+    public StageCue withFemMood(String newFemMood) {
+        return new StageCue(cgPath, useWideBackground, cameraAngle,
+                maleMood, newFemMood, showMale, showFem, EffectType.NONE, false, false, false, showConductor);
+    }
+
+    // Adjusts the stranger's sprite for the follow-up beats of a choice reaction.
+    // - After a flustered reaction, once she starts talking she switches to flustered_laugh.
+    // - The traffic line uses neutral_talking while she speaks and plain neutral on narration.
+    public static StageCue adjustReactionBeat(StageCue cue, String speaker, boolean strangerHasSpoken) {
+        boolean isNarrator = "Narrator".equals(speaker);
+        String mood = cue.getFemMood();
+        if ("flustered".equals(mood) && (strangerHasSpoken || !isNarrator)) {
+            return cue.withFemMood("flustered_laugh");
+        }
+        if ("neutral_talking".equals(mood) && isNarrator) {
+            return cue.withFemMood("neutral");
+        }
+        return cue;
+    }
+
     // Returns the visual stage direction for a specific scene and dialogue beat index.
     public static StageCue forSceneBeat(String sceneId, int beatIndex, Momentum momentum) {
         return forSceneBeat(sceneId, beatIndex, momentum, "STANDARD");
@@ -395,6 +416,11 @@ public class StageCue {
                         "surprised", "surprised", true, true, EffectType.SHAKE_BLUR, false);
 
             case "Sincere":
+                // S02 traffic line: she answers in a neutral talking pose
+                if (choice != null && choice.getText() != null && choice.getText().contains("traffic ngayon")) {
+                    return new StageCue(null, false, CameraAngle.TWO_SEAT,
+                            "sincere", "neutral_talking", true, true, EffectType.GENTLE_NOD, false);
+                }
                 if (isWarm) {
                     boolean igShared = lower.contains("follow mo") || lower.contains("waved warmly");
                     boolean extraWarm = igShared || lower.contains("smile") || lower.contains("thank you")
