@@ -131,20 +131,20 @@ public class EndingView extends StackPane {
         // 2. Center result card with commemorative badge overlapping the top border, stats, momentum, and Ride Again
         Image badgeImg = ImageLoader.load(outcome.getBadgePath());
         ImageView badgeView = new ImageView();
-        badgeView.setFitWidth(96);
-        badgeView.setFitHeight(96);
+        badgeView.setFitWidth(160);
+        badgeView.setFitHeight(160);
         badgeView.setPreserveRatio(true);
         badgeView.setSmooth(true);
         badgeView.setMouseTransparent(true);
         if (badgeImg != null) {
             badgeView.setImage(badgeImg);
-            badgeView.setTranslateY(-48);
+            badgeView.setTranslateY(-80);
         } else {
             badgeView.setVisible(false);
             badgeView.setManaged(false);
         }
 
-        double topPadding = (badgeImg != null) ? 64 : 36;
+        double topPadding = (badgeImg != null) ? 96 : 36;
         card = new VBox(16);
         card.setMaxWidth(Double.MAX_VALUE);
         card.setMaxHeight(Region.USE_PREF_SIZE);
