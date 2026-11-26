@@ -616,8 +616,8 @@ public class EncounterView extends StackPane {
             return;
         }
 
-        // Switch BGM between warm acoustic theme and cold melancholy lo-fi piano based on story lane
-        syncSceneMusic(current.getSceneId());
+        // Switch BGM between warm acoustic, cold melancholy, and sudden brake tracks
+        syncSceneMusic(current.getSceneId(), 0);
 
         typewriter.stop();
         stopAutoTimer();
@@ -638,7 +638,15 @@ public class EncounterView extends StackPane {
         displayCurrentBeat();
     }
 
-    private void syncSceneMusic(String sceneId) {
+    private void syncSceneMusic(String sceneId, int beatIndex) {
+        if ("S03".equals(sceneId)) {
+            if (beatIndex == 0 && pendingNextSceneId == null) {
+                app.stopBackgroundMusic();
+            } else {
+                app.switchBackgroundMusic(GameApplication.BGM_SUDDEN_BRAKE_PATH);
+            }
+            return;
+        }
         if ("S05B".equals(sceneId) || "S06B".equals(sceneId)
                 || (("S07".equals(sceneId) || "S08".equals(sceneId)) && momentum.getValue() < 0)) {
             app.switchBackgroundMusic(GameApplication.BGM_COLD_PATH);
@@ -661,6 +669,11 @@ public class EncounterView extends StackPane {
 
         DialogueBeat beat = currentBeats.get(currentBeatIndex);
         StageCue cue = (currentBeatIndex < currentBeatCues.size()) ? currentBeatCues.get(currentBeatIndex) : null;
+
+        // Keep pre-brake silence until the impact flash triggers BGM_SUDDEN_BRAKE_PATH
+        if (instantRestore || cue == null || !cue.isPlayBrakeSfx()) {
+            syncSceneMusic(encounter.getCurrentSceneId(), currentBeatIndex);
+        }
 
         // Update overlapping speaker nameplate (hidden on Narrator beats like DDLC Screenshot 2)
         updateNameplate(beat.getSpeaker());
@@ -1030,7 +1043,7 @@ public class EncounterView extends StackPane {
         warmSmileVariant = snap.warmSmileVariant;
         lastFemMood = snap.lastFemMood;
 
-        syncSceneMusic(snap.sceneId);
+        syncSceneMusic(snap.sceneId, snap.beatIndex);
         updateHUD();
 
         if (snap.showingChoices) {
@@ -1914,6 +1927,7 @@ public class EncounterView extends StackPane {
         applyCameraAngle(StageCue.CameraAngle.TWO_SEAT, false);
 
         pendingBrakeReveal = () -> {
+            app.switchBackgroundMusic(GameApplication.BGM_SUDDEN_BRAKE_PATH);
             if (cgImage != null) {
                 showEventCgImmediate(cue.getCgPath(), cgImage);
                 applyBeatStageVisuals(cue, speaker, true);

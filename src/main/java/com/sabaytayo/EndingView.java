@@ -64,9 +64,7 @@ public class EndingView extends StackPane {
         setClip(rootClip);
 
         app.stopBusAmbience();
-        app.switchBackgroundMusic(outcome.isColdTone()
-                ? GameApplication.BGM_COLD_PATH
-                : GameApplication.BGM_WARM_PATH);
+        app.switchBackgroundMusic(outcome.getEndingBgmPath());
         if (outcome.playsChimeOnReveal()) {
             app.playPhoneNotificationSfx();
         }

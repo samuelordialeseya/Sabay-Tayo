@@ -1,5 +1,8 @@
 package com.sabaytayo;
 
+import java.util.HashSet;
+import java.util.Set;
+
 // Tests all five Outcome subclasses and OutcomeClassifier priority rules.
 public class OutcomeClassifierTest {
 
@@ -57,17 +60,29 @@ public class OutcomeClassifierTest {
         check("Respect 50 + Annoyance 22 + Trust 40 -> RivalOutcome",
                 classifier.classify(rivalStats) instanceof RivalOutcome);
 
-        // 7. Polymorphic Ending CG & badge paths on all 5 Outcome classes
+        // 7. Polymorphic Ending CG, badge, and distinct BGM paths on all 5 Outcome classes
         Outcome[] allOutcomes = {
             new BlockedOutcome(), new LoverOutcome(), new BestFriendOutcome(),
             new RivalOutcome(), new AcquaintanceOutcome()
         };
+        Set<String> endingBgms = new HashSet<>();
         for (Outcome o : allOutcomes) {
             check(o.getTitle() + " provides Ending CG path",
                     o.getEndingCgPath() != null && o.getEndingCgPath().startsWith("/assets/CG/cg_ending_"));
             check(o.getTitle() + " provides Badge path",
                     o.getBadgePath() != null && o.getBadgePath().startsWith("/assets/ui/endings/badge_ending_"));
+            String bgmPath = o.getEndingBgmPath();
+            check(o.getTitle() + " provides Ending BGM path",
+                    bgmPath != null && bgmPath.startsWith("/assets/AUDIO/bgm_ending_") && bgmPath.endsWith(".mp3"));
+            check(o.getTitle() + " BGM resource exists",
+                    OutcomeClassifierTest.class.getResource(bgmPath) != null);
+            endingBgms.add(bgmPath);
         }
+        check("All 5 endings have distinct BGM tracks", endingBgms.size() == 5);
+        check("Main Menu BGM resource exists",
+                OutcomeClassifierTest.class.getResource(GameApplication.BGM_MENU_PATH) != null);
+        check("Sudden Brake BGM resource exists",
+                OutcomeClassifierTest.class.getResource(GameApplication.BGM_SUDDEN_BRAKE_PATH) != null);
         check("BlockedOutcome uses cold BGM tone", new BlockedOutcome().isColdTone());
         check("LoverOutcome plays reveal chime", new LoverOutcome().playsChimeOnReveal());
 
