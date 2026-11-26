@@ -349,8 +349,9 @@
 
 .field-label {
     -fx-font-family: "Segoe UI Semibold", "Segoe UI", sans-serif;
-    -fx-font-size: 15px;
-    -fx-text-fill: #f6dbc2;
+    -fx-font-size: 12px;
+    -fx-letter-spacing: 1.2px;
+    -fx-text-fill: #d9b9a6;
 }
 
 .input-field {
@@ -583,4 +584,117 @@
     -fx-border-radius: 20px;
     -fx-padding: 9px 22px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.65), 12, 0, 0, 3);
+}
+
+/* 11. BOARDING PASS SETUP SCREEN */
+.pass-divider {
+    -fx-border-color: rgba(214, 133, 124, 0.55);
+    -fx-border-width: 1 0 0 0;
+    -fx-border-style: segments(6, 5);
+}
+
+.input-field:focused {
+    -fx-border-color: #fde09b;
+    -fx-effect: dropshadow(gaussian, rgba(253, 224, 155, 0.35), 10, 0.1, 0, 0);
+}
+
+.dark-combo {
+    -fx-background-color: #1b1628;
+    -fx-background-radius: 8px;
+    -fx-border-color: #a66c82;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1.5px;
+    -fx-padding: 3px 2px;
+    -fx-cursor: hand;
+}
+
+.dark-combo:hover,
+.dark-combo:showing {
+    -fx-border-color: #fde09b;
+}
+
+.dark-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #fff4e8;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 15px;
+}
+
+.dark-combo .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.dark-combo .arrow {
+    -fx-background-color: #f7b88f;
+}
+
+.dark-combo .combo-box-popup .list-view {
+    -fx-background-color: #1b1628;
+    -fx-border-color: #a66c82;
+    -fx-border-width: 1.5px;
+}
+
+.dark-combo .combo-box-popup .list-cell {
+    -fx-background-color: #1b1628;
+    -fx-text-fill: #f6e7da;
+    -fx-padding: 8px 12px;
+}
+
+.dark-combo .combo-box-popup .list-cell:hover,
+.dark-combo .combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #4e2e4a;
+    -fx-text-fill: #fde09b;
+}
+
+.preview-box {
+    -fx-background-color: rgba(14, 9, 20, 0.75);
+    -fx-background-radius: 8px;
+    -fx-border-color: #fde09b;
+    -fx-border-width: 0 0 0 3;
+    -fx-padding: 12px 16px;
+}
+
+.preview-caption {
+    -fx-font-family: "Segoe UI Semibold", "Segoe UI", sans-serif;
+    -fx-font-size: 11px;
+    -fx-letter-spacing: 1.4px;
+    -fx-text-fill: #b39aa8;
+}
+
+.preview-text {
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 15px;
+    -fx-font-style: italic;
+    -fx-text-fill: #f3e2d6;
+    -fx-line-spacing: 3px;
+}
+
+.menu-button.primary-button {
+    -fx-background-color: #8a5a3c, #fde09b;
+    -fx-background-insets: 0, 0 0 3 0;
+    -fx-border-color: transparent;
+    -fx-text-fill: #2a1730;
+    -fx-effect: dropshadow(gaussian, rgba(253, 224, 155, 0.35), 14, 0.2, 0, 0);
+}
+
+.menu-button.primary-button:hover {
+    -fx-background-color: #8a5a3c, #ffeab8;
+    -fx-text-fill: #2a1730;
+    -fx-effect: dropshadow(gaussian, rgba(253, 224, 155, 0.6), 18, 0.3, 0, 0);
+}
+
+.menu-button.ghost-button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: #7a5462;
+    -fx-border-insets: 0;
+    -fx-border-width: 1.5px;
+    -fx-text-fill: #d9c0cc;
+}
+
+.menu-button.ghost-button:hover {
+    -fx-background-color: rgba(247, 184, 143, 0.12);
+    -fx-border-color: #f7b88f;
+    -fx-border-insets: 0;
+    -fx-text-fill: #fff4e8;
 }

@@ -1,6 +1,5 @@
 package com.sabaytayo;
 
-import java.io.InputStream;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -39,6 +38,7 @@ public class EndingView extends StackPane {
     private final Region bottomLetterbox;
     private final Region dimOverlay;
     private final Region introCurtain;
+    private final StackPane cardWrapper;
     private final VBox card;
     private final Label cgPromptLabel;
     private final StackPane cgPlaceholderOverlay;
@@ -71,10 +71,10 @@ public class EndingView extends StackPane {
             app.playPhoneNotificationSfx();
         }
 
-        // 1. Outcome-specific 16:9 Ending CG (falls back to bg.jpg if the PNG is not yet added)
-        Image endingCg = loadResourceImage(outcome.getEndingCgPath());
+        // 1. Outcome-specific 16:9 Ending CG (falls back to empty night bus background if missing)
+        Image endingCg = ImageLoader.load(outcome.getEndingCgPath());
         this.hasEndingCg = (endingCg != null);
-        Image bgImage = hasEndingCg ? endingCg : loadResourceImage("/com/sabaytayo/images/bg.jpg");
+        Image bgImage = hasEndingCg ? endingCg : ImageLoader.load("/assets/BACKGROUNDS/bg_bus_night_empty.png");
 
         bgView = new ImageView();
         bgView.setPreserveRatio(true);
@@ -130,26 +130,29 @@ public class EndingView extends StackPane {
         cgPromptLabel.getStyleClass().add("cg-continue-pill");
         cgPromptLabel.setMouseTransparent(true);
 
-        // 2. Center result card with commemorative badge, stats, momentum, and Ride Again
-        card = new VBox(16);
-        card.maxWidthProperty().bind(Bindings.min(widthProperty().multiply(0.56), 740));
-        card.setMaxHeight(Region.USE_PREF_SIZE);
-        card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(36, 52, 36, 52));
-        card.getStyleClass().add("dialogue-box");
-
-        Image badgeImg = loadResourceImage(outcome.getBadgePath());
+        // 2. Center result card with commemorative badge overlapping the top border, stats, momentum, and Ride Again
+        Image badgeImg = ImageLoader.load(outcome.getBadgePath());
         ImageView badgeView = new ImageView();
         badgeView.setFitWidth(96);
         badgeView.setFitHeight(96);
         badgeView.setPreserveRatio(true);
-        badgeView.setSmooth(false);
+        badgeView.setSmooth(true);
+        badgeView.setMouseTransparent(true);
         if (badgeImg != null) {
             badgeView.setImage(badgeImg);
+            badgeView.setTranslateY(-48);
         } else {
             badgeView.setVisible(false);
             badgeView.setManaged(false);
         }
+
+        double topPadding = (badgeImg != null) ? 64 : 36;
+        card = new VBox(16);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.setMaxHeight(Region.USE_PREF_SIZE);
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(topPadding, 52, 36, 52));
+        card.getStyleClass().add("dialogue-box");
 
         Label title = new Label(outcome.getTitle());
         title.getStyleClass().add("title-header");
@@ -190,7 +193,12 @@ public class EndingView extends StackPane {
             app.showStart();
         });
 
-        card.getChildren().addAll(badgeView, title, desc, ruleLabel, statsGrid, playAgainButton);
+        card.getChildren().addAll(title, desc, ruleLabel, statsGrid, playAgainButton);
+
+        cardWrapper = new StackPane(card, badgeView);
+        cardWrapper.maxWidthProperty().bind(Bindings.min(widthProperty().multiply(0.56), 740));
+        cardWrapper.setMaxHeight(Region.USE_PREF_SIZE);
+        StackPane.setAlignment(badgeView, Pos.TOP_CENTER);
 
         // Top-right toolbar: Debug Back + View CG / Results toggle + Window controls
         Button backToRideBtn = new Button("← Back (Debug)");
@@ -262,7 +270,7 @@ public class EndingView extends StackPane {
         getChildren().addAll(
                 bgView, atmosphereLayer, toneOverlay,
                 topLetterbox, bottomLetterbox,
-                cgPlaceholderOverlay, dimOverlay, card,
+                cgPlaceholderOverlay, dimOverlay, cardWrapper,
                 cgPromptLabel, introCurtain, topControls
         );
         StackPane.setAlignment(topLetterbox, Pos.TOP_CENTER);
@@ -385,11 +393,11 @@ public class EndingView extends StackPane {
         }
 
         if (!animate) {
-            card.setVisible(visible);
-            card.setOpacity(visible ? 1.0 : 0.0);
-            card.setTranslateY(0.0);
-            card.setScaleX(1.0);
-            card.setScaleY(1.0);
+            cardWrapper.setVisible(visible);
+            cardWrapper.setOpacity(visible ? 1.0 : 0.0);
+            cardWrapper.setTranslateY(0.0);
+            cardWrapper.setScaleX(1.0);
+            cardWrapper.setScaleY(1.0);
             dimOverlay.setOpacity(visible ? 1.0 : 0.0);
             topLetterbox.setPrefHeight(visible ? 0.0 : LETTERBOX_HEIGHT);
             bottomLetterbox.setPrefHeight(visible ? 0.0 : LETTERBOX_HEIGHT);
@@ -412,26 +420,26 @@ public class EndingView extends StackPane {
                 promptPulseTimeline = null;
             }
             cgPromptLabel.setVisible(false);
-            card.setVisible(true);
-            card.setOpacity(0.0);
-            card.setTranslateY(18.0);
-            card.setScaleX(0.97);
-            card.setScaleY(0.97);
+            cardWrapper.setVisible(true);
+            cardWrapper.setOpacity(0.0);
+            cardWrapper.setTranslateY(18.0);
+            cardWrapper.setScaleX(0.97);
+            cardWrapper.setScaleY(0.97);
 
             cardAnimTimeline = new Timeline(
                     new KeyFrame(Duration.ZERO,
-                            new KeyValue(card.opacityProperty(), 0.0),
-                            new KeyValue(card.translateYProperty(), 18.0),
-                            new KeyValue(card.scaleXProperty(), 0.97),
-                            new KeyValue(card.scaleYProperty(), 0.97),
+                            new KeyValue(cardWrapper.opacityProperty(), 0.0),
+                            new KeyValue(cardWrapper.translateYProperty(), 18.0),
+                            new KeyValue(cardWrapper.scaleXProperty(), 0.97),
+                            new KeyValue(cardWrapper.scaleYProperty(), 0.97),
                             new KeyValue(dimOverlay.opacityProperty(), dimOverlay.getOpacity()),
                             new KeyValue(topLetterbox.prefHeightProperty(), topLetterbox.getPrefHeight()),
                             new KeyValue(bottomLetterbox.prefHeightProperty(), bottomLetterbox.getPrefHeight())),
                     new KeyFrame(Duration.millis(320),
-                            new KeyValue(card.opacityProperty(), 1.0, Interpolator.EASE_OUT),
-                            new KeyValue(card.translateYProperty(), 0.0, Interpolator.EASE_OUT),
-                            new KeyValue(card.scaleXProperty(), 1.0, Interpolator.EASE_OUT),
-                            new KeyValue(card.scaleYProperty(), 1.0, Interpolator.EASE_OUT),
+                            new KeyValue(cardWrapper.opacityProperty(), 1.0, Interpolator.EASE_OUT),
+                            new KeyValue(cardWrapper.translateYProperty(), 0.0, Interpolator.EASE_OUT),
+                            new KeyValue(cardWrapper.scaleXProperty(), 1.0, Interpolator.EASE_OUT),
+                            new KeyValue(cardWrapper.scaleYProperty(), 1.0, Interpolator.EASE_OUT),
                             new KeyValue(dimOverlay.opacityProperty(), 1.0, Interpolator.EASE_OUT),
                             new KeyValue(topLetterbox.prefHeightProperty(), 0.0, Interpolator.EASE_BOTH),
                             new KeyValue(bottomLetterbox.prefHeightProperty(), 0.0, Interpolator.EASE_BOTH))
@@ -445,22 +453,22 @@ public class EndingView extends StackPane {
 
             cardAnimTimeline = new Timeline(
                     new KeyFrame(Duration.ZERO,
-                            new KeyValue(card.opacityProperty(), card.getOpacity()),
-                            new KeyValue(card.translateYProperty(), card.getTranslateY()),
+                            new KeyValue(cardWrapper.opacityProperty(), cardWrapper.getOpacity()),
+                            new KeyValue(cardWrapper.translateYProperty(), cardWrapper.getTranslateY()),
                             new KeyValue(dimOverlay.opacityProperty(), dimOverlay.getOpacity()),
                             new KeyValue(topLetterbox.prefHeightProperty(), topLetterbox.getPrefHeight()),
                             new KeyValue(bottomLetterbox.prefHeightProperty(), bottomLetterbox.getPrefHeight())),
                     new KeyFrame(Duration.millis(260),
-                            new KeyValue(card.opacityProperty(), 0.0, Interpolator.EASE_IN),
-                            new KeyValue(card.translateYProperty(), 14.0, Interpolator.EASE_IN),
+                            new KeyValue(cardWrapper.opacityProperty(), 0.0, Interpolator.EASE_IN),
+                            new KeyValue(cardWrapper.translateYProperty(), 14.0, Interpolator.EASE_IN),
                             new KeyValue(dimOverlay.opacityProperty(), 0.0, Interpolator.EASE_OUT),
                             new KeyValue(topLetterbox.prefHeightProperty(), LETTERBOX_HEIGHT, Interpolator.EASE_BOTH),
                             new KeyValue(bottomLetterbox.prefHeightProperty(), LETTERBOX_HEIGHT, Interpolator.EASE_BOTH))
             );
             cardAnimTimeline.setOnFinished(e -> {
                 cardAnimTimeline = null;
-                card.setVisible(false);
-                card.setTranslateY(0.0);
+                cardWrapper.setVisible(false);
+                cardWrapper.setTranslateY(0.0);
             });
             cardAnimTimeline.play();
         }
@@ -494,21 +502,6 @@ public class EndingView extends StackPane {
         overlay.setAlignment(Pos.CENTER);
         overlay.setMouseTransparent(true);
         return overlay;
-    }
-
-    private Image loadResourceImage(String resourcePath) {
-        if (resourcePath == null) {
-            return null;
-        }
-        try {
-            InputStream stream = getClass().getResourceAsStream(resourcePath);
-            if (stream != null) {
-                return new Image(stream);
-            }
-        } catch (Exception e) {
-            System.err.println("Notice: Could not load image " + resourcePath);
-        }
-        return null;
     }
 
     private void updateCoverFit() {

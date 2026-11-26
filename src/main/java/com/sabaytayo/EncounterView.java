@@ -1,7 +1,7 @@
 package com.sabaytayo;
 
-import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,8 +89,7 @@ public class EncounterView extends StackPane {
     private final Image bgWideShotImage;
     private final Image bgCloseUpImage;
     private Image conductorImage;
-    private final Map<String, Image> maleSprites = new HashMap<>();
-    private final Map<String, Image> femSprites = new HashMap<>();
+    private final SpriteSet sprites = new SpriteSet();
     private final Map<String, Image> cgCache = new HashMap<>();
     private String activeCgPath = null;
 
@@ -123,7 +122,7 @@ public class EncounterView extends StackPane {
     private boolean modalOpen = false;
 
     // Timelines & VN playback states
-    private Timeline typingTimeline;
+    private final Typewriter typewriter;
     private Timeline conductorAnimTimeline;
     private Timeline stageShiftTimeline;
     private Timeline femAnimTimeline;
@@ -139,13 +138,11 @@ public class EncounterView extends StackPane {
     private PauseTransition autoAdvanceTimer;
     private Runnable pendingFadeMidpoint;
     private Runnable pendingBrakeReveal;
+    private boolean awaitingBlackResetReveal = false;
     private boolean initialFadePlayed = false;
     private boolean conductorOnStage = false;
     private boolean transitioningToEnding = false;
 
-    private Label activeTypingLabel;
-    private String activeFullText;
-    private Runnable onTypingFinished;
     private String pendingNextSceneId = null;
 
     private final List<DialogueBeat> currentBeats = new ArrayList<>();
@@ -193,6 +190,7 @@ public class EncounterView extends StackPane {
 
     public EncounterView(GameApplication app, RelationshipStats stats, Momentum momentum, Encounter encounter) {
         this.app = app;
+        this.typewriter = new Typewriter(app);
         this.stats = stats;
         this.momentum = momentum;
         this.encounter = encounter;
@@ -200,11 +198,11 @@ public class EncounterView extends StackPane {
         getStyleClass().add("encounter-root");
 
         // 1. Load backgrounds and character sprite maps
-        bgWideShotImage = loadSpriteImage("/assets/BACKGROUNDS/bg_bus_wide-shot.png");
-        bgCloseUpImage = loadSpriteImage("/assets/BACKGROUNDS/bg_bus_close-up.png");
-        Image fallbackBg = loadSpriteImage("/assets/BACKGROUNDS/bg_bus_night_empty.png");
+        bgWideShotImage = ImageLoader.load("/assets/BACKGROUNDS/bg_bus_wide-shot.png");
+        bgCloseUpImage = ImageLoader.load("/assets/BACKGROUNDS/bg_bus_close-up.png");
+        Image fallbackBg = ImageLoader.load("/assets/BACKGROUNDS/bg_bus_night_empty.png");
 
-        loadCharacterSprites();
+        conductorImage = sprites.getConductor();
 
         // 2. Stage layer (clipped so camera pans/zooms/shakes never expose blank borders)
         stageLayer = new StackPane();
@@ -322,7 +320,7 @@ public class EncounterView extends StackPane {
         conductorSlot.setVisible(false);
         StackPane.setAlignment(conductorSpriteView, Pos.BOTTOM_CENTER);
 
-        maleSpriteView = createSpriteView(maleSprites.get("neutral"));
+        maleSpriteView = createSpriteView(sprites.getMale("neutral"));
         maleSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.86));
         maleSpriteView.setEffect(maleTone);
 
@@ -332,7 +330,7 @@ public class EncounterView extends StackPane {
         maleSlot.setPickOnBounds(false);
         StackPane.setAlignment(maleSpriteView, Pos.BOTTOM_CENTER);
 
-        femSpriteView = createSpriteView(femSprites.get("neutral"));
+        femSpriteView = createSpriteView(sprites.getFem("neutral"));
         femSpriteView.fitHeightProperty().bind(heightProperty().multiply(0.76));
         femSpriteView.setEffect(femTone);
 
@@ -516,34 +514,6 @@ public class EncounterView extends StackPane {
         loadScene();
     }
 
-    // Loads all MC, FEM-C, and Conductor cameo sprites into lookup maps.
-    private void loadCharacterSprites() {
-        conductorImage = loadSpriteImage("/assets/CONDUCTOR/cameo_conductor.png");
-
-        maleSprites.put("neutral", loadSpriteImage("/assets/MC/male_neutral.png"));
-        maleSprites.put("sincere", loadSpriteImage("/assets/MC/male_sincere.png"));
-        maleSprites.put("smirk", loadSpriteImage("/assets/MC/male_smirk.png"));
-        maleSprites.put("awkward", loadSpriteImage("/assets/MC/male_awkward.png"));
-        maleSprites.put("deadpan", loadSpriteImage("/assets/MC/male_deadpan.png"));
-        maleSprites.put("flustered", loadSpriteImage("/assets/MC/male_flustered.png"));
-        maleSprites.put("laughing", loadSpriteImage("/assets/MC/male_laughing.png"));
-        maleSprites.put("relieved_smile", loadSpriteImage("/assets/MC/male_relieved_smile.png"));
-        maleSprites.put("surprised", loadSpriteImage("/assets/MC/male_surprised.png"));
-
-        femSprites.put("neutral", loadSpriteImage("/assets/FEM-C/fem_neutral.png"));
-        femSprites.put("shy", loadSpriteImage("/assets/FEM-C/fem_shy_apologetic.png"));
-        femSprites.put("neutral_talking", loadSpriteImage("/assets/FEM-C/fem_neutral_talking.png"));
-        femSprites.put("warm_smile_1", loadSpriteImage("/assets/FEM-C/fem_warm_smile1.png"));
-        femSprites.put("warm_smile_2", loadSpriteImage("/assets/FEM-C/fem_warm_smile2.png"));
-        femSprites.put("flustered", loadSpriteImage("/assets/FEM-C/fem_flustered.png"));
-        femSprites.put("flustered_laugh", loadSpriteImage("/assets/FEM-C/fem_flustered_laugh.png"));
-        femSprites.put("laughing", loadSpriteImage("/assets/FEM-C/fem_laughing.png"));
-        femSprites.put("annoyed", loadSpriteImage("/assets/FEM-C/fem_annoyed.png"));
-        femSprites.put("surprised", loadSpriteImage("/assets/FEM-C/fem_surprised.png"));
-        femSprites.put("wince", loadSpriteImage("/assets/FEM-C/fem_wince.png"));
-        femSprites.put("phone_looking", loadSpriteImage("/assets/FEM-C/fem_phone_looking.png"));
-    }
-
     private Button createInlineControl(String label, Runnable action) {
         Button btn = new Button(label);
         btn.getStyleClass().add("vn-inline-btn");
@@ -613,21 +583,6 @@ public class EncounterView extends StackPane {
         cgPlaceholderOverlay.setPadding(new Insets(64, 24, choiceBottomPad, 24));
     }
 
-    private Image loadSpriteImage(String resourcePath) {
-        if (resourcePath == null) {
-            return null;
-        }
-        try {
-            InputStream stream = getClass().getResourceAsStream(resourcePath);
-            if (stream != null) {
-                return new Image(stream);
-            }
-        } catch (Exception e) {
-            System.err.println("Notice: Could not load image " + resourcePath);
-        }
-        return null;
-    }
-
     // Loads an Event CG if the user has added it to src/main/resources/assets/CG/ (returns null if not yet added).
     private Image loadEventCg(String cgPath) {
         if (cgPath == null) {
@@ -636,7 +591,7 @@ public class EncounterView extends StackPane {
         if (cgCache.containsKey(cgPath)) {
             return cgCache.get(cgPath);
         }
-        Image img = loadSpriteImage(cgPath);
+        Image img = ImageLoader.load(cgPath);
         cgCache.put(cgPath, img);
         return img;
     }
@@ -664,7 +619,7 @@ public class EncounterView extends StackPane {
         // Switch BGM between warm acoustic theme and cold melancholy lo-fi piano based on story lane
         syncSceneMusic(current.getSceneId());
 
-        stopTypingAnimation();
+        typewriter.stop();
         stopAutoTimer();
         pendingNextSceneId = null;
         hideChoices();
@@ -710,6 +665,11 @@ public class EncounterView extends StackPane {
         // Update overlapping speaker nameplate (hidden on Narrator beats like DDLC Screenshot 2)
         updateNameplate(beat.getSpeaker());
 
+        if (!instantRestore && cue != null && cue.isFadeResetTransition() && getScene() != null) {
+            playBlackResetBeat(cue, beat);
+            return;
+        }
+
         // Apply per-beat CG switch (or Missing-CG placeholder), camera framing, sprite expressions, speaker focus, and animations
         if (cue != null) {
             applyStageCue(cue, beat.getSpeaker(), instantRestore);
@@ -718,11 +678,11 @@ public class EncounterView extends StackPane {
         }
 
         if (instantRestore) {
-            stopTypingAnimation();
+            typewriter.stop();
             dialogueLabel.setText(beat.getText() != null ? beat.getText() : "");
             onBeatTypingComplete();
         } else {
-            playTypewriter(dialogueLabel, beat.getText(), this::onBeatTypingComplete);
+            typewriter.play(dialogueLabel, beat.getText(), this::onBeatTypingComplete);
         }
     }
 
@@ -792,11 +752,13 @@ public class EncounterView extends StackPane {
     private void renderChoices(Scene scene) {
         choicesContainer.getChildren().clear();
 
-        for (DialogueChoice choice : scene.getChoices()) {
+        // Scramble choices each time so there is no fixed order pattern
+        List<DialogueChoice> shuffledChoices = new ArrayList<>(scene.getChoices());
+        Collections.shuffle(shuffledChoices);
+
+        for (DialogueChoice choice : shuffledChoices) {
             boolean unlocked = choice.isUnlocked(momentum);
             String formatted = ScriptFormatter.format(choice.getText(), app.getPlayer(), app.getStranger());
-
-            String toneTag = extractToneTag(formatted);
             String cleanText = stripTonePrefix(formatted);
 
             Button btn = new Button();
@@ -814,13 +776,6 @@ public class EncounterView extends StackPane {
             content.maxWidthProperty().bind(choicesContainer.prefWidthProperty().subtract(48));
             content.setMinHeight(Region.USE_PREF_SIZE);
             content.setMaxHeight(Region.USE_PREF_SIZE);
-
-            if (!toneTag.isEmpty()) {
-                Label badge = new Label(toneTag.toUpperCase());
-                badge.getStyleClass().addAll("tone-badge", "tone-" + toneTag.toLowerCase());
-                badge.setMinWidth(Region.USE_PREF_SIZE);
-                content.getChildren().add(badge);
-            }
 
             Label textLbl = new Label(cleanText);
             textLbl.getStyleClass().add("vn-choice-label");
@@ -871,7 +826,7 @@ public class EncounterView extends StackPane {
 
     private void handleChoiceSelected(DialogueChoice choice) {
         pushSnapshot();
-        stopTypingAnimation();
+        typewriter.stop();
         stopAutoTimer();
         hideChoices();
 
@@ -900,7 +855,7 @@ public class EncounterView extends StackPane {
             if (reaction != null && !reaction.isBlank()) {
                 String strangerName = (app.getStranger() != null && app.getStranger().getName() != null && !app.getStranger().getName().isBlank())
                         ? app.getStranger().getName()
-                        : "Fatima";
+                        : "Amara";
                 List<DialogueBeat> reactionBeats = DialogueBeat.splitReaction(reaction, strangerName);
                 StageCue reactionCue = StageCue.forChoiceReactionBeat(choice, reaction, momentum);
                 boolean strangerHasSpoken = false;
@@ -918,16 +873,6 @@ public class EncounterView extends StackPane {
         }
 
         displayCurrentBeat();
-    }
-
-    private String extractToneTag(String text) {
-        if (text != null && text.startsWith("[")) {
-            int close = text.indexOf(']');
-            if (close > 1) {
-                return text.substring(1, close).trim();
-            }
-        }
-        return "";
     }
 
     private String stripTonePrefix(String choiceText) {
@@ -994,8 +939,14 @@ public class EncounterView extends StackPane {
         if (transitioningToEnding) {
             return;
         }
-        if (typingTimeline != null) {
-            finishTypingImmediately();
+        if (awaitingBlackResetReveal) {
+            awaitingBlackResetReveal = false;
+            stopBgFadeAnimation(true);
+            typewriter.finishNow();
+            return;
+        }
+        if (typewriter.isTyping()) {
+            typewriter.finishNow();
             return;
         }
 
@@ -1049,7 +1000,7 @@ public class EncounterView extends StackPane {
         StepSnapshot snap = historyStack.remove(historyStack.size() - 1);
         backBtn.setDisable(historyStack.isEmpty());
 
-        stopTypingAnimation();
+        typewriter.stop();
         stopAutoTimer();
         stopBgFadeAnimation(false);
         stopBusHeadlightArrival();
@@ -1130,7 +1081,7 @@ public class EncounterView extends StackPane {
     private void toggleAutoMode() {
         autoMode = !autoMode;
         updateInlineButtonState(autoBtn, autoMode);
-        if (autoMode && typingTimeline == null && !showingChoices && !modalOpen) {
+        if (autoMode && !typewriter.isTyping() && !showingChoices && !modalOpen) {
             scheduleNextAuto();
         } else if (!autoMode) {
             stopAutoTimer();
@@ -1212,7 +1163,7 @@ public class EncounterView extends StackPane {
     }
 
     private void proceedToNextScene(String nextId) {
-        stopTypingAnimation();
+        typewriter.stop();
         stopAutoTimer();
         pendingNextSceneId = null;
 
@@ -1365,81 +1316,9 @@ public class EncounterView extends StackPane {
         modalOverlay.setManaged(false);
         modalOverlay.getChildren().clear();
         modalOpen = false;
-        if (autoMode && typingTimeline == null && !showingChoices) {
+        if (autoMode && !typewriter.isTyping() && !showingChoices) {
             scheduleNextAuto();
         }
-    }
-
-    // -------------------------------------------------------------------------
-    // Typewriter Effect
-    // -------------------------------------------------------------------------
-
-    private void playTypewriter(Label targetLabel, String fullText, Runnable afterDone) {
-        stopTypingAnimation();
-
-        if (fullText == null || fullText.isEmpty()) {
-            targetLabel.setText("");
-            if (afterDone != null) {
-                afterDone.run();
-            }
-            return;
-        }
-
-        activeTypingLabel = targetLabel;
-        activeFullText = fullText;
-        onTypingFinished = afterDone;
-        targetLabel.setText("");
-
-        final int[] charIndex = { 0 };
-        typingTimeline = new Timeline(new KeyFrame(Duration.millis(app.getTypingDelayMs()), e -> {
-            charIndex[0]++;
-            targetLabel.setText(fullText.substring(0, charIndex[0]));
-            if (charIndex[0] % 3 == 1 && !java.lang.Character.isWhitespace(fullText.charAt(charIndex[0] - 1))) {
-                app.playTextBlip();
-            }
-        }));
-        typingTimeline.setCycleCount(fullText.length());
-        typingTimeline.setOnFinished(e -> {
-            typingTimeline = null;
-            activeTypingLabel = null;
-            activeFullText = null;
-            if (onTypingFinished != null) {
-                Runnable done = onTypingFinished;
-                onTypingFinished = null;
-                done.run();
-            }
-        });
-        typingTimeline.play();
-    }
-
-    private void finishTypingImmediately() {
-        if (typingTimeline == null) {
-            return;
-        }
-        typingTimeline.stop();
-        typingTimeline = null;
-
-        if (activeTypingLabel != null && activeFullText != null) {
-            activeTypingLabel.setText(activeFullText);
-        }
-        activeTypingLabel = null;
-        activeFullText = null;
-
-        if (onTypingFinished != null) {
-            Runnable done = onTypingFinished;
-            onTypingFinished = null;
-            done.run();
-        }
-    }
-
-    private void stopTypingAnimation() {
-        if (typingTimeline != null) {
-            typingTimeline.stop();
-            typingTimeline = null;
-        }
-        activeTypingLabel = null;
-        activeFullText = null;
-        onTypingFinished = null;
     }
 
     private void transitionToEndingCinematic() {
@@ -1447,7 +1326,7 @@ public class EncounterView extends StackPane {
             return;
         }
         transitioningToEnding = true;
-        stopTypingAnimation();
+        typewriter.stop();
         stopAutoTimer();
         stopBgFadeAnimation(false);
         stopBusHeadlightArrival();
@@ -1485,7 +1364,7 @@ public class EncounterView extends StackPane {
     }
 
     private void cleanupTimers() {
-        stopTypingAnimation();
+        typewriter.stop();
         stopAutoTimer();
         stopBgFadeAnimation(false);
         stopBusHeadlightArrival();
@@ -1614,22 +1493,19 @@ public class EncounterView extends StackPane {
 
         // 4. Normal Sprite Stage (or Missing CG with Dev Placeholder OFF)
         if (!instantRestore && (wasInCg || wasPlaceholder || bgChanged) && getScene() != null) {
-            fadeThroughBlack(() -> {
-                hideEventCgImmediate();
-                if (targetBg != null && bgView.getImage() != targetBg) {
-                    bgView.setImage(targetBg);
-                    updateCoverFit();
-                }
-                applyBeatStageVisuals(cue, speaker, false);
-            });
+            fadeThroughBlack(() -> applySpriteStageImmediate(cue, speaker, targetBg));
         } else {
-            hideEventCgImmediate();
-            if (bgChanged) {
-                bgView.setImage(targetBg);
-                updateCoverFit();
-            }
-            applyBeatStageVisuals(cue, speaker, false);
+            applySpriteStageImmediate(cue, speaker, targetBg);
         }
+    }
+
+    private void applySpriteStageImmediate(StageCue cue, String speaker, Image targetBg) {
+        hideEventCgImmediate();
+        if (targetBg != null && bgView.getImage() != targetBg) {
+            bgView.setImage(targetBg);
+            updateCoverFit();
+        }
+        applyBeatStageVisuals(cue, speaker, false);
     }
 
     private void applyBeatStageVisuals(StageCue cue, String speaker, boolean inCgMode) {
@@ -1639,7 +1515,7 @@ public class EncounterView extends StackPane {
         applyConductorPresence(cue.isShowConductor(), getScene() != null && !inCgMode);
 
         if (cue.getMaleMood() != null) {
-            Image mImg = maleSprites.get(cue.getMaleMood());
+            Image mImg = sprites.getMale(cue.getMaleMood());
             if (mImg != null) {
                 maleSpriteView.setImage(mImg);
             }
@@ -1654,7 +1530,7 @@ public class EncounterView extends StackPane {
                 femKey = "warm_smile_" + warmSmileVariant;
             }
             lastFemMood = cue.getFemMood();
-            Image fImg = femSprites.get(femKey);
+            Image fImg = sprites.getFem(femKey);
             if (fImg != null) {
                 femSpriteView.setImage(fImg);
             }
@@ -1793,7 +1669,69 @@ public class EncounterView extends StackPane {
         bgFadeTimeline.play();
     }
 
+    // Fades to black, resets sprites behind the curtain, types the narrator line, then fades out to reveal neutral.
+    private void playBlackResetBeat(StageCue cue, DialogueBeat beat) {
+        resetSpriteTransforms();
+        stopBgFadeAnimation(false);
+        stopBusHeadlightArrival();
+        stopSuddenBrakeSequence(false);
+        typewriter.stop();
+
+        dialogueLabel.setText("");
+        awaitingBlackResetReveal = true;
+        Image targetBg = cue.isUseWideBackground() ? bgWideShotImage : bgCloseUpImage;
+
+        pendingFadeMidpoint = () -> {
+            awaitingBlackResetReveal = false;
+            bgFadeTimeline = null;
+            if (cue.isPlayPhoneNotificationSfx()) {
+                app.playPhoneNotificationSfx();
+            }
+            applySpriteStageImmediate(cue, beat.getSpeaker(), targetBg);
+            typewriter.play(dialogueLabel, beat.getText(), () -> {
+                fadeOutFromBlack();
+                onBeatTypingComplete();
+            });
+        };
+
+        bgFadeTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(bgFadeOverlay.opacityProperty(), bgFadeOverlay.getOpacity())),
+                new KeyFrame(Duration.millis(FADE_TO_BLACK_MS), e -> {
+                    if (pendingFadeMidpoint != null) {
+                        Runnable action = pendingFadeMidpoint;
+                        pendingFadeMidpoint = null;
+                        action.run();
+                    }
+                }, new KeyValue(bgFadeOverlay.opacityProperty(), 1.0, Interpolator.EASE_BOTH))
+        );
+        bgFadeTimeline.play();
+    }
+
+    private void fadeOutFromBlack() {
+        double currentOpacity = bgFadeOverlay.getOpacity();
+        if (currentOpacity <= 0.01) {
+            bgFadeOverlay.setOpacity(0.0);
+            return;
+        }
+        if (bgFadeTimeline != null) {
+            bgFadeTimeline.stop();
+            bgFadeTimeline = null;
+        }
+        bgFadeTimeline = new Timeline(
+                new KeyFrame(Duration.ZERO,
+                        new KeyValue(bgFadeOverlay.opacityProperty(), currentOpacity)),
+                new KeyFrame(Duration.millis(180),
+                        new KeyValue(bgFadeOverlay.opacityProperty(), currentOpacity)),
+                new KeyFrame(Duration.millis(180 + FADE_FROM_BLACK_MS),
+                        new KeyValue(bgFadeOverlay.opacityProperty(), 0.0, Interpolator.EASE_BOTH))
+        );
+        bgFadeTimeline.setOnFinished(e -> bgFadeTimeline = null);
+        bgFadeTimeline.play();
+    }
+
     private void stopBgFadeAnimation(boolean commitPending) {
+        awaitingBlackResetReveal = false;
         if (bgFadeTimeline != null) {
             bgFadeTimeline.stop();
             bgFadeTimeline = null;
@@ -1964,11 +1902,11 @@ public class EncounterView extends StackPane {
         }
         maleSlot.setVisible(true);
         femSlot.setVisible(true);
-        Image mSurprised = maleSprites.get("surprised");
+        Image mSurprised = sprites.getMale("surprised");
         if (mSurprised != null) {
             maleSpriteView.setImage(mSurprised);
         }
-        Image fSurprised = femSprites.get("surprised");
+        Image fSurprised = sprites.getFem("surprised");
         if (fSurprised != null) {
             femSpriteView.setImage(fSurprised);
         }

@@ -8,6 +8,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.media.AudioClip;
@@ -75,6 +76,10 @@ public class GameApplication extends Application {
     public void start(Stage stage) {
         this.primaryStage = stage;
         stage.setTitle("Sabay Tayo? — a branching bus-ride dialogue game");
+        Image appIcon = ImageLoader.load("/assets/ui/app_icon.png");
+        if (appIcon != null) {
+            stage.getIcons().add(appIcon);
+        }
         stage.initStyle(StageStyle.UNDECORATED);
         stage.setResizable(true);
 

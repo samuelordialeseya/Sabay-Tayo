@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -28,6 +29,7 @@ public class StartView extends StackPane {
     private final TextField nameField;
     private final ComboBox<Pronouns> playerPronounsBox;
     private final ComboBox<Pronouns> strangerPronounsBox;
+    private final Label previewLabel;
     private final Label errorLabel;
 
     // Menu button rows for active highlight switching
@@ -38,16 +40,14 @@ public class StartView extends StackPane {
     public StartView(GameApplication app) {
         this.app = app;
 
-        // 1. Bus interior twilight background image
+        // 1. Rainy twilight bus stop background image
         ImageView bgView = new ImageView();
-        try {
-            Image bg = new Image(getClass().getResourceAsStream("/com/sabaytayo/images/bg.jpg"));
+        Image bg = ImageLoader.load("/assets/BACKGROUNDS/bg_main_menu.png");
+        if (bg != null) {
             bgView.setImage(bg);
             bgView.fitWidthProperty().bind(widthProperty());
             bgView.fitHeightProperty().bind(heightProperty());
             bgView.setPreserveRatio(false);
-        } catch (Exception e) {
-            System.err.println("Notice: Could not load bg.jpg, using default styling.");
         }
 
         // 2. Ambient rain & passing streetlight layer
@@ -72,6 +72,14 @@ public class StartView extends StackPane {
         strangerPronounsBox.getItems().addAll(Pronouns.SHE_HER, Pronouns.HE_HIM, Pronouns.THEY_THEM);
         strangerPronounsBox.setValue(Pronouns.SHE_HER);
         strangerPronounsBox.setPrefWidth(210);
+
+        previewLabel = new Label("");
+        previewLabel.setWrapText(true);
+
+        nameField.textProperty().addListener((obs, oldVal, newVal) -> updatePreview());
+        playerPronounsBox.valueProperty().addListener((obs, oldVal, newVal) -> updatePreview());
+        strangerPronounsBox.valueProperty().addListener((obs, oldVal, newVal) -> updatePreview());
+        updatePreview();
 
         errorLabel = new Label("");
         errorLabel.getStyleClass().add("error-text");
@@ -142,11 +150,9 @@ public class StartView extends StackPane {
         logoView.setPreserveRatio(true);
         logoView.fitWidthProperty().bind(Bindings.min(widthProperty().multiply(0.45), 680));
         logoView.setSmooth(false);
-        try {
-            Image logo = new Image(getClass().getResourceAsStream("/assets/BACKGROUNDS/logo_sabay_tayo2.png"));
+        Image logo = ImageLoader.load("/assets/BACKGROUNDS/logo_sabay_tayo2.png");
+        if (logo != null) {
             logoView.setImage(logo);
-        } catch (Exception e) {
-            System.err.println("Notice: Could not load logo_sabay_tayo2.png.");
         }
         return logoView;
     }
@@ -207,11 +213,11 @@ public class StartView extends StackPane {
     public void showCharacterSetup() {
         contentLayer.getChildren().clear();
 
-        VBox card = new VBox(16);
+        VBox card = new VBox(18);
         card.maxWidthProperty().bind(Bindings.min(widthProperty().multiply(0.46), 600));
         card.setMaxHeight(Region.USE_PREF_SIZE);
-        card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(36, 46, 36, 46));
+        card.setAlignment(Pos.TOP_CENTER);
+        card.setPadding(new Insets(34, 46, 34, 46));
         card.getStyleClass().add("dialogue-box");
 
         Label titleLabel = new Label("Boarding Pass");
@@ -220,27 +226,51 @@ public class StartView extends StackPane {
         Label subtitleLabel = new Label("Set up your commuter profile before boarding the bus");
         subtitleLabel.getStyleClass().add("sub-header");
 
-        Label nameLabel = new Label("Your Name:");
-        nameLabel.getStyleClass().add("field-label");
+        // thin dashed line under the header, like a ticket tear-off
+        Region divider = new Region();
+        divider.getStyleClass().add("pass-divider");
+        divider.setPrefHeight(1);
+        divider.setMinHeight(1);
+        divider.setMaxHeight(1);
 
-        Label playerPronounLabel = new Label("Your Pronouns:");
+        Label nameLabel = new Label("YOUR NAME");
+        nameLabel.getStyleClass().add("field-label");
+        nameField.setMaxWidth(Double.MAX_VALUE);
+        VBox nameBox = new VBox(7, nameLabel, nameField);
+
+        Label playerPronounLabel = new Label("YOUR PRONOUNS");
         playerPronounLabel.getStyleClass().add("field-label");
 
-        Label strangerPronounLabel = new Label("Seatmate's Pronouns:");
+        Label strangerPronounLabel = new Label("SEATMATE'S PRONOUNS");
         strangerPronounLabel.getStyleClass().add("field-label");
 
-        HBox pronounsRow = new HBox(20,
-                new VBox(6, playerPronounLabel, playerPronounsBox),
-                new VBox(6, strangerPronounLabel, strangerPronounsBox)
-        );
-        pronounsRow.setAlignment(Pos.CENTER);
+        playerPronounsBox.getStyleClass().add("dark-combo");
+        strangerPronounsBox.getStyleClass().add("dark-combo");
+        playerPronounsBox.setMaxWidth(Double.MAX_VALUE);
+        strangerPronounsBox.setMaxWidth(Double.MAX_VALUE);
+
+        VBox playerPronounBox = new VBox(7, playerPronounLabel, playerPronounsBox);
+        VBox strangerPronounBox = new VBox(7, strangerPronounLabel, strangerPronounsBox);
+        HBox.setHgrow(playerPronounBox, Priority.ALWAYS);
+        HBox.setHgrow(strangerPronounBox, Priority.ALWAYS);
+        playerPronounBox.setMaxWidth(Double.MAX_VALUE);
+        strangerPronounBox.setMaxWidth(Double.MAX_VALUE);
+        HBox pronounsRow = new HBox(20, playerPronounBox, strangerPronounBox);
+
+        // preview sits in its own recessed box so it reads like a line from the story
+        Label previewCaption = new Label("PREVIEW");
+        previewCaption.getStyleClass().add("preview-caption");
+        previewLabel.getStyleClass().add("preview-text");
+        VBox previewBox = new VBox(5, previewCaption, previewLabel);
+        previewBox.getStyleClass().add("preview-box");
+        previewBox.setAlignment(Pos.CENTER_LEFT);
 
         HBox buttonRow = new HBox(16);
         buttonRow.setAlignment(Pos.CENTER);
-        buttonRow.setPadding(new Insets(10, 0, 0, 0));
+        buttonRow.setPadding(new Insets(8, 0, 0, 0));
 
         Button backButton = new Button("← Back");
-        backButton.getStyleClass().add("menu-button");
+        backButton.getStyleClass().addAll("menu-button", "ghost-button");
         backButton.setPrefWidth(145);
         backButton.setOnAction(e -> {
             app.playClickSfx();
@@ -248,7 +278,7 @@ public class StartView extends StackPane {
         });
 
         Button boardButton = new Button("Board the Bus ➔");
-        boardButton.getStyleClass().addAll("menu-button", "commute-menu-btn-active");
+        boardButton.getStyleClass().addAll("menu-button", "primary-button");
         boardButton.setPrefWidth(220);
         boardButton.setOnAction(e -> {
             app.playClickSfx();
@@ -260,15 +290,27 @@ public class StartView extends StackPane {
         card.getChildren().addAll(
                 titleLabel,
                 subtitleLabel,
-                nameLabel,
-                nameField,
+                divider,
+                nameBox,
                 pronounsRow,
+                previewBox,
                 errorLabel,
                 buttonRow
         );
 
         contentLayer.getChildren().add(card);
         StackPane.setAlignment(card, Pos.CENTER);
+    }
+
+    private void updatePreview() {
+        String rawName = nameField.getText();
+        String previewName = (rawName == null || rawName.trim().isEmpty()) ? "Sam" : rawName.trim();
+        Pronouns playerPronouns = playerPronounsBox.getValue() != null ? playerPronounsBox.getValue() : Pronouns.THEY_THEM;
+        Pronouns strangerPronouns = strangerPronounsBox.getValue() != null ? strangerPronounsBox.getValue() : Pronouns.SHE_HER;
+
+        String sample = "{player} took {their} seat beside {seatmate} as {s_they} shifted {s_their} bag.";
+        String formatted = ScriptFormatter.format(sample, playerPronouns, previewName, "Amara");
+        previewLabel.setText(TextFormatter.formatStrangerText(formatted, strangerPronouns));
     }
 
     private void handleBoarding() {
