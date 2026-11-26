@@ -155,6 +155,10 @@ public class EncounterView extends StackPane {
     private boolean showingChoices = false;
     private boolean autoMode = false;
 
+    // Warm smile rotation: starts at 2 so the first smile of the game flips to variant 1
+    private int warmSmileVariant = 2;
+    private String lastFemMood = null;
+
     // Captures a full beat/choice state so debug Back/Rewind can undo choices and scene jumps cleanly.
     private static class StepSnapshot {
         final String sceneId;
@@ -165,10 +169,15 @@ public class EncounterView extends StackPane {
         final int beatIndex;
         final String pendingNextSceneId;
         final boolean showingChoices;
+        final int warmSmileVariant;
+        final String lastFemMood;
 
         StepSnapshot(String sceneId, int[] statsSnapshot, int momentumValue,
                      List<DialogueBeat> beats, List<StageCue> cues,
-                     int beatIndex, String pendingNextSceneId, boolean showingChoices) {
+                     int beatIndex, String pendingNextSceneId, boolean showingChoices,
+                     int warmSmileVariant, String lastFemMood) {
+            this.warmSmileVariant = warmSmileVariant;
+            this.lastFemMood = lastFemMood;
             this.sceneId = sceneId;
             this.statsSnapshot = statsSnapshot;
             this.momentumValue = momentumValue;
@@ -523,8 +532,11 @@ public class EncounterView extends StackPane {
 
         femSprites.put("neutral", loadSpriteImage("/assets/FEM-C/fem_neutral.png"));
         femSprites.put("shy", loadSpriteImage("/assets/FEM-C/fem_shy_apologetic.png"));
-        femSprites.put("warm_smile", loadSpriteImage("/assets/FEM-C/fem_warm_smile.png"));
+        femSprites.put("neutral_talking", loadSpriteImage("/assets/FEM-C/fem_neutral_talking.png"));
+        femSprites.put("warm_smile_1", loadSpriteImage("/assets/FEM-C/fem_warm_smile1.png"));
+        femSprites.put("warm_smile_2", loadSpriteImage("/assets/FEM-C/fem_warm_smile2.png"));
         femSprites.put("flustered", loadSpriteImage("/assets/FEM-C/fem_flustered.png"));
+        femSprites.put("flustered_laugh", loadSpriteImage("/assets/FEM-C/fem_flustered_laugh.png"));
         femSprites.put("laughing", loadSpriteImage("/assets/FEM-C/fem_laughing.png"));
         femSprites.put("annoyed", loadSpriteImage("/assets/FEM-C/fem_annoyed.png"));
         femSprites.put("surprised", loadSpriteImage("/assets/FEM-C/fem_surprised.png"));
@@ -891,9 +903,16 @@ public class EncounterView extends StackPane {
                         : "Fatima";
                 List<DialogueBeat> reactionBeats = DialogueBeat.splitReaction(reaction, strangerName);
                 StageCue reactionCue = StageCue.forChoiceReactionBeat(choice, reaction, momentum);
+                boolean strangerHasSpoken = false;
                 for (int i = 0; i < reactionBeats.size(); i++) {
-                    currentBeats.add(reactionBeats.get(i));
-                    currentBeatCues.add(i == 0 ? reactionCue : reactionCue.withoutEffect());
+                    DialogueBeat rb = reactionBeats.get(i);
+                    currentBeats.add(rb);
+                    StageCue beatCue = (i == 0) ? reactionCue : reactionCue.withoutEffect();
+                    beatCue = StageCue.adjustReactionBeat(beatCue, rb.getSpeaker(), strangerHasSpoken);
+                    currentBeatCues.add(beatCue);
+                    if (!"Narrator".equals(rb.getSpeaker())) {
+                        strangerHasSpoken = true;
+                    }
                 }
             }
         }
@@ -1057,6 +1076,8 @@ public class EncounterView extends StackPane {
         currentBeatCues.addAll(snap.cues);
         currentBeatIndex = snap.beatIndex;
         pendingNextSceneId = snap.pendingNextSceneId;
+        warmSmileVariant = snap.warmSmileVariant;
+        lastFemMood = snap.lastFemMood;
 
         syncSceneMusic(snap.sceneId);
         updateHUD();
@@ -1099,7 +1120,9 @@ public class EncounterView extends StackPane {
                 currentBeatCues,
                 currentBeatIndex,
                 pendingNextSceneId,
-                showingChoices
+                showingChoices,
+                warmSmileVariant,
+                lastFemMood
         ));
         backBtn.setDisable(false);
     }
@@ -1622,7 +1645,16 @@ public class EncounterView extends StackPane {
             }
         }
         if (cue.getFemMood() != null) {
-            Image fImg = femSprites.get(cue.getFemMood());
+            String femKey = cue.getFemMood();
+            if ("warm_smile".equals(femKey)) {
+                // Alternate between warm_smile_1 and warm_smile_2 each time she newly smiles
+                if (!"warm_smile".equals(lastFemMood)) {
+                    warmSmileVariant = (warmSmileVariant == 1) ? 2 : 1;
+                }
+                femKey = "warm_smile_" + warmSmileVariant;
+            }
+            lastFemMood = cue.getFemMood();
+            Image fImg = femSprites.get(femKey);
             if (fImg != null) {
                 femSpriteView.setImage(fImg);
             }
