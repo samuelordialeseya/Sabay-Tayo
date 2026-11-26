@@ -120,13 +120,24 @@ public class StageCueTest {
         check("Flirty speak beat stays in steady two-seat framing with smirk", speakCue.getCameraAngle() == StageCue.CameraAngle.TWO_SEAT && "smirk".equals(speakCue.getMaleMood()));
         check("Flirty warm reaction focuses on stranger with kilig fluster", reactCue.getCameraAngle() == StageCue.CameraAngle.FOCUS_RIGHT && "flustered".equals(reactCue.getFemMood()) && reactCue.getEffectType() == StageCue.EffectType.KILIG_FLUSTER);
 
-        // S02 traffic line uses neutral talking; narration beat drops back to neutral
+        // S02 traffic line uses neutral talking and sincere; narration beat drops back to neutral
         SincereChoice traffic = new SincereChoice("[Sincere] \"Ang traffic ngayon, no? Mukhang matatagalan pa tayo rito.\"",
                 "S03", "\"Oo nga eh.\" She glanced at you.", "\"Oo nga eh.\"");
+        StageCue trafficSpeakCue = StageCue.forChoiceSpeakBeat(traffic);
         StageCue trafficCue = StageCue.forChoiceReactionBeat(traffic, "\"Oo nga eh.\" She glanced at you.", warmM);
+        check("S02 traffic speak uses sincere", "sincere".equals(trafficSpeakCue.getMaleMood()));
         check("S02 traffic reply uses neutral_talking", "neutral_talking".equals(trafficCue.getFemMood()));
         check("Narration beat of traffic reply uses neutral",
                 "neutral".equals(StageCue.adjustReactionBeat(trafficCue, "Narrator", true).getFemMood()));
+
+        // S03 sudden brake check-in uses concerned MC sprite + wincing_talking FEM-C sprite
+        SincereChoice brakeCheck = new SincereChoice("[Sincere] \"Okay ka lang ba? Nasaktan ka ba? Baka nahihilo ka?\"",
+                "S04A", "\"Oo, okay lang naman.\"", "\"Oo, okay lang naman.\"");
+        StageCue brakeSpeak = StageCue.forChoiceSpeakBeat(brakeCheck);
+        StageCue brakeReact = StageCue.forChoiceReactionBeat(brakeCheck, "\"Oo, okay lang naman.\"", warmM);
+        check("S03 brake check-in speak uses concerned MC", "concerned".equals(brakeSpeak.getMaleMood()));
+        check("S03 brake check-in reply uses concerned MC and wincing_talking FEM-C",
+                "concerned".equals(brakeReact.getMaleMood()) && "wincing_talking".equals(brakeReact.getFemMood()));
 
         // After the flustered reaction, her spoken lines switch to flustered_laugh
         StageCue flusteredCue = StageCue.forChoiceReactionBeat(flirty, "She smiled softly.", warmM);

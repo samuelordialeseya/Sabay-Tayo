@@ -407,8 +407,12 @@ public class StageCue {
                 return new StageCue(null, false, CameraAngle.TWO_SEAT,
                         "smirk", null, true, true, EffectType.NONE, false);
             case "Sincere":
+                String speakMood = (choice != null && choice.getText() != null
+                        && choice.getText().contains("Okay ka lang ba"))
+                        ? "concerned"
+                        : "sincere";
                 return new StageCue(null, false, CameraAngle.TWO_SEAT,
-                        "sincere", null, true, true, EffectType.NONE, false);
+                        speakMood, null, true, true, EffectType.NONE, false);
             case "Blunt":
                 return new StageCue(null, false, CameraAngle.TWO_SEAT,
                         "deadpan", null, true, true, EffectType.NONE, false);
@@ -445,10 +449,10 @@ public class StageCue {
                     return new StageCue(null, false, CameraAngle.TWO_SEAT,
                             "sincere", "neutral_talking", true, true, EffectType.GENTLE_NOD, false);
                 }
-                // S03 post-brake check-in: she talks while still wincing from the head bump
+                // S03 post-brake check-in: MC looks concerned while she talks still wincing from the head bump
                 if (choice != null && choice.getText() != null && choice.getText().contains("Okay ka lang ba")) {
                     return new StageCue(null, false, CameraAngle.TWO_SEAT,
-                            "sincere", "wincing_talking", true, true, EffectType.GENTLE_NOD, false);
+                            "concerned", "wincing_talking", true, true, EffectType.GENTLE_NOD, false);
                 }
                 if (isWarm) {
                     boolean igShared = lower.contains("follow mo") || lower.contains("waved warmly");

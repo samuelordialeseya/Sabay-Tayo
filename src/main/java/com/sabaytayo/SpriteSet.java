@@ -16,6 +16,7 @@ public class SpriteSet {
 
         addMale("neutral", "male_neutral");
         addMale("sincere", "male_sincere");
+        addMale("concerned", "male_concerned");
         addMale("smirk", "male_smirk");
         addMale("awkward", "male_awkward");
         addMale("deadpan", "male_deadpan");
